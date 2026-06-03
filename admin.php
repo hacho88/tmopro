@@ -1,5 +1,7 @@
 ﻿<?php
 session_start();
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 const ADMIN_PASSWORD = 'admin123';
 
@@ -172,7 +174,6 @@ $totalRetail = array_sum(array_map(fn($product) => (float)($product['price_base'
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Админка tmopro.ru</title>
   <meta name="theme-color" content="<?= e($themeColor) ?>">
-  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -327,10 +328,5 @@ $totalRetail = array_sum(array_map(fn($product) => (float)($product['price_base'
     </main>
   </div>
 <?php endif; ?>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
-  }
-</script>
 </body>
 </html>
