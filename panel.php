@@ -19,6 +19,21 @@ function save_json($path, $data) {
     return file_put_contents($path, $json . PHP_EOL, LOCK_EX) !== false;
 }
 
+function handle_upload($field, $subfolder) {
+    if (empty($_FILES[$field]) || $_FILES[$field]['error'] !== UPLOAD_ERR_OK) return null;
+    $uploadDir = __DIR__ . '/uploads/' . $subfolder . '/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+    $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg','jpeg','png','gif','webp','svg'];
+    if (!in_array($ext, $allowed, true)) return 'err_ext';
+    $name = bin2hex(random_bytes(8)) . '.' . $ext;
+    $path = $uploadDir . $name;
+    if (move_uploaded_file($_FILES[$field]['tmp_name'], $path)) {
+        return 'uploads/' . $subfolder . '/' . $name;
+    }
+    return 'err_move';
+}
+
 $settingsPath = __DIR__ . '/settings.json';
 $productsPath = __DIR__ . '/products.json';
 
@@ -82,7 +97,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
             'hero_title' => trim($_POST['hero_title'] ?? $settings['hero_title']),
             'hero_subtitle' => trim($_POST['hero_subtitle'] ?? $settings['hero_subtitle'])
         ]);
-        if (save_json($settingsPath, $settings)) $success = 'Настройки сохранены.';
+        if (!empty($_FILES['logo_file']['tmp_name'])) {
+            $logo = handle_upload('logo_file', 'logos');
+            if ($logo && !str_starts_with($logo, 'err_')) { $settings['logo_url'] = $logo; $settings['logo_type'] = 'image'; }
+            elseif ($logo) $error = 'Ошибка загрузки логотипа: ' . $logo;
+        }
+        if (!empty($_FILES['bg_file']['tmp_name'])) {
+            $bg = handle_upload('bg_file', 'backgrounds');
+            if ($bg && !str_starts_with($bg, 'err_')) { $settings['background_image'] = $bg; $settings['background_type'] = 'image'; }
+            elseif ($bg) $error = 'Ошибка загрузки фона: ' . $bg;
+        }
+        if (save_json($settingsPath, $settings)) $success = ($success ?: '') . ' Настройки сохранены.';
         else $error = 'Ошибка записи settings.json';
         $tab = 'settings';
     }
@@ -92,6 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         foreach (($_POST['id'] ?? []) as $i => $id) {
             $name = trim($_POST['name'][$i] ?? '');
             if ($name === '') continue;
+            $img = $products[$i]['image'] ?? '';
+            $fileKey = 'product_image_' . $id;
+            if (!empty($_FILES[$fileKey]['tmp_name'])) {
+                $up = handle_upload($fileKey, 'products');
+                if ($up && !str_starts_with($up, 'err_')) $img = $up;
+            }
             $saved[] = [
                 'id' => (int)$id,
                 'article' => trim($_POST['article'][$i] ?? ''),
@@ -100,7 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
                 'brand' => trim($_POST['brand'][$i] ?? ''),
                 'stock' => max(0, (int)($_POST['stock'][$i] ?? 0)),
                 'price_base' => max(0, (float)($_POST['price_base'][$i] ?? 0)),
-                'price_wholesale' => max(0, (float)($_POST['price_wholesale'][$i] ?? 0))
+                'price_wholesale' => max(0, (float)($_POST['price_wholesale'][$i] ?? 0)),
+                'image' => $img
             ];
         }
         $products = $saved;
@@ -248,7 +280,7 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
   <?php endif; ?>
 
   <?php if ($tab === 'settings'): ?>
-    <form method="post" class="card">
+    <form method="post" class="card" enctype="multipart/form-data">
       <input type="hidden" name="action" value="save_settings">
       <h2 style="font-size:20px;margin-bottom:16px;">Настройки сайта</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
@@ -277,6 +309,8 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
         </label>
         <label><span>Текст логотипа</span><input name="logo_text" value="<?= e($settings['logo_text']) ?>" class="field"></label>
         <label style="grid-column:1/-1;"><span>Ссылка на логотип</span><input name="logo_url" value="<?= e($settings['logo_url']) ?>" placeholder="logo.png" class="field"></label>
+        <label style="grid-column:1/-1;"><span>Или загрузить логотип</span><input type="file" name="logo_file" accept="image/*" class="field" style="padding:8px;"></label>
+        <?php if ($settings['logo_url']): ?><div style="grid-column:1/-1;"><img src="<?= e($settings['logo_url']) ?>" style="max-height:60px;border-radius:8px;"></div><?php endif; ?>
         <label><span>Тип фона</span>
           <select name="background_type" class="field">
             <option value="gradient" <?= $settings['background_type']==='gradient'?'selected':'' ?>>Градиент</option>
@@ -286,6 +320,8 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
         </label>
         <label><span>Цвет фона</span><input name="background_color" type="color" value="<?= e($settings['background_color']) ?>" class="field" style="height:48px;padding:4px;"></label>
         <label style="grid-column:1/-1;"><span>Ссылка на фон</span><input name="background_image" value="<?= e($settings['background_image']) ?>" placeholder="background.jpg" class="field"></label>
+        <label style="grid-column:1/-1;"><span>Или загрузить фон</span><input type="file" name="bg_file" accept="image/*" class="field" style="padding:8px;"></label>
+        <?php if ($settings['background_image']): ?><div style="grid-column:1/-1;"><img src="<?= e($settings['background_image']) ?>" style="max-height:120px;border-radius:8px;"></div><?php endif; ?>
         <label style="grid-column:1/-1;"><span>Главный заголовок</span><textarea name="hero_title" rows="2" class="field"><?= e($settings['hero_title']) ?></textarea></label>
         <label style="grid-column:1/-1;"><span>Подзаголовок</span><textarea name="hero_subtitle" rows="3" class="field"><?= e($settings['hero_subtitle']) ?></textarea></label>
       </div>
@@ -306,7 +342,7 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
         <form method="post"><input type="hidden" name="action" value="add_product"><button class="btn btn-dark">+ Добавить</button></form>
       </div>
 
-      <form method="post" id="prodForm">
+      <form method="post" id="prodForm" enctype="multipart/form-data">
         <input type="hidden" name="action" value="save_products">
         <?php foreach ($products as $i => $product): ?>
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
@@ -324,6 +360,10 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
               <label><span>Цена до 10</span><input name="price_base[]" type="number" step="0.01" value="<?= e($product['price_base'] ?? 0) ?>" class="field"></label>
               <label><span>Опт от 10</span><input name="price_wholesale[]" type="number" step="0.01" value="<?= e($product['price_wholesale'] ?? 0) ?>" class="field"></label>
             </div>
+            <label style="margin-top:12px;"><span>Фото товара</span>
+              <?php if (!empty($product['image'])): ?><div style="margin-bottom:8px;"><img src="<?= e($product['image']) ?>" style="max-height:80px;border-radius:8px;"></div><?php endif; ?>
+              <input type="file" name="product_image_<?= e($product['id'] ?? 0) ?>" accept="image/*" class="field" style="padding:8px;">
+            </label>
           </div>
         <?php endforeach; ?>
         <div class="sticky-save"><button class="btn" style="width:100%;">Сохранить каталог</button></div>
