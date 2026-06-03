@@ -40,20 +40,20 @@ $categoriesPath = __DIR__ . '/categories.json';
 $categories = read_json($categoriesPath, []);
 
 $defaultSettings = [
-    'site_name' => 'tmopro.ru',
-    'site_short_name' => 'tmopro',
+    'site_name' => 'TMOPRO — Сантехника оптом',
+    'site_short_name' => 'TMOPRO',
     'phone' => '+7 (800) 555-35-35',
     'email_manager' => 'info@tmopro.ru',
-    'theme_color' => 'indigo',
+    'theme_color' => 'emerald',
     'default_view' => 'table',
-    'logo_type' => 'text',
-    'logo_text' => 'TMO',
-    'logo_url' => '',
+    'logo_type' => 'image',
+    'logo_text' => 'TMOPRO',
+    'logo_url' => 'logo.svg',
     'background_type' => 'gradient',
     'background_color' => '#f8fafc',
     'background_image' => '',
-    'hero_title' => 'Премиальная сантехника оптом',
-    'hero_subtitle' => 'Подберите позиции, укажите количество и отправьте заявку.'
+    'hero_title' => 'Сантехника оптом от производителя. Все на одной площадке.',
+    'hero_subtitle' => 'Шаровые краны, фитинги, трубы и комплектующие для инженерных систем. Оптовые цены от 10 шт.'
 ];
 
 $settings = array_merge($defaultSettings, read_json($settingsPath, $defaultSettings));
