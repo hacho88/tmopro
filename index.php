@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="vue.global.prod.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -35,6 +35,10 @@
   <style>
     [v-cloak] { display: none; }
     .number-smooth { transition: color .25s ease, opacity .25s ease, transform .25s ease; }
+    .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 28px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
+    .fallback h1 { margin: 0 0 12px; font-size: 32px; line-height: 1.1; }
+    .fallback p { margin: 0 0 20px; color: #64748b; line-height: 1.7; }
+    .fallback a { display: inline-flex; margin-right: 10px; border-radius: 16px; background: #4f46e5; color: #fff; padding: 13px 18px; font-weight: 800; text-decoration: none; }
   </style>
 </head>
 <body class="bg-slate-50/50 text-slate-950 antialiased">
@@ -202,8 +206,18 @@
       </div>
     </nav>
   </div>
+  <div id="app-fallback" class="fallback">
+    <h1>Сайт загружается</h1>
+    <p>Если каталог не появился через несколько секунд, браузер не смог загрузить скрипты интерфейса. Попробуйте обновить страницу или открыть сайт в другом браузере.</p>
+    <a href="index.php?v=3">Обновить</a>
+    <a href="admin.php?v=3">Админка</a>
+  </div>
 
   <script>
+    if (!window.Vue) {
+      throw new Error('Vue CDN failed to load');
+    }
+
     const { createApp } = Vue;
 
     const QtyControl = {
@@ -330,6 +344,7 @@
         }
       }
     }).mount('#app');
+    document.getElementById('app-fallback')?.remove();
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));

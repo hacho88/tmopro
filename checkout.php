@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Оформление заказа — tmopro.ru</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="vue.global.prod.js"></script>
   <script>
     tailwind.config = {
       theme: {

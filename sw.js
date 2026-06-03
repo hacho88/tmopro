@@ -3,6 +3,7 @@ const APP_SHELL = [
   './',
   './index.php',
   './checkout.php',
+  './vue.global.prod.js',
   './settings.json',
   './products.json',
   './manifest.json',
