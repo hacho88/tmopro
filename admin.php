@@ -175,7 +175,6 @@ $totalRetail = array_sum(array_map(fn($product) => (float)($product['price_base'
   <title>Админка tmopro.ru</title>
   <meta name="theme-color" content="<?= e($themeColor) ?>">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -184,6 +183,134 @@ $totalRetail = array_sum(array_map(fn($product) => (float)($product['price_base'
     .field { width: 100%; border-radius: 18px; border: 1px solid #e2e8f0; background: #f8fafc; padding: 14px 16px; font-weight: 700; outline: none; transition: .18s ease; }
     .field:focus { background: #fff; border-color: transparent; box-shadow: 0 0 0 4px rgba(79,70,229,.14); }
     .label { margin-bottom: 8px; display: block; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #f6f7fb; color: #020617; }
+    main { padding: 32px; }
+    body > main:first-child { min-height: 100vh; display: grid; place-items: center; }
+    section, aside { background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(15,23,42,.08); }
+    a { color: inherit; text-decoration: none; }
+    button { border: 0; cursor: pointer; }
+    input, textarea, select, button { font: inherit; }
+    .min-h-screen { min-height: 100vh; }
+    .grid { display: grid; }
+    .flex { display: flex; }
+    .hidden { display: none; }
+    .block { display: block; }
+    .inline-flex { display: inline-flex; }
+    .items-center { align-items: center; }
+    .items-end { align-items: flex-end; }
+    .items-start { align-items: flex-start; }
+    .justify-between { justify-content: space-between; }
+    .place-items-center { place-items: center; }
+    .text-center { text-align: center; }
+    .gap-1 { gap: 4px; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .gap-5 { gap: 20px; }
+    .gap-6 { gap: 24px; }
+    .space-y-2 > * + * { margin-top: 8px; }
+    .space-y-3 > * + * { margin-top: 12px; }
+    .space-y-4 > * + * { margin-top: 16px; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-5 { margin-bottom: 20px; }
+    .mb-6 { margin-bottom: 24px; }
+    .mb-8 { margin-bottom: 32px; }
+    .mt-1 { margin-top: 4px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-5 { margin-top: 20px; }
+    .mt-6 { margin-top: 24px; }
+    .p-2 { padding: 8px; }
+    .p-3 { padding: 12px; }
+    .p-4 { padding: 16px; }
+    .p-5 { padding: 20px; }
+    .p-6 { padding: 24px; }
+    .p-8 { padding: 32px; }
+    .px-3 { padding-left: 12px; padding-right: 12px; }
+    .px-4 { padding-left: 16px; padding-right: 16px; }
+    .px-5 { padding-left: 20px; padding-right: 20px; }
+    .px-6 { padding-left: 24px; padding-right: 24px; }
+    .px-7 { padding-left: 28px; padding-right: 28px; }
+    .py-2 { padding-top: 8px; padding-bottom: 8px; }
+    .py-3 { padding-top: 12px; padding-bottom: 12px; }
+    .py-4 { padding-top: 16px; padding-bottom: 16px; }
+    .w-full { width: 100%; }
+    .max-w-md { max-width: 448px; }
+    .max-w-2xl { max-width: 672px; }
+    .h-12 { height: 48px; }
+    .h-16 { height: 64px; }
+    .w-12 { width: 48px; }
+    .w-16 { width: 64px; }
+    .rounded-xl { border-radius: 12px; }
+    .rounded-2xl { border-radius: 16px; }
+    .rounded-3xl, .rounded-\[28px\], .rounded-\[32px\] { border-radius: 28px; }
+    .rounded-full { border-radius: 999px; }
+    .bg-white { background: #fff; }
+    .bg-slate-50 { background: #f8fafc; }
+    .bg-slate-100 { background: #f1f5f9; }
+    .bg-slate-950 { background: #020617; }
+    .bg-red-50 { background: #fef2f2; }
+    .bg-emerald-50 { background: #ecfdf5; }
+    .text-white { color: #fff; }
+    .text-slate-950 { color: #020617; }
+    .text-slate-600 { color: #475569; }
+    .text-slate-500 { color: #64748b; }
+    .text-slate-400 { color: #94a3b8; }
+    .text-red-600 { color: #dc2626; }
+    .text-emerald-600, .text-emerald-700 { color: #059669; }
+    .text-xs { font-size: 12px; }
+    .text-sm { font-size: 14px; }
+    .text-xl { font-size: 20px; }
+    .text-2xl { font-size: 24px; }
+    .text-3xl { font-size: 30px; }
+    .text-4xl { font-size: 36px; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-black { font-weight: 900; }
+    .leading-7 { line-height: 1.75; }
+    .shadow-lg, .shadow-xl, .shadow-md { box-shadow: 0 12px 32px rgba(15,23,42,.14); }
+    .border, .border-b, .border-r { border: 1px solid #e2e8f0; }
+    .sticky { position: sticky; }
+    .bottom-4 { bottom: 16px; }
+    .top-0 { top: 0; }
+    .top-24 { top: 96px; }
+    .z-40 { z-index: 40; }
+    .overflow-hidden { overflow: hidden; }
+    .transition, .transition-all { transition: .18s ease; }
+    .hover\:bg-white:hover { background: #fff; }
+    .hover\:shadow-lg:hover, .hover\:shadow-md:hover { box-shadow: 0 16px 42px rgba(15,23,42,.14); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    @media (min-width: 768px) {
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .md\:col-span-2 { grid-column: span 2 / span 2; }
+    }
+    @media (min-width: 1024px) {
+      .lg\:grid { display: grid; }
+      .lg\:grid-cols-\[290px_1fr\] { grid-template-columns: 290px 1fr; }
+      .lg\:grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      .lg\:sticky { position: sticky; }
+      .lg\:top-0 { top: 0; }
+      .lg\:h-screen { height: 100vh; }
+      .lg\:p-6 { padding: 24px; }
+      .lg\:px-10 { padding-left: 40px; padding-right: 40px; }
+      .lg\:block { display: block; }
+      .lg\:inline-flex { display: inline-flex; }
+      .lg\:text-left { text-align: left; }
+    }
+    @media (min-width: 1280px) {
+      .xl\:grid-cols-\[1fr_360px\] { grid-template-columns: 1fr 360px; }
+      .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .xl\:col-span-2 { grid-column: span 2 / span 2; }
+      .xl\:flex-row { flex-direction: row; }
+      .xl\:items-end { align-items: flex-end; }
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#f6f7fb] text-slate-950 antialiased">
