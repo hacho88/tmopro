@@ -1,0 +1,16 @@
+{
+  "site_name": "tmopro.ru — Сантехника Оптом",
+  "site_short_name": "tmopro.ru",
+  "phone": "+7 (800) 555-35-35",
+  "email_manager": "info@tmopro.ru",
+  "theme_color": "indigo",
+  "default_view": "table",
+  "logo_type": "text",
+  "logo_text": "TMO",
+  "logo_url": "",
+  "background_type": "gradient",
+  "background_color": "#f8fafc",
+  "background_image": "",
+  "hero_title": "Премиальная сантехника оптом для комплектации объектов.",
+  "hero_subtitle": "Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук."
+}

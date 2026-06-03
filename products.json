@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "article": "GRH-23334000",
+    "name": "Смеситель для раковины Grohe BauEdge S-Size",
+    "category": "Смесители",
+    "brand": "Grohe",
+    "stock": 64,
+    "price_base": 8950,
+    "price_wholesale": 7350
+  },
+  {
+    "id": 2,
+    "article": "GRH-32867000",
+    "name": "Смеситель кухонный Grohe Eurosmart Cosmopolitan",
+    "category": "Смесители",
+    "brand": "Grohe",
+    "stock": 38,
+    "price_base": 12900,
+    "price_wholesale": 10800
+  },
+  {
+    "id": 3,
+    "article": "GEB-500.275.01.1",
+    "name": "Унитаз подвесной Geberit Selnova Rimfree",
+    "category": "Керамика",
+    "brand": "Geberit",
+    "stock": 22,
+    "price_base": 17600,
+    "price_wholesale": 14900
+  },
+  {
+    "id": 4,
+    "article": "GEB-111.300.00.5",
+    "name": "Инсталляция Geberit Duofix для подвесного унитаза",
+    "category": "Керамика",
+    "brand": "Geberit",
+    "stock": 31,
+    "price_base": 31900,
+    "price_wholesale": 27400
+  },
+  {
+    "id": 5,
+    "article": "RHA-13103121001",
+    "name": "Труба Rehau Rautitan Stabil 16 мм",
+    "category": "Инженерия",
+    "brand": "Rehau",
+    "stock": 420,
+    "price_base": 245,
+    "price_wholesale": 198
+  },
+  {
+    "id": 6,
+    "article": "RHA-160001-001",
+    "name": "Фитинг Rehau Rautitan PX угол 16 x 16 мм",
+    "category": "Инженерия",
+    "brand": "Rehau",
+    "stock": 180,
+    "price_base": 690,
+    "price_wholesale": 560
+  },
+  {
+    "id": 7,
+    "article": "STT-SVQ-0001-000015",
+    "name": "Кран шаровый Stout 1/2 полнопроходной",
+    "category": "Инженерия",
+    "brand": "Stout",
+    "stock": 256,
+    "price_base": 520,
+    "price_wholesale": 410
+  },
+  {
+    "id": 8,
+    "article": "STT-SVM-0001-002020",
+    "name": "Коллекторная группа Stout 1 дюйм на 2 выхода",
+    "category": "Отопление",
+    "brand": "Stout",
+    "stock": 47,
+    "price_base": 6450,
+    "price_wholesale": 5320
+  }
+]
