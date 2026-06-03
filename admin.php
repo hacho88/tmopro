@@ -1,37 +1,336 @@
 ﻿<?php
 session_start();
+
 const ADMIN_PASSWORD = 'admin123';
-function e($value) { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
-function readJsonFile($path, $fallback) { if (!file_exists($path)) return $fallback; $data = json_decode(file_get_contents($path), true); return is_array($data) ? $data : $fallback; }
-function saveJsonFile($path, $data) { file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); }
+
+function e($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function read_json($path, $fallback) {
+    if (!file_exists($path)) {
+        return $fallback;
+    }
+    $json = file_get_contents($path);
+    $data = json_decode($json, true);
+    return is_array($data) ? $data : $fallback;
+}
+
+function save_json($path, $data, &$error) {
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        $error = 'Не удалось подготовить JSON для сохранения.';
+        return false;
+    }
+    if (file_put_contents($path, $json . PHP_EOL, LOCK_EX) === false) {
+        $error = 'Не удалось сохранить файл. Проверьте права на запись для ' . basename($path) . '.';
+        return false;
+    }
+    return true;
+}
+
 $settingsPath = __DIR__ . '/settings.json';
 $productsPath = __DIR__ . '/products.json';
-$defaultSettings = ['site_name'=>'tmopro.ru — Сантехника Оптом','site_short_name'=>'tmopro.ru','phone'=>'+7 (800) 555-35-35','email_manager'=>'info@tmopro.ru','theme_color'=>'indigo','default_view'=>'table','logo_type'=>'text','logo_text'=>'TMO','logo_url'=>'','background_type'=>'gradient','background_color'=>'#f8fafc','background_image'=>'','hero_title'=>'Премиальная сантехника оптом для комплектации объектов.','hero_subtitle'=>'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.'];
-$settings = array_merge($defaultSettings, readJsonFile($settingsPath, $defaultSettings));
-$products = readJsonFile($productsPath, []);
-$error = ''; $success = ''; $activeTab = $_GET['tab'] ?? 'dashboard';
-if (isset($_GET['logout'])) { $_SESSION = []; session_destroy(); header('Location: admin.php'); exit; }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) { if (hash_equals(ADMIN_PASSWORD, (string)$_POST['password'])) { $_SESSION['tmopro_admin'] = true; header('Location: admin.php'); exit; } $error = 'Неверный пароль. Попробуйте еще раз.'; }
-$isAuthorized = !empty($_SESSION['tmopro_admin']);
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized && isset($_POST['action'])) {
-  $action = $_POST['action'];
-  if ($action === 'save_design') {
-    $settings = ['site_name'=>trim($_POST['site_name'] ?? $defaultSettings['site_name']),'site_short_name'=>trim($_POST['site_short_name'] ?? $defaultSettings['site_short_name']),'phone'=>trim($_POST['phone'] ?? $defaultSettings['phone']),'email_manager'=>trim($_POST['email_manager'] ?? $defaultSettings['email_manager']),'theme_color'=>in_array($_POST['theme_color'] ?? 'indigo', ['indigo','emerald','slate'], true) ? $_POST['theme_color'] : 'indigo','default_view'=>in_array($_POST['default_view'] ?? 'table', ['table','grid'], true) ? $_POST['default_view'] : 'table','logo_type'=>in_array($_POST['logo_type'] ?? 'text', ['text','image'], true) ? $_POST['logo_type'] : 'text','logo_text'=>trim($_POST['logo_text'] ?? 'TMO'),'logo_url'=>trim($_POST['logo_url'] ?? ''),'background_type'=>in_array($_POST['background_type'] ?? 'gradient', ['gradient','solid','image'], true) ? $_POST['background_type'] : 'gradient','background_color'=>trim($_POST['background_color'] ?? '#f8fafc'),'background_image'=>trim($_POST['background_image'] ?? ''),'hero_title'=>trim($_POST['hero_title'] ?? $defaultSettings['hero_title']),'hero_subtitle'=>trim($_POST['hero_subtitle'] ?? $defaultSettings['hero_subtitle'])];
-    saveJsonFile($settingsPath, $settings); $success = 'Внешний вид сайта сохранен.'; $activeTab = 'design';
-  }
-  if ($action === 'add_product') { $maxId = 0; foreach ($products as $p) $maxId = max($maxId, (int)($p['id'] ?? 0)); $products[] = ['id'=>$maxId+1,'article'=>'NEW-'.($maxId+1),'name'=>'Новый товар','category'=>'Смесители','brand'=>'Grohe','stock'=>0,'price_base'=>0,'price_wholesale'=>0]; saveJsonFile($productsPath, $products); $success = 'Новый товар добавлен.'; $activeTab = 'products'; }
-  if ($action === 'delete_product') { $deleteId = (int)($_POST['delete_id'] ?? 0); $products = array_values(array_filter($products, fn($p) => (int)($p['id'] ?? 0) !== $deleteId)); saveJsonFile($productsPath, $products); $success = 'Товар удален.'; $activeTab = 'products'; }
-  if ($action === 'save_products') { $saved = []; foreach (($_POST['id'] ?? []) as $i => $id) { $name = trim($_POST['name'][$i] ?? ''); if ($name === '') continue; $saved[] = ['id'=>(int)$id,'article'=>trim($_POST['article'][$i] ?? ''),'name'=>$name,'category'=>trim($_POST['category'][$i] ?? ''),'brand'=>trim($_POST['brand'][$i] ?? ''),'stock'=>max(0,(int)($_POST['stock'][$i] ?? 0)),'price_base'=>max(0,(float)($_POST['price_base'][$i] ?? 0)),'price_wholesale'=>max(0,(float)($_POST['price_wholesale'][$i] ?? 0))]; } $products = $saved; saveJsonFile($productsPath, array_values($products)); $success = 'Каталог товаров сохранен.'; $activeTab = 'products'; }
+
+$defaultSettings = [
+    'site_name' => 'tmopro.ru — Сантехника Оптом',
+    'site_short_name' => 'tmopro.ru',
+    'phone' => '+7 (800) 555-35-35',
+    'email_manager' => 'info@tmopro.ru',
+    'theme_color' => 'indigo',
+    'default_view' => 'table',
+    'logo_type' => 'text',
+    'logo_text' => 'TMO',
+    'logo_url' => '',
+    'background_type' => 'gradient',
+    'background_color' => '#f8fafc',
+    'background_image' => '',
+    'hero_title' => 'Премиальная сантехника оптом для комплектации объектов.',
+    'hero_subtitle' => 'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.'
+];
+
+$settings = array_merge($defaultSettings, read_json($settingsPath, $defaultSettings));
+$products = read_json($productsPath, []);
+$error = '';
+$success = '';
+$tab = $_GET['tab'] ?? 'overview';
+
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: admin.php');
+    exit;
 }
-$accentClass = ['indigo'=>'bg-indigo-600','emerald'=>'bg-emerald-600','slate'=>'bg-slate-900'][$settings['theme_color']] ?? 'bg-indigo-600';
-$totalStock = array_sum(array_map(fn($p) => (int)($p['stock'] ?? 0), $products));
-$averageDiscount = count($products) ? round(array_sum(array_map(fn($p) => max(0, (float)($p['price_base'] ?? 0) - (float)($p['price_wholesale'] ?? 0)), $products)) / count($products)) : 0;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_password'])) {
+    if (hash_equals(ADMIN_PASSWORD, (string)$_POST['login_password'])) {
+        $_SESSION['tmopro_admin'] = true;
+        header('Location: admin.php');
+        exit;
+    }
+    $error = 'Неверный пароль.';
+}
+
+$isAuthorized = !empty($_SESSION['tmopro_admin']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'save_settings') {
+        $theme = in_array($_POST['theme_color'] ?? 'indigo', ['indigo', 'emerald', 'slate'], true) ? $_POST['theme_color'] : 'indigo';
+        $view = in_array($_POST['default_view'] ?? 'table', ['table', 'grid'], true) ? $_POST['default_view'] : 'table';
+        $logoType = in_array($_POST['logo_type'] ?? 'text', ['text', 'image'], true) ? $_POST['logo_type'] : 'text';
+        $backgroundType = in_array($_POST['background_type'] ?? 'gradient', ['gradient', 'solid', 'image'], true) ? $_POST['background_type'] : 'gradient';
+
+        $settings = [
+            'site_name' => trim($_POST['site_name'] ?? $defaultSettings['site_name']),
+            'site_short_name' => trim($_POST['site_short_name'] ?? $defaultSettings['site_short_name']),
+            'phone' => trim($_POST['phone'] ?? $defaultSettings['phone']),
+            'email_manager' => trim($_POST['email_manager'] ?? $defaultSettings['email_manager']),
+            'theme_color' => $theme,
+            'default_view' => $view,
+            'logo_type' => $logoType,
+            'logo_text' => trim($_POST['logo_text'] ?? 'TMO'),
+            'logo_url' => trim($_POST['logo_url'] ?? ''),
+            'background_type' => $backgroundType,
+            'background_color' => trim($_POST['background_color'] ?? '#f8fafc'),
+            'background_image' => trim($_POST['background_image'] ?? ''),
+            'hero_title' => trim($_POST['hero_title'] ?? $defaultSettings['hero_title']),
+            'hero_subtitle' => trim($_POST['hero_subtitle'] ?? $defaultSettings['hero_subtitle'])
+        ];
+
+        if (save_json($settingsPath, $settings, $error)) {
+            $success = 'Настройки сайта сохранены.';
+        }
+        $tab = 'settings';
+    }
+
+    if ($action === 'save_products') {
+        $saved = [];
+        foreach (($_POST['id'] ?? []) as $index => $id) {
+            $name = trim($_POST['name'][$index] ?? '');
+            if ($name === '') {
+                continue;
+            }
+            $saved[] = [
+                'id' => (int)$id,
+                'article' => trim($_POST['article'][$index] ?? ''),
+                'name' => $name,
+                'category' => trim($_POST['category'][$index] ?? ''),
+                'brand' => trim($_POST['brand'][$index] ?? ''),
+                'stock' => max(0, (int)($_POST['stock'][$index] ?? 0)),
+                'price_base' => max(0, (float)($_POST['price_base'][$index] ?? 0)),
+                'price_wholesale' => max(0, (float)($_POST['price_wholesale'][$index] ?? 0))
+            ];
+        }
+        $products = array_values($saved);
+        if (save_json($productsPath, $products, $error)) {
+            $success = 'Каталог товаров сохранен.';
+        }
+        $tab = 'products';
+    }
+
+    if ($action === 'add_product') {
+        $maxId = 0;
+        foreach ($products as $product) {
+            $maxId = max($maxId, (int)($product['id'] ?? 0));
+        }
+        $products[] = [
+            'id' => $maxId + 1,
+            'article' => 'NEW-' . ($maxId + 1),
+            'name' => 'Новый товар',
+            'category' => 'Смесители',
+            'brand' => 'Grohe',
+            'stock' => 0,
+            'price_base' => 0,
+            'price_wholesale' => 0
+        ];
+        if (save_json($productsPath, $products, $error)) {
+            $success = 'Товар добавлен. Заполните поля и сохраните каталог.';
+        }
+        $tab = 'products';
+    }
+
+    if ($action === 'delete_product') {
+        $deleteId = (int)($_POST['delete_id'] ?? 0);
+        $products = array_values(array_filter($products, fn($product) => (int)($product['id'] ?? 0) !== $deleteId));
+        if (save_json($productsPath, $products, $error)) {
+            $success = 'Товар удален.';
+        }
+        $tab = 'products';
+    }
+}
+
+$themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
+$totalStock = array_sum(array_map(fn($product) => (int)($product['stock'] ?? 0), $products));
+$totalRetail = array_sum(array_map(fn($product) => (float)($product['price_base'] ?? 0), $products));
 ?>
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Панель управления — tmopro.ru</title><meta name="theme-color" content="#4f46e5"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg" type="image/svg+xml"><script src="https://cdn.tailwindcss.com"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Arial}.admin-field{width:100%;border-radius:1rem;border:1px solid #e2e8f0;background:#f8fafc;padding:.95rem 1rem;font-weight:700;outline:none;transition:all .2s}.admin-field:focus{background:#fff;border-color:transparent;box-shadow:0 0 0 4px rgba(99,102,241,.16)}</style></head><body class="min-h-screen bg-slate-50 text-slate-950 antialiased">
-<?php if (!$isAuthorized): ?><main class="grid min-h-screen place-items-center px-4"><section class="w-full max-w-md rounded-[2rem] border border-slate-100 bg-white p-8 shadow-[0_20px_80px_rgb(15,23,42,0.10)]"><div class="mb-8 text-center"><div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl <?= e($accentClass) ?> text-white shadow-xl"><svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h1 class="text-3xl font-black tracking-[-0.04em]">Вход в управление</h1><p class="mt-2 text-sm font-semibold text-slate-500">Введите пароль администратора</p></div><?php if ($error !== ''): ?><div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600"><?= e($error) ?></div><?php endif; ?><form method="post" class="space-y-4"><input name="password" type="password" required autofocus placeholder="Пароль" class="admin-field"><button class="w-full rounded-2xl <?= e($accentClass) ?> px-6 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:scale-[.99]">Открыть панель</button></form></section></main><?php else: ?>
-<div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]"><aside class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur-xl lg:h-screen lg:border-b-0 lg:border-r lg:px-5"><div class="mb-6 flex items-center justify-between lg:block"><div class="flex items-center gap-3"><div class="grid h-12 w-12 place-items-center rounded-2xl <?= e($accentClass) ?> text-white shadow-lg"><span class="text-sm font-black"><?= e($settings['logo_text'] ?: 'TMO') ?></span></div><div><div class="font-black tracking-tight"><?= e($settings['site_short_name']) ?></div><div class="text-xs font-bold text-slate-400">мини-CMS</div></div></div><a href="admin.php?logout=1" class="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-600 lg:mt-5 lg:inline-flex">Выйти</a></div><nav class="grid grid-cols-3 gap-2 lg:grid-cols-1"><?php $tabs=['dashboard'=>['Обзор','Понятная сводка'],'design'=>['Внешний вид','Логотип, фон, контакты'],'products'=>['Товары','Цены и остатки']]; foreach($tabs as $key=>$tab): ?><a href="admin.php?tab=<?= e($key) ?>" class="rounded-2xl px-4 py-3 text-sm font-black transition <?= $activeTab === $key ? e($accentClass).' text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-white hover:shadow-md' ?>"><span class="block"><?= e($tab[0]) ?></span><span class="hidden text-xs opacity-70 lg:block"><?= e($tab[1]) ?></span></a><?php endforeach; ?></nav></aside>
-<main class="px-4 py-6 sm:px-6 lg:px-10"><div class="mb-8 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"><div><div class="mb-3 inline-flex rounded-full bg-white px-4 py-2 text-sm font-black text-slate-500 shadow-sm ring-1 ring-slate-100">Управление сайтом без MySQL</div><h1 class="text-4xl font-black tracking-[-0.05em] sm:text-5xl">Панель управления</h1><p class="mt-3 max-w-2xl font-medium leading-7 text-slate-500">Все меняется через простые формы. Никаких таблиц базы данных, phpMyAdmin и сложных настроек.</p></div><a href="index.php" target="_blank" class="inline-flex rounded-2xl bg-slate-950 px-6 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5">Открыть сайт</a></div><?php if ($success !== ''): ?><div class="mb-6 rounded-2xl bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-700 ring-1 ring-inset ring-emerald-100"><?= e($success) ?></div><?php endif; ?>
-<?php if ($activeTab === 'dashboard'): ?><section class="grid gap-5 md:grid-cols-3"><div class="rounded-[1.7rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"><div class="text-sm font-black text-slate-400">Товаров</div><div class="mt-3 text-4xl font-black"><?= count($products) ?></div></div><div class="rounded-[1.7rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"><div class="text-sm font-black text-slate-400">На складе</div><div class="mt-3 text-4xl font-black"><?= e($totalStock) ?></div></div><div class="rounded-[1.7rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"><div class="text-sm font-black text-slate-400">Средняя выгода</div><div class="mt-3 text-4xl font-black"><?= e(number_format($averageDiscount, 0, ',', ' ')) ?> ₽</div></div></section><section class="mt-6 rounded-[1.7rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"><h2 class="text-2xl font-black tracking-[-0.03em]">Что можно делать</h2><div class="mt-5 grid gap-4 md:grid-cols-3"><div class="rounded-2xl bg-slate-50 p-5"><b>1. Менять внешний вид</b><p class="mt-2 text-sm font-semibold text-slate-500">Логотип, фон, главный текст, цвет сайта и контакты.</p></div><div class="rounded-2xl bg-slate-50 p-5"><b>2. Управлять товарами</b><p class="mt-2 text-sm font-semibold text-slate-500">Добавлять позиции, менять цены, остатки, бренды и категории.</p></div><div class="rounded-2xl bg-slate-50 p-5"><b>3. Работать как приложение</b><p class="mt-2 text-sm font-semibold text-slate-500">Сайт получил PWA: его можно установить на телефон.</p></div></div></section><?php endif; ?>
-<?php if ($activeTab === 'design'): ?><form method="post" class="grid gap-6 xl:grid-cols-[1fr_360px]"><input type="hidden" name="action" value="save_design"><section class="rounded-[1.7rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"><h2 class="mb-5 text-2xl font-black tracking-[-0.03em]">Внешний вид и контакты</h2><div class="grid gap-5 md:grid-cols-2"><label class="md:col-span-2"><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Полное название сайта</span><input name="site_name" value="<?= e($settings['site_name']) ?>" class="admin-field"></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Короткое имя</span><input name="site_short_name" value="<?= e($settings['site_short_name']) ?>" class="admin-field"></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Телефон</span><input name="phone" value="<?= e($settings['phone']) ?>" class="admin-field"></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Email менеджера</span><input name="email_manager" type="email" value="<?= e($settings['email_manager']) ?>" class="admin-field"></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Цвет темы</span><select name="theme_color" class="admin-field"><option value="indigo" <?= $settings['theme_color']==='indigo'?'selected':'' ?>>indigo — премиальный синий</option><option value="emerald" <?= $settings['theme_color']==='emerald'?'selected':'' ?>>emerald — зеленый</option><option value="slate" <?= $settings['theme_color']==='slate'?'selected':'' ?>>slate — строгий темный</option></select></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Вид каталога</span><select name="default_view" class="admin-field"><option value="table" <?= $settings['default_view']==='table'?'selected':'' ?>>Таблица</option><option value="grid" <?= $settings['default_view']==='grid'?'selected':'' ?>>Плитка</option></select></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Тип логотипа</span><select name="logo_type" class="admin-field"><option value="text" <?= $settings['logo_type']==='text'?'selected':'' ?>>Текстовый</option><option value="image" <?= $settings['logo_type']==='image'?'selected':'' ?>>Картинка по ссылке</option></select></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Текст логотипа</span><input name="logo_text" value="<?= e($settings['logo_text']) ?>" class="admin-field"></label><label class="md:col-span-2"><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">URL логотипа</span><input name="logo_url" value="<?= e($settings['logo_url']) ?>" placeholder="Например: /logo.png" class="admin-field"></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Тип фона</span><select name="background_type" class="admin-field"><option value="gradient" <?= $settings['background_type']==='gradient'?'selected':'' ?>>Воздушный градиент</option><option value="solid" <?= $settings['background_type']==='solid'?'selected':'' ?>>Сплошной цвет</option><option value="image" <?= $settings['background_type']==='image'?'selected':'' ?>>Фоновая картинка</option></select></label><label><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Цвет фона</span><input name="background_color" type="color" value="<?= e($settings['background_color']) ?>" class="h-[58px] w-full rounded-2xl border border-slate-200 bg-slate-50 p-2"></label><label class="md:col-span-2"><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">URL фоновой картинки</span><input name="background_image" value="<?= e($settings['background_image']) ?>" placeholder="Например: /background.jpg" class="admin-field"></label><label class="md:col-span-2"><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Главный заголовок</span><textarea name="hero_title" rows="2" class="admin-field"><?= e($settings['hero_title']) ?></textarea></label><label class="md:col-span-2"><span class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Подзаголовок</span><textarea name="hero_subtitle" rows="3" class="admin-field"><?= e($settings['hero_subtitle']) ?></textarea></label></div><button class="mt-6 rounded-2xl <?= e($accentClass) ?> px-7 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5">Сохранить внешний вид</button></section><aside class="h-fit rounded-[1.7rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"><h3 class="text-xl font-black">Подсказка</h3><p class="mt-3 text-sm font-semibold leading-6 text-slate-500">Чтобы поменять логотип или фон, загрузите картинку в public_html, например logo.png, и укажите путь /logo.png или logo.png.</p></aside></form><?php endif; ?>
-<?php if ($activeTab === 'products'): ?><section class="rounded-[1.7rem] border border-slate-100 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:p-6"><div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 class="text-2xl font-black tracking-[-0.03em]">Каталог товаров</h2><p class="mt-1 text-sm font-semibold text-slate-500">Меняйте данные как в понятной таблице.</p></div><form method="post"><input type="hidden" name="action" value="add_product"><button class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white">+ Добавить товар</button></form></div><form method="post"><input type="hidden" name="action" value="save_products"><div class="space-y-4"><?php foreach ($products as $index=>$product): ?><article class="rounded-2xl border border-slate-100 bg-slate-50 p-4"><div class="mb-4 flex items-center justify-between gap-3"><div class="font-black">Товар #<?= e($product['id'] ?? $index + 1) ?></div><button form="delete-<?= e($product['id'] ?? 0) ?>" class="rounded-xl bg-red-50 px-3 py-2 text-xs font-black text-red-600" onclick="return confirm('Удалить товар?')">Удалить</button></div><input type="hidden" name="id[]" value="<?= e($product['id'] ?? $index + 1) ?>"><div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4"><label class="xl:col-span-2"><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Название</span><input name="name[]" value="<?= e($product['name'] ?? '') ?>" class="admin-field"></label><label><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Артикул</span><input name="article[]" value="<?= e($product['article'] ?? '') ?>" class="admin-field"></label><label><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Бренд</span><input name="brand[]" value="<?= e($product['brand'] ?? '') ?>" class="admin-field"></label><label><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Категория</span><input name="category[]" value="<?= e($product['category'] ?? '') ?>" class="admin-field"></label><label><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Остаток</span><input name="stock[]" type="number" value="<?= e($product['stock'] ?? 0) ?>" class="admin-field"></label><label><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Цена до 10</span><input name="price_base[]" type="number" step="0.01" value="<?= e($product['price_base'] ?? 0) ?>" class="admin-field"></label><label><span class="mb-1 block text-xs font-black uppercase tracking-widest text-slate-400">Опт от 10</span><input name="price_wholesale[]" type="number" step="0.01" value="<?= e($product['price_wholesale'] ?? 0) ?>" class="admin-field"></label></div></article><?php endforeach; ?></div><div class="sticky bottom-4 mt-6 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-[0_18px_60px_rgb(15,23,42,0.16)] backdrop-blur-xl"><button class="w-full rounded-2xl <?= e($accentClass) ?> px-7 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5">Сохранить каталог</button></div></form><?php foreach ($products as $product): ?><form id="delete-<?= e($product['id'] ?? 0) ?>" method="post"><input type="hidden" name="action" value="delete_product"><input type="hidden" name="delete_id" value="<?= e($product['id'] ?? 0) ?>"></form><?php endforeach; ?></section><?php endif; ?>
-</main></div><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));}</script><?php endif; ?></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Админка tmopro.ru</title>
+  <meta name="theme-color" content="<?= e($themeColor) ?>">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .field { width: 100%; border-radius: 18px; border: 1px solid #e2e8f0; background: #f8fafc; padding: 14px 16px; font-weight: 700; outline: none; transition: .18s ease; }
+    .field:focus { background: #fff; border-color: transparent; box-shadow: 0 0 0 4px rgba(79,70,229,.14); }
+    .label { margin-bottom: 8px; display: block; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f6f7fb] text-slate-950 antialiased">
+<?php if (!$isAuthorized): ?>
+  <main class="grid min-h-screen place-items-center px-4">
+    <section class="w-full max-w-md rounded-[32px] border border-white bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,.12)]">
+      <div class="mb-8 text-center">
+        <div class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-3xl text-white shadow-xl" style="background: <?= e($themeColor) ?>;">TMO</div>
+        <h1 class="text-3xl font-black tracking-[-.04em]">Панель управления</h1>
+        <p class="mt-2 text-sm font-semibold text-slate-500">Вход для администратора сайта</p>
+      </div>
+      <?php if ($error): ?><div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600"><?= e($error) ?></div><?php endif; ?>
+      <form method="post" class="space-y-4">
+        <input name="login_password" type="password" required autofocus placeholder="Пароль" class="field">
+        <button class="w-full rounded-2xl px-6 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5" style="background: <?= e($themeColor) ?>;">Войти</button>
+      </form>
+    </section>
+  </main>
+<?php else: ?>
+  <div class="min-h-screen lg:grid lg:grid-cols-[290px_1fr]">
+    <aside class="border-b border-slate-200 bg-white/90 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:p-6">
+      <div class="mb-6 flex items-center justify-between gap-4 lg:block">
+        <div class="flex items-center gap-3">
+          <div class="grid h-12 w-12 place-items-center rounded-2xl text-sm font-black text-white" style="background: <?= e($themeColor) ?>;"><?= e($settings['logo_text'] ?: 'TMO') ?></div>
+          <div>
+            <div class="font-black"><?= e($settings['site_short_name']) ?></div>
+            <div class="text-xs font-bold text-slate-400">управление сайтом</div>
+          </div>
+        </div>
+        <a href="admin.php?logout=1" class="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-600 lg:mt-6 lg:inline-flex">Выйти</a>
+      </div>
+      <nav class="grid grid-cols-3 gap-2 lg:grid-cols-1">
+        <?php $tabs = ['overview' => 'Обзор', 'settings' => 'Сайт', 'products' => 'Товары']; ?>
+        <?php foreach ($tabs as $key => $title): ?>
+          <a href="admin.php?tab=<?= e($key) ?>" class="rounded-2xl px-4 py-3 text-center text-sm font-black transition lg:text-left <?= $tab === $key ? 'text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-white hover:shadow-md' ?>" style="<?= $tab === $key ? 'background:' . e($themeColor) . ';' : '' ?>"><?= e($title) ?></a>
+        <?php endforeach; ?>
+      </nav>
+    </aside>
+
+    <main class="px-4 py-6 sm:px-6 lg:px-10">
+      <div class="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <div class="mb-3 inline-flex rounded-full bg-white px-4 py-2 text-sm font-black text-slate-500 shadow-sm ring-1 ring-slate-100">Без MySQL · JSON CMS</div>
+          <h1 class="text-4xl font-black tracking-[-.05em] sm:text-5xl">Админ-панель</h1>
+          <p class="mt-3 max-w-2xl font-medium leading-7 text-slate-500">Простое управление сайтом: контакты, внешний вид, товары, цены и остатки.</p>
+        </div>
+        <a href="index.php" target="_blank" class="rounded-2xl bg-slate-950 px-6 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5">Открыть сайт</a>
+      </div>
+
+      <?php if ($success): ?><div class="mb-6 rounded-2xl bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-700 ring-1 ring-emerald-100"><?= e($success) ?></div><?php endif; ?>
+      <?php if ($error): ?><div class="mb-6 rounded-2xl bg-red-50 px-5 py-4 text-sm font-black text-red-600 ring-1 ring-red-100"><?= e($error) ?></div><?php endif; ?>
+
+      <?php if ($tab === 'overview'): ?>
+        <section class="grid gap-5 md:grid-cols-3">
+          <div class="rounded-[28px] bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,.06)]"><div class="text-sm font-black text-slate-400">Товаров</div><div class="mt-3 text-4xl font-black"><?= count($products) ?></div></div>
+          <div class="rounded-[28px] bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,.06)]"><div class="text-sm font-black text-slate-400">Остаток</div><div class="mt-3 text-4xl font-black"><?= e($totalStock) ?></div></div>
+          <div class="rounded-[28px] bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,.06)]"><div class="text-sm font-black text-slate-400">Сумма цен</div><div class="mt-3 text-4xl font-black"><?= e(number_format($totalRetail, 0, ',', ' ')) ?> ₽</div></div>
+        </section>
+        <section class="mt-6 rounded-[28px] bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,.06)]">
+          <h2 class="text-2xl font-black tracking-[-.03em]">Как работать</h2>
+          <div class="mt-5 grid gap-4 md:grid-cols-3">
+            <a href="admin.php?tab=settings" class="rounded-2xl bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg"><b>1. Настроить сайт</b><p class="mt-2 text-sm font-semibold text-slate-500">Название, телефон, почта, логотип, фон и главный экран.</p></a>
+            <a href="admin.php?tab=products" class="rounded-2xl bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg"><b>2. Заполнить товары</b><p class="mt-2 text-sm font-semibold text-slate-500">Артикулы, бренды, остатки, розничные и оптовые цены.</p></a>
+            <a href="index.php" target="_blank" class="rounded-2xl bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg"><b>3. Проверить витрину</b><p class="mt-2 text-sm font-semibold text-slate-500">Откройте сайт и проверьте, как покупатель видит каталог.</p></a>
+          </div>
+        </section>
+      <?php endif; ?>
+
+      <?php if ($tab === 'settings'): ?>
+        <form method="post" class="grid gap-6 xl:grid-cols-[1fr_360px]">
+          <input type="hidden" name="action" value="save_settings">
+          <section class="rounded-[28px] bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,.06)]">
+            <h2 class="mb-6 text-2xl font-black tracking-[-.03em]">Настройки сайта</h2>
+            <div class="grid gap-5 md:grid-cols-2">
+              <label class="md:col-span-2"><span class="label">Название сайта</span><input name="site_name" value="<?= e($settings['site_name']) ?>" class="field"></label>
+              <label><span class="label">Короткое имя</span><input name="site_short_name" value="<?= e($settings['site_short_name']) ?>" class="field"></label>
+              <label><span class="label">Телефон</span><input name="phone" value="<?= e($settings['phone']) ?>" class="field"></label>
+              <label><span class="label">Email менеджера</span><input name="email_manager" type="email" value="<?= e($settings['email_manager']) ?>" class="field"></label>
+              <label><span class="label">Цвет</span><select name="theme_color" class="field"><option value="indigo" <?= $settings['theme_color'] === 'indigo' ? 'selected' : '' ?>>Синий indigo</option><option value="emerald" <?= $settings['theme_color'] === 'emerald' ? 'selected' : '' ?>>Зеленый emerald</option><option value="slate" <?= $settings['theme_color'] === 'slate' ? 'selected' : '' ?>>Темный slate</option></select></label>
+              <label><span class="label">Вид каталога</span><select name="default_view" class="field"><option value="table" <?= $settings['default_view'] === 'table' ? 'selected' : '' ?>>Таблица</option><option value="grid" <?= $settings['default_view'] === 'grid' ? 'selected' : '' ?>>Плитка</option></select></label>
+              <label><span class="label">Тип логотипа</span><select name="logo_type" class="field"><option value="text" <?= $settings['logo_type'] === 'text' ? 'selected' : '' ?>>Текст</option><option value="image" <?= $settings['logo_type'] === 'image' ? 'selected' : '' ?>>Картинка</option></select></label>
+              <label><span class="label">Текст логотипа</span><input name="logo_text" value="<?= e($settings['logo_text']) ?>" class="field"></label>
+              <label class="md:col-span-2"><span class="label">Ссылка на логотип</span><input name="logo_url" value="<?= e($settings['logo_url']) ?>" placeholder="logo.png или /logo.png" class="field"></label>
+              <label><span class="label">Тип фона</span><select name="background_type" class="field"><option value="gradient" <?= $settings['background_type'] === 'gradient' ? 'selected' : '' ?>>Градиент</option><option value="solid" <?= $settings['background_type'] === 'solid' ? 'selected' : '' ?>>Цвет</option><option value="image" <?= $settings['background_type'] === 'image' ? 'selected' : '' ?>>Картинка</option></select></label>
+              <label><span class="label">Цвет фона</span><input name="background_color" type="color" value="<?= e($settings['background_color']) ?>" class="h-[54px] w-full rounded-2xl border border-slate-200 bg-slate-50 p-2"></label>
+              <label class="md:col-span-2"><span class="label">Ссылка на фон</span><input name="background_image" value="<?= e($settings['background_image']) ?>" placeholder="background.jpg или /background.jpg" class="field"></label>
+              <label class="md:col-span-2"><span class="label">Главный заголовок</span><textarea name="hero_title" rows="2" class="field"><?= e($settings['hero_title']) ?></textarea></label>
+              <label class="md:col-span-2"><span class="label">Подзаголовок</span><textarea name="hero_subtitle" rows="3" class="field"><?= e($settings['hero_subtitle']) ?></textarea></label>
+            </div>
+            <button class="mt-6 rounded-2xl px-7 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5" style="background: <?= e($themeColor) ?>;">Сохранить настройки</button>
+          </section>
+          <aside class="h-fit rounded-[28px] bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,.06)]">
+            <h3 class="text-xl font-black">Проверка записи</h3>
+            <div class="mt-4 space-y-3 text-sm font-bold text-slate-500">
+              <div class="rounded-2xl bg-slate-50 p-4">settings.json: <?= is_writable($settingsPath) ? '<span class="text-emerald-600">можно сохранять</span>' : '<span class="text-red-600">нет прав записи</span>' ?></div>
+              <div class="rounded-2xl bg-slate-50 p-4">products.json: <?= is_writable($productsPath) ? '<span class="text-emerald-600">можно сохранять</span>' : '<span class="text-red-600">нет прав записи</span>' ?></div>
+            </div>
+          </aside>
+        </form>
+      <?php endif; ?>
+
+      <?php if ($tab === 'products'): ?>
+        <section class="rounded-[28px] bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,.06)]">
+          <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div><h2 class="text-2xl font-black tracking-[-.03em]">Товары</h2><p class="mt-1 text-sm font-semibold text-slate-500">Одна карточка — один товар. После правок нажмите “Сохранить каталог”.</p></div>
+            <form method="post"><input type="hidden" name="action" value="add_product"><button class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white">+ Добавить</button></form>
+          </div>
+          <form method="post" id="productsForm">
+            <input type="hidden" name="action" value="save_products">
+            <div class="grid gap-4">
+              <?php foreach ($products as $index => $product): ?>
+                <article class="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                  <div class="mb-4 flex items-center justify-between gap-3">
+                    <div class="text-sm font-black text-slate-500">ID <?= e($product['id'] ?? $index + 1) ?></div>
+                    <button type="submit" form="deleteProduct<?= e($product['id'] ?? 0) ?>" class="rounded-xl bg-red-50 px-3 py-2 text-xs font-black text-red-600" onclick="return confirm('Удалить товар?')">Удалить</button>
+                  </div>
+                  <input type="hidden" name="id[]" value="<?= e($product['id'] ?? $index + 1) ?>">
+                  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <label class="xl:col-span-2"><span class="label">Название</span><input name="name[]" value="<?= e($product['name'] ?? '') ?>" class="field"></label>
+                    <label><span class="label">Артикул</span><input name="article[]" value="<?= e($product['article'] ?? '') ?>" class="field"></label>
+                    <label><span class="label">Бренд</span><input name="brand[]" value="<?= e($product['brand'] ?? '') ?>" class="field"></label>
+                    <label><span class="label">Категория</span><input name="category[]" value="<?= e($product['category'] ?? '') ?>" class="field"></label>
+                    <label><span class="label">Остаток</span><input name="stock[]" type="number" value="<?= e($product['stock'] ?? 0) ?>" class="field"></label>
+                    <label><span class="label">Цена до 10</span><input name="price_base[]" type="number" step="0.01" value="<?= e($product['price_base'] ?? 0) ?>" class="field"></label>
+                    <label><span class="label">Опт от 10</span><input name="price_wholesale[]" type="number" step="0.01" value="<?= e($product['price_wholesale'] ?? 0) ?>" class="field"></label>
+                  </div>
+                </article>
+              <?php endforeach; ?>
+            </div>
+            <div class="sticky bottom-4 mt-6 rounded-3xl border border-slate-200 bg-white/90 p-3 shadow-[0_18px_60px_rgba(15,23,42,.18)] backdrop-blur-xl">
+              <button class="w-full rounded-2xl px-7 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5" style="background: <?= e($themeColor) ?>;">Сохранить каталог</button>
+            </div>
+          </form>
+          <?php foreach ($products as $product): ?>
+            <form method="post" id="deleteProduct<?= e($product['id'] ?? 0) ?>">
+              <input type="hidden" name="action" value="delete_product">
+              <input type="hidden" name="delete_id" value="<?= e($product['id'] ?? 0) ?>">
+            </form>
+          <?php endforeach; ?>
+        </section>
+      <?php endif; ?>
+    </main>
+  </div>
+<?php endif; ?>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
+</body>
+</html>
