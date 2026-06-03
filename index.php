@@ -106,10 +106,13 @@
 
           <div class="mt-7">
             <div class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Категория</div>
-            <div class="space-y-2">
-              <button v-for="category in categories" :key="category" @click="toggleCategory(category)" :class="['flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold transition-all duration-300', selectedCategories.includes(category) ? accentBg + ' text-white shadow-md' : 'bg-slate-50 text-slate-600 hover:bg-white hover:shadow-md']">
-                <span>{{ category }}</span><span>{{ countBy('category', category) }}</span>
-              </button>
+            <div class="space-y-3">
+              <div v-for="cat in categoryList" :key="cat.id" class="space-y-1">
+                <div class="text-xs font-bold text-slate-500 px-4 py-1">{{ cat.name }}</div>
+                <button v-for="sub in cat.subcategories" :key="sub.id" @click="toggleCategory(sub.name)" :class="['flex w-full items-center justify-between rounded-2xl px-4 py-2.5 text-sm font-bold transition-all duration-300', selectedCategories.includes(sub.name) ? accentBg + ' text-white shadow-md' : 'bg-slate-50 text-slate-600 hover:bg-white hover:shadow-md']">
+                  <span>{{ sub.name }}</span><span>{{ countBy('category', sub.name) }}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -146,8 +149,13 @@
                 <tbody>
                   <tr v-for="product in filteredProducts" :key="product.id" class="group rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-md">
                     <td class="rounded-l-2xl px-4 py-4">
-                      <div class="font-extrabold text-slate-950">{{ product.name }}</div>
-                      <div class="mt-1 text-xs font-bold text-slate-400">{{ product.article }} · {{ product.brand }}</div>
+                      <div class="flex items-center gap-3">
+                        <img v-if="product.image" :src="product.image" class="h-12 w-12 rounded-xl object-cover">
+                        <div>
+                          <div class="font-extrabold text-slate-950">{{ product.name }}</div>
+                          <div class="mt-1 text-xs font-bold text-slate-400">{{ product.article }} · {{ product.brand }}</div>
+                        </div>
+                      </div>
                     </td>
                     <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ product.category }}</span></td>
                     <td class="px-4 py-4 text-sm font-bold text-slate-500">{{ product.stock }} шт</td>
@@ -162,6 +170,9 @@
 
           <div v-else class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <article v-for="product in filteredProducts" :key="product.id" class="group rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <div v-if="product.image" class="mb-4 overflow-hidden rounded-xl">
+                <img :src="product.image" class="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105">
+              </div>
               <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                   <div class="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">{{ product.article }}</div>
@@ -265,6 +276,7 @@
         return {
           settings: { site_name: 'tmopro.ru — Сантехника Оптом', site_short_name: 'tmopro.ru', phone: '+7 (800) 555-35-35', email_manager: 'info@tmopro.ru', theme_color: 'indigo', default_view: 'table', logo_type: 'text', logo_text: 'TMO', logo_url: '', background_type: 'gradient', background_color: '#f8fafc', background_image: '', hero_title: 'Премиальная сантехника оптом для комплектации объектов.', hero_subtitle: 'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.' },
           products: [],
+          categories: [],
           qty: {},
           selectedCategories: [],
           selectedBrands: [],
@@ -275,7 +287,7 @@
         };
       },
       computed: {
-        categories() { return [...new Set(this.products.map(item => item.category))]; },
+        categoryList() { return this.categories; },
         brands() { return [...new Set(this.products.map(item => item.brand))]; },
         cart() { return JSON.parse(localStorage.getItem('tmopro_cart') || '[]'); },
         cartCount() { return this.cart.reduce((sum, item) => sum + Number(item.qty), 0); },
@@ -304,9 +316,10 @@
       },
       async mounted() {
         try {
-          const [settingsResponse, productsResponse] = await Promise.all([fetch('settings.json'), fetch('products.json')]);
+          const [settingsResponse, productsResponse, categoriesResponse] = await Promise.all([fetch('settings.json'), fetch('products.json'), fetch('categories.json')]);
           this.settings = await settingsResponse.json();
           this.products = await productsResponse.json();
+          this.categories = await categoriesResponse.json();
           this.view = this.settings.default_view || 'table';
           this.products.forEach(product => this.qty[product.id] = 1);
           document.title = this.settings.site_name;
