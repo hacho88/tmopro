@@ -36,6 +36,8 @@ function handle_upload($field, $subfolder) {
 
 $settingsPath = __DIR__ . '/settings.json';
 $productsPath = __DIR__ . '/products.json';
+$categoriesPath = __DIR__ . '/categories.json';
+$categories = read_json($categoriesPath, []);
 
 $defaultSettings = [
     'site_name' => 'tmopro.ru',
@@ -144,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
     if ($action === 'add_product') {
         $maxId = 0;
         foreach ($products as $p) $maxId = max($maxId, (int)($p['id'] ?? 0));
-        $products[] = ['id' => $maxId + 1, 'article' => 'NEW-' . ($maxId + 1), 'name' => 'Новый товар', 'category' => 'Смесители', 'brand' => 'Grohe', 'stock' => 0, 'price_base' => 0, 'price_wholesale' => 0];
+        $products[] = ['id' => $maxId + 1, 'article' => 'NEW-' . ($maxId + 1), 'name' => 'Новый товар', 'category' => 'Смесители для умывальника', 'brand' => 'TIM', 'stock' => 0, 'price_base' => 0, 'price_wholesale' => 0];
         if (save_json($productsPath, $products)) $success = 'Товар добавлен.';
         $tab = 'products';
     }
@@ -355,7 +357,17 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
               <label><span>Название</span><input name="name[]" value="<?= e($product['name'] ?? '') ?>" class="field"></label>
               <label><span>Артикул</span><input name="article[]" value="<?= e($product['article'] ?? '') ?>" class="field"></label>
               <label><span>Бренд</span><input name="brand[]" value="<?= e($product['brand'] ?? '') ?>" class="field"></label>
-              <label><span>Категория</span><input name="category[]" value="<?= e($product['category'] ?? '') ?>" class="field"></label>
+              <label><span>Категория</span>
+                <select name="category[]" class="field">
+                  <?php foreach ($categories as $cat): ?>
+                    <optgroup label="<?= e($cat['name']) ?>">
+                      <?php foreach ($cat['subcategories'] as $sub): ?>
+                        <option value="<?= e($sub['name']) ?>" <?= ($product['category'] ?? '') === $sub['name'] ? 'selected' : '' ?>><?= e($sub['name']) ?></option>
+                      <?php endforeach; ?>
+                    </optgroup>
+                  <?php endforeach; ?>
+                </select>
+              </label>
               <label><span>Остаток</span><input name="stock[]" type="number" value="<?= e($product['stock'] ?? 0) ?>" class="field"></label>
               <label><span>Цена до 10</span><input name="price_base[]" type="number" step="0.01" value="<?= e($product['price_base'] ?? 0) ?>" class="field"></label>
               <label><span>Опт от 10</span><input name="price_wholesale[]" type="number" step="0.01" value="<?= e($product['price_wholesale'] ?? 0) ?>" class="field"></label>

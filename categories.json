@@ -1,0 +1,131 @@
+[
+  {
+    "id": 1,
+    "name": "Бытовая сантехника",
+    "slug": "bytovaya-santehnika",
+    "subcategories": [
+      {"id": 101, "name": "Смесители для умывальника", "slug": "smesiteli-dlya-umyvalnika"},
+      {"id": 102, "name": "Смесители для кухни", "slug": "smesiteli-dlya-kuhni"},
+      {"id": 103, "name": "Смесители для душа", "slug": "smesiteli-dlya-dusha"},
+      {"id": 104, "name": "Смесители для ванны", "slug": "smesiteli-dlya-vanny"},
+      {"id": 105, "name": "Смесители для биде", "slug": "smesiteli-dlya-bide"},
+      {"id": 106, "name": "Унитазы-компакты", "slug": "unitazy-kompakty"},
+      {"id": 107, "name": "Подвесные унитазы", "slug": "podvesnye-unitazy"},
+      {"id": 108, "name": "Инсталляции", "slug": "installyatsii"},
+      {"id": 109, "name": "Умывальники", "slug": "umyvalniki"},
+      {"id": 110, "name": "Душевые системы", "slug": "dushevye-sistemy"}
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Инженерная сантехника",
+    "slug": "injenernaya-santehnika",
+    "subcategories": [
+      {"id": 201, "name": "Шаровые краны", "slug": "sharovye-krany"},
+      {"id": 202, "name": "Краны для воды", "slug": "krany-dlya-vody"},
+      {"id": 203, "name": "Краны для газа", "slug": "krany-dlya-gaza"},
+      {"id": 204, "name": "Краны с фильтром", "slug": "krany-s-filtrom"},
+      {"id": 205, "name": "Вентильные краны", "slug": "ventilnye-krany"},
+      {"id": 206, "name": "Обратные клапаны", "slug": "obratnye-klapany"},
+      {"id": 207, "name": "Смесительные клапаны", "slug": "smesitelnye-klapany"},
+      {"id": 208, "name": "Гибкая подводка", "slug": "gibkaya-podvodka"},
+      {"id": 209, "name": "Хомуты", "slug": "homuty"},
+      {"id": 210, "name": "Уплотнительные материалы", "slug": "uplotnitelnye-materialy"}
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Фитинги",
+    "slug": "fitingi",
+    "subcategories": [
+      {"id": 301, "name": "Латунные фитинги", "slug": "latunnye-fitingi"},
+      {"id": 302, "name": "Никелированные фитинги", "slug": "nikelirovannye-fitingi"},
+      {"id": 303, "name": "Хромированные фитинги", "slug": "hromirovannye-fitingi"},
+      {"id": 304, "name": "Пресс-фитинги", "slug": "press-fitingi"},
+      {"id": 305, "name": "Аксиальные фитинги", "slug": "aksialnye-fitingi"},
+      {"id": 306, "name": "Фитинги из нержавейки", "slug": "fitingi-nerzhaveyka"},
+      {"id": 307, "name": "Полипропиленовые фитинги", "slug": "polipropilenovye-fitingi"},
+      {"id": 308, "name": "Евроконуса", "slug": "evrokonusa"},
+      {"id": 309, "name": "Мультифлексы", "slug": "multifleksy"}
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Теплый пол",
+    "slug": "teplyy-pol",
+    "subcategories": [
+      {"id": 401, "name": "Коллекторные группы", "slug": "kollektornye-gruppy"},
+      {"id": 402, "name": "Насосно-смесительные узлы", "slug": "nasosno-smesitelnye-uzly"},
+      {"id": 403, "name": "Трубы для теплого пола", "slug": "truby-dlya-teplogo-pola"},
+      {"id": 404, "name": "Краны для теплого пола", "slug": "krany-dlya-teplogo-pola"},
+      {"id": 405, "name": "Шкафы для коллекторов", "slug": "shkafy-dlya-kollektorov"},
+      {"id": 406, "name": "Воздухоотводчики", "slug": "vozduhootvodchiki"},
+      {"id": 407, "name": "Комплектующие для теплого пола", "slug": "komplektuyuschie-dlya-teplogo-pola"}
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Отопление",
+    "slug": "otoplenie",
+    "subcategories": [
+      {"id": 501, "name": "Радиаторы алюминиевые", "slug": "radiatory-alyuminievye"},
+      {"id": 502, "name": "Радиаторы биметаллические", "slug": "radiatory-bimetallicheskie"},
+      {"id": 503, "name": "Радиаторы стальные", "slug": "radiatory-stalnye"},
+      {"id": 504, "name": "Термостатические головки", "slug": "termostaticheskie-golovki"},
+      {"id": 505, "name": "Редукторы давления", "slug": "reduktory-davleniya"},
+      {"id": 506, "name": "Группы безопасности", "slug": "gruppy-bezopasnosti"},
+      {"id": 507, "name": "Расширительные баки", "slug": "rasshiritelnye-baki"},
+      {"id": 508, "name": "Узлы подключения", "slug": "uzly-podklyucheniya"}
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Насосы",
+    "slug": "nasosy",
+    "subcategories": [
+      {"id": 601, "name": "Циркуляционные насосы", "slug": "tsirkulyatsionnye-nasosy"},
+      {"id": 602, "name": "Скважинные насосы", "slug": "skvazhinnye-nasosy"},
+      {"id": 603, "name": "Вибрационные насосы", "slug": "vibratsionnye-nasosy"},
+      {"id": 604, "name": "Поверхностные насосы", "slug": "poverhnostnye-nasosy"},
+      {"id": 605, "name": "Дренажные насосы", "slug": "drenazhnye-nasosy"},
+      {"id": 606, "name": "Насосные станции", "slug": "nasosnye-stantsii"},
+      {"id": 607, "name": "Гидроаккумуляторы", "slug": "gidroakkumulyatory"},
+      {"id": 608, "name": "Комплектующие для насосов", "slug": "komplektuyuschie-dlya-nasosov"}
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Фильтры",
+    "slug": "filtry",
+    "subcategories": [
+      {"id": 701, "name": "Промывные фильтры", "slug": "promyvnye-filtry"},
+      {"id": 702, "name": "Фильтры грубой очистки", "slug": "filtry-gruboy-ochistki"},
+      {"id": 703, "name": "Газовые фильтры", "slug": "gazovye-filtry"},
+      {"id": 704, "name": "Фильтры для воды", "slug": "filtry-dlya-vody"}
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Трубы",
+    "slug": "truby",
+    "subcategories": [
+      {"id": 801, "name": "Металлопластиковые трубы", "slug": "truby-metalloplastikovye"},
+      {"id": 802, "name": "Трубы из сшитого полиэтилена", "slug": "truby-sshityy-polietilen"},
+      {"id": 803, "name": "Трубы для теплого пола", "slug": "truby-dlya-teplogo-pola"},
+      {"id": 804, "name": "Трубы для радиаторов", "slug": "truby-dlya-radiatorov"},
+      {"id": 805, "name": "Трубы из нержавейки", "slug": "truby-nerzhaveyka"}
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Котельное оборудование",
+    "slug": "kotelnoe-oborudovanie",
+    "subcategories": [
+      {"id": 901, "name": "Котлы газовые", "slug": "kotly-gazovye"},
+      {"id": 902, "name": "Котлы электрические", "slug": "kotly-elektricheskie"},
+      {"id": 903, "name": "Горелки", "slug": "gorelki"},
+      {"id": 904, "name": "Теплообменники", "slug": "teploobmenniki"},
+      {"id": 905, "name": "Арматура для котлов", "slug": "armatura-dlya-kotlov"}
+    ]
+  }
+]
