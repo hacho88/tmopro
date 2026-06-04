@@ -88,7 +88,7 @@ img { max-width: 100%; display: block; }
 }
 
 /* Layout */
-.container { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+.container { max-width: 1440px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 640px) { .container { padding: 0 24px; } }
 @media (min-width: 1024px) { .container { padding: 0 32px; } }
 
@@ -149,6 +149,8 @@ img { max-width: 100%; display: block; }
 .py-4 { padding-top: 16px; padding-bottom: 16px; }
 .py-5 { padding-top: 20px; padding-bottom: 20px; }
 .py-6 { padding-top: 24px; padding-bottom: 24px; }
+.py-10 { padding-top: 40px; padding-bottom: 40px; }
+.py-16 { padding-top: 64px; padding-bottom: 64px; }
 .mb-2 { margin-bottom: 8px; }
 .mb-3 { margin-bottom: 12px; }
 .mb-4 { margin-bottom: 16px; }
@@ -575,7 +577,7 @@ img { max-width: 100%; display: block; }
   .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
   .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
   .md\:pb-0 { padding-bottom: 0; }
-  .md\:text-6xl { font-size: 60px; }
+  .md\:text-6xl { font-size: 52px; }
 }
 
 @media (min-width: 1024px) {
@@ -585,7 +587,7 @@ img { max-width: 100%; display: block; }
   .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
   .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
   .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .lg\:grid-cols-sidebar { grid-template-columns: 300px 1fr; }
+  .lg\:grid-cols-sidebar { grid-template-columns: 280px 1fr; }
   .lg\:sticky { position: sticky; top: 100px; }
   .lg\:gap-8 { gap: 32px; }
   .lg\:gap-10 { gap: 40px; }
