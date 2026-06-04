@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=lux-gold-d">
+  <link rel="stylesheet" href="style.css?v=lux-gold-e">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -108,15 +108,17 @@
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
           class="category-tile hover-lift">
-          <div class="flex items-center justify-between gap-4">
-            <div class="min-w-0">
-              <div class="text-base font-extrabold text-gray-900 truncate">{{ cat.name }}</div>
-              <div class="text-sm font-bold text-gray-500 mt-1">{{ cat.count }} позиций</div>
-            </div>
-            <span class="category-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-            </span>
-          </div>
+          <span class="category-media" aria-hidden="true">
+            <img v-if="cat.image" :src="cat.image" class="category-media-img" @error="cat.image = ''">
+            <span v-else class="category-media-placeholder"></span>
+          </span>
+          <span class="category-body">
+            <span class="category-title">{{ cat.name }}</span>
+            <span class="category-meta">{{ cat.count }} позиций</span>
+          </span>
+          <span class="category-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </span>
         </button>
       </div>
     </section>
@@ -385,9 +387,12 @@
               const name = (sub && sub.name) ? String(sub.name) : '';
               if (!name) return;
               const count = this.countBy('category', name);
-              if (!byName.has(name) || (byName.get(name).count || 0) < (count || 0)) {
-                byName.set(name, { name, count });
-              }
+              const image = (sub && sub.image) ? String(sub.image) : '';
+              const existing = byName.get(name);
+              const shouldReplace = !existing
+                || (Number(existing.count) || 0) < (count || 0)
+                || (!existing.image && image);
+              if (shouldReplace) byName.set(name, { name, count, image });
             });
           });
           return Array.from(byName.values()).sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 9);

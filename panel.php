@@ -159,6 +159,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         if (save_json($productsPath, $products)) $success = 'Товар удален.';
         $tab = 'products';
     }
+
+    if ($action === 'save_categories') {
+        $nextSubId = 0;
+        foreach ($categories as $cat) {
+            foreach (($cat['subcategories'] ?? []) as $sub) {
+                $nextSubId = max($nextSubId, (int)($sub['id'] ?? 0));
+            }
+        }
+        $nextSubId++;
+
+        $updated = [];
+        $missing = [];
+
+        foreach ($categories as $cat) {
+            $cid = (int)($cat['id'] ?? 0);
+            $subs = [];
+            foreach (($cat['subcategories'] ?? []) as $sub) {
+                $sid = (int)($sub['id'] ?? 0);
+                $img = (string)($sub['image'] ?? '');
+                $fileKey = 'subcat_image_' . $sid;
+                if (!empty($_FILES[$fileKey]['tmp_name'])) {
+                    $up = handle_upload($fileKey, 'categories');
+                    if ($up && !str_starts_with($up, 'err_')) $img = $up;
+                    elseif ($up) $error = 'Ошибка загрузки изображения: ' . $up;
+                }
+                $img = trim((string)$img);
+                if ($img === '') {
+                    $missing[] = (string)($sub['name'] ?? ('ID ' . $sid));
+                }
+                $sub['image'] = $img;
+                $subs[] = $sub;
+            }
+
+            $cat['subcategories'] = $subs;
+            $updated[] = $cat;
+        }
+
+        if (!empty($missing)) {
+            $error = 'Нельзя сохранить категории без фото. Заполни изображение для: ' . implode(', ', array_slice($missing, 0, 8)) . (count($missing) > 8 ? '…' : '');
+        } else {
+            $categories = $updated;
+            if (save_json($categoriesPath, $categories)) $success = 'Категории сохранены.';
+            else $error = 'Ошибка записи categories.json';
+        }
+        $tab = 'categories';
+    }
+
+    if ($action === 'add_subcategory') {
+        $parentId = (int)($_POST['parent_category_id'] ?? 0);
+        $name = trim((string)($_POST['sub_name'] ?? ''));
+        $slug = trim((string)($_POST['sub_slug'] ?? ''));
+        if ($name === '' || $slug === '') {
+            $error = 'Название и slug обязательны.';
+        } else {
+            $img = '';
+            if (!empty($_FILES['sub_image']['tmp_name'])) {
+                $up = handle_upload('sub_image', 'categories');
+                if ($up && !str_starts_with($up, 'err_')) $img = $up;
+                elseif ($up) $error = 'Ошибка загрузки изображения: ' . $up;
+            }
+            if ($img === '') {
+                $error = ($error ?: '') . ' Фото для категории обязательно.';
+            } else {
+                $maxId = 0;
+                foreach ($categories as $cat) {
+                    foreach (($cat['subcategories'] ?? []) as $sub) {
+                        $maxId = max($maxId, (int)($sub['id'] ?? 0));
+                    }
+                }
+                $newSub = ['id' => $maxId + 1, 'name' => $name, 'slug' => $slug, 'image' => $img];
+                foreach ($categories as &$cat) {
+                    if ((int)($cat['id'] ?? 0) === $parentId) {
+                        if (!isset($cat['subcategories']) || !is_array($cat['subcategories'])) $cat['subcategories'] = [];
+                        $cat['subcategories'][] = $newSub;
+                        break;
+                    }
+                }
+                unset($cat);
+                if (save_json($categoriesPath, $categories)) $success = 'Категория добавлена.';
+                else $error = 'Ошибка записи categories.json';
+            }
+        }
+        $tab = 'categories';
+    }
 }
 
 $themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
@@ -308,6 +392,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   <div class="nav">
     <a href="panel.php?tab=overview" class="<?= $tab==='overview'?'active':'' ?>">Обзор</a>
     <a href="panel.php?tab=settings" class="<?= $tab==='settings'?'active':'' ?>">Настройки сайта</a>
+    <a href="panel.php?tab=categories" class="<?= $tab==='categories'?'active':'' ?>">Категории</a>
     <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
   </div>
 
@@ -333,6 +418,66 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <p style="margin-top:6px;color:#64748b;font-size:14px;">Откройте сайт и проверьте, как покупатель видит каталог.</p>
         </a>
       </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'categories'): ?>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:20px;">Категории</h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Для витрины категории обязательна фотография. Если фото не указано — сохранить нельзя.</p>
+        </div>
+      </div>
+
+      <form method="post" class="card" enctype="multipart/form-data" style="margin-bottom:16px;">
+        <input type="hidden" name="action" value="add_subcategory">
+        <h3 style="font-size:16px;margin-bottom:12px;">Добавить подкатегорию (обязательно с фото)</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+          <label><span>Родительская категория</span>
+            <select name="parent_category_id" class="field" required>
+              <?php foreach ($categories as $cat): ?>
+                <option value="<?= e($cat['id'] ?? 0) ?>"><?= e($cat['name'] ?? '') ?></option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <label><span>Название</span><input name="sub_name" class="field" required></label>
+          <label><span>Slug</span><input name="sub_slug" class="field" required placeholder="latunnye-fitingi"></label>
+          <label><span>Фото</span><input type="file" name="sub_image" class="field" accept="image/*" required style="padding:8px;"></label>
+        </div>
+        <button class="btn" style="margin-top:12px;">Добавить</button>
+      </form>
+
+      <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="save_categories">
+        <?php foreach ($categories as $cat): ?>
+          <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
+            <div style="font-weight:900;margin-bottom:10px;"><?= e($cat['name'] ?? '') ?></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+              <?php foreach (($cat['subcategories'] ?? []) as $sub): ?>
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px;">
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <div style="width:56px;height:44px;border-radius:12px;overflow:hidden;border:1px solid rgba(15,23,42,0.08);background:#f1f5f9;flex:0 0 auto;">
+                      <?php if (!empty($sub['image'])): ?><img src="<?= e($sub['image']) ?>" style="width:100%;height:100%;object-fit:cover;" /><?php endif; ?>
+                    </div>
+                    <div style="min-width:0;">
+                      <div style="font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= e($sub['name'] ?? '') ?></div>
+                      <div style="font-size:12px;color:#64748b;font-weight:700;">slug: <?= e($sub['slug'] ?? '') ?></div>
+                    </div>
+                  </div>
+                  <div style="margin-top:10px;">
+                    <label style="margin:0;"><span>Фото (обязательно)</span>
+                      <input type="file" name="subcat_image_<?= e($sub['id'] ?? 0) ?>" accept="image/*" class="field" style="padding:8px;">
+                    </label>
+                    <div style="margin-top:8px;font-size:12px;color:#64748b;font-weight:700;">Текущее: <?= e($sub['image'] ?? '') ?></div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endforeach; ?>
+        <div class="sticky-save"><button class="btn" style="width:100%;">Сохранить категории</button></div>
+      </form>
     </div>
   <?php endif; ?>
 
