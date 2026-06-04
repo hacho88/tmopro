@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=dark-premium-b">
+  <link rel="stylesheet" href="style.css?v=dark-premium-c">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -196,9 +196,15 @@
             <div class="text-sm font-bold text-gray-500">
               Найдено: <span class="text-gray-900 font-extrabold">{{ filteredProducts.length }}</span> товаров
             </div>
-            <div class="segmented">
-              <button @click="view = 'grid'" :class="['segmented-item', view === 'grid' ? 'is-active' : '']">Плитка</button>
-              <button @click="view = 'table'" :class="['segmented-item', view === 'table' ? 'is-active' : '']">Таблица</button>
+            <div class="flex items-center gap-3">
+              <button type="button" @click="toggleDense" :class="['density-toggle', dense ? 'is-on' : '']">
+                <span class="density-dot" aria-hidden="true"></span>
+                <span>Плотно</span>
+              </button>
+              <div class="segmented">
+                <button @click="view = 'grid'" :class="['segmented-item', view === 'grid' ? 'is-active' : '']">Плитка</button>
+                <button @click="view = 'table'" :class="['segmented-item', view === 'table' ? 'is-active' : '']">Таблица</button>
+              </div>
             </div>
           </div>
 
@@ -247,7 +253,7 @@
           </div>
 
           <!-- Grid View -->
-          <div v-else class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
             <article v-for="product in filteredProducts" :key="product.id" class="card-product animate-fadeIn">
               <div v-if="product.image" class="overflow-hidden" style="height: 200px;">
                 <img :src="product.image" class="product-img">
@@ -365,6 +371,7 @@
           selectedBrands: [],
           search: '',
           view: 'grid',
+          dense: false,
           loading: true,
           cartBump: false
         };
@@ -401,6 +408,7 @@
           this.products = await productsResponse.json();
           this.categories = await categoriesResponse.json();
           this.view = this.settings.default_view || 'grid';
+          this.dense = localStorage.getItem('tmopro_dense') === '1';
           this.products.forEach(product => this.qty[product.id] = 1);
           document.title = this.settings.site_name;
         } finally {
@@ -410,6 +418,10 @@
       methods: {
         money(value) { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value); },
         setQty(id, value) { this.qty[id] = Math.max(1, parseInt(value || 1, 10)); },
+        toggleDense() {
+          this.dense = !this.dense;
+          localStorage.setItem('tmopro_dense', this.dense ? '1' : '0');
+        },
         toggleCategory(category) { this.selectedCategories = this.toggle(this.selectedCategories, category); },
         toggleBrand(brand) { this.selectedBrands = this.toggle(this.selectedBrands, brand); },
         toggle(list, value) { return list.includes(value) ? list.filter(item => item !== value) : [...list, value]; },
