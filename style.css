@@ -587,7 +587,7 @@ img { max-width: 100%; display: block; }
 }
 .lux-hero-bg img {
   object-fit: cover;
-  object-position: 72% center;
+  object-position: 82% center;
   transform: scale(1.03);
   filter: contrast(1.08) saturate(1.04);
 }
@@ -680,7 +680,7 @@ img { max-width: 100%; display: block; }
   .lux-hero-media { min-height: 260px; }
   .lux-title { font-size: 44px; }
   .lux-featured-grid { grid-template-columns: 1fr; }
-  .lux-hero-bg img { object-position: 70% 35%; }
+  .lux-hero-bg img { object-position: 62% 35%; }
 }
 
 /* Dense grid mode */
