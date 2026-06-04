@@ -63,16 +63,20 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               B2B-каталог с мгновенным расчетом опта
             </div>
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-tight">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight" style="max-width: 20ch;">
               {{ settings.hero_title }}
             </h1>
-            <p class="text-lg sm:text-xl text-gray-400 mb-8 max-w-xl leading-relaxed">
+            <p class="text-base sm:text-lg text-gray-400 mb-8 max-w-xl leading-relaxed">
               {{ settings.hero_subtitle }}
             </p>
             <div class="flex flex-wrap gap-3">
               <a href="#catalog" class="btn btn-lg btn-primary">Перейти в каталог</a>
               <a :href="'tel:' + settings.phone" class="btn btn-lg btn-secondary">Позвонить нам</a>
             </div>
+            <a href="#catalog" class="inline-flex items-center gap-2 mt-6 text-sm font-bold text-gray-300 transition" style="opacity:.9;">
+              <span>Смотреть позиции и цены</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
           </div>
           <div class="hidden lg:block animate-fadeUp delay-2">
             <div class="grid grid-cols-2 gap-4">
