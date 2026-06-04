@@ -660,26 +660,10 @@ img { max-width: 100%; display: block; }
     linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.18));
 }
 
-.lux-featured { padding-top: 18px; padding-bottom: 22px; margin-top: -22px; position: relative; z-index: 3; }
-.lux-featured-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
-.lux-feature-card {
-  border-radius: 22px;
-  padding: 18px 18px;
-  background: rgba(9, 11, 14, 0.88);
-  border: 1px solid rgba(229,201,139,0.18);
-  box-shadow: 0 28px 80px rgba(0,0,0,0.40);
-  transition: transform .2s ease, border-color .2s ease;
-}
-.lux-feature-card:hover { transform: translateY(-4px); border-color: rgba(229,201,139,0.30); }
-.lux-feature-title { font-size: 13px; font-weight: 1000; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.90); }
-.lux-feature-desc { margin-top: 8px; font-size: 13px; font-weight: 800; color: rgba(226,232,240,0.62); }
-.lux-feature-link { margin-top: 14px; font-size: 12px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(229,201,139,0.88); }
-
 @media (max-width: 1024px) {
   .lux-hero-inner { grid-template-columns: 1fr; padding: 54px 0 28px; }
   .lux-hero-media { min-height: 260px; }
   .lux-title { font-size: 44px; }
-  .lux-featured-grid { grid-template-columns: 1fr; }
   .lux-hero-bg img { object-position: 62% 35%; }
 }
 

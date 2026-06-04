@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=lux-gold-c">
+  <link rel="stylesheet" href="style.css?v=lux-gold-d">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -97,16 +97,6 @@
         <div class="lux-hero-media" aria-hidden="true">
           <div class="lux-hero-media-placeholder"></div>
         </div>
-      </div>
-    </section>
-
-    <section class="container lux-featured">
-      <div class="lux-featured-grid">
-        <a v-for="cat in topCategories.slice(0, 3)" :key="cat.name" href="#catalog" @click.prevent="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });" class="lux-feature-card">
-          <div class="lux-feature-title">{{ cat.name }}</div>
-          <div class="lux-feature-desc">{{ cat.count }} позиций</div>
-          <div class="lux-feature-link">Посмотреть товары →</div>
-        </a>
       </div>
     </section>
 
