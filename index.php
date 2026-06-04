@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=dark-premium-a">
+  <link rel="stylesheet" href="style.css?v=dark-premium-b">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -98,6 +98,53 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container py-10 lg:py-16">
+      <div class="section-head mb-8">
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight">Категории</h2>
+        <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2">Быстрый доступ к основным группам товара</p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
+          class="category-tile hover-lift">
+          <div class="flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <div class="text-base font-extrabold text-gray-900 truncate">{{ cat.name }}</div>
+              <div class="text-sm font-bold text-gray-500 mt-1">{{ cat.count }} позиций</div>
+            </div>
+            <span class="category-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="container pb-10 lg:pb-0">
+      <div class="grid gap-4 lg:grid-cols-3">
+        <div class="card p-6 hover-lift">
+          <div class="adv-icon mb-4" :class="accentBg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="text-lg font-extrabold">Мгновенный расчет опта</div>
+          <div class="text-sm font-semibold text-gray-500 mt-2">Цена автоматически пересчитывается от количества</div>
+        </div>
+        <div class="card p-6 hover-lift">
+          <div class="adv-icon mb-4 bg-dark">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 7h-7"/><path d="M14 17H7"/><path d="M7 7v10"/><path d="M17 7v10"/></svg>
+          </div>
+          <div class="text-lg font-extrabold">Прайс как инструмент</div>
+          <div class="text-sm font-semibold text-gray-500 mt-2">Плитка или таблица — выбирай удобный режим</div>
+        </div>
+        <div class="card p-6 hover-lift">
+          <div class="adv-icon mb-4 bg-accent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          </div>
+          <div class="text-lg font-extrabold">Быстрая поддержка</div>
+          <div class="text-sm font-semibold text-gray-500 mt-2">Ответим по наличию, доставке и условиям</div>
         </div>
       </div>
     </section>
@@ -324,6 +371,15 @@
       },
       computed: {
         categoryList() { return this.categories; },
+        topCategories() {
+          const all = [];
+          (this.categories || []).forEach(cat => {
+            (cat.subcategories || []).forEach(sub => {
+              all.push({ name: sub.name, count: this.countBy('category', sub.name) });
+            });
+          });
+          return all.sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 9);
+        },
         brands() { return [...new Set(this.products.map(item => item.brand))]; },
         cart() { return JSON.parse(localStorage.getItem('tmopro_cart') || '[]'); },
         cartCount() { return this.cart.reduce((sum, item) => sum + Number(item.qty), 0); },
