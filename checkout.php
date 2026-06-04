@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Оформление заказа — tmopro.ru</title>
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="vue.global.prod.js"></script>
   <script>
@@ -20,7 +22,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>[v-cloak] { display: none; }</style>
+  <style>
+    [v-cloak] { display: none; }
+    :root { --tmo-accent-rgb: 79,70,229; }
+  </style>
 </head>
 <body class="bg-slate-50/50 text-slate-950 antialiased">
   <div id="app" v-cloak class="min-h-screen">
@@ -54,11 +59,11 @@
         <section class="rounded-2xl border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:p-8">
           <h2 class="mb-6 text-xl font-extrabold">Данные юридического лица</h2>
           <div class="grid gap-5 sm:grid-cols-2">
-            <label class="sm:col-span-2"><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Название компании / ИП</span><input name="company" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-indigo-500/20"></label>
-            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">ИНН</span><input name="inn" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-indigo-500/20"></label>
-            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Контактное лицо</span><input name="contact_person" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-indigo-500/20"></label>
-            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Телефон</span><input name="phone" type="tel" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-indigo-500/20"></label>
-            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Email</span><input name="email" type="email" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-indigo-500/20"></label>
+            <label class="sm:col-span-2"><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Название компании / ИП</span><input name="company" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]"></label>
+            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">ИНН</span><input name="inn" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]"></label>
+            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Контактное лицо</span><input name="contact_person" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]"></label>
+            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Телефон</span><input name="phone" type="tel" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]"></label>
+            <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Email</span><input name="email" type="email" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]"></label>
           </div>
           <input type="hidden" name="cart_json" :value="cartJson">
           <button type="submit" :disabled="cart.length === 0" :class="['mt-8 w-full rounded-2xl px-6 py-5 text-base font-extrabold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-[.99] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none', cart.length ? accentBg : 'bg-slate-300']">Запросить счет и резерв</button>
@@ -125,6 +130,8 @@
         this.cart = JSON.parse(localStorage.getItem('tmopro_cart') || '[]');
         const settingsResponse = await fetch('settings.json');
         this.settings = await settingsResponse.json();
+        const rgbMap = { indigo: '79,70,229', emerald: '5,150,105', slate: '15,23,42' };
+        document.documentElement.style.setProperty('--tmo-accent-rgb', rgbMap[this.settings.theme_color] || '79,70,229');
       },
       methods: {
         unitPrice(item) { return Number(item.qty) >= 10 ? Number(item.price_wholesale) : Number(item.price_base); },

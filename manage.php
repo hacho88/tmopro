@@ -311,9 +311,27 @@ $totalRetail = array_sum(array_map(fn($product) => (float)($product['price_base'
       .xl\:flex-row { flex-direction: row; }
       .xl\:items-end { align-items: flex-end; }
     }
+
+    .bg-orb { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .bg-orb::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -240px;
+      width: 820px;
+      height: 520px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: radial-gradient(closest-side, rgba(255,255,255,.0), rgba(255,255,255,0)),
+                  radial-gradient(closest-side, rgba(79,70,229,.22), transparent 70%);
+      filter: blur(44px);
+      opacity: .55;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#f6f7fb] text-slate-950 antialiased">
+
+<div class="bg-orb"></div>
 <?php if (!$isAuthorized): ?>
   <main class="grid min-h-screen place-items-center px-4">
     <section class="w-full max-w-md rounded-[32px] border border-white bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,.12)]">

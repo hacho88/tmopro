@@ -93,13 +93,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Заказ принят — tmopro.ru</title>
+  <meta name="theme-color" content="#059669">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>body { font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Arial; }</style>
+  <style>
+    body { font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Arial; }
+    .bg-orb { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .bg-orb::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -240px;
+      width: 820px;
+      height: 520px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: radial-gradient(closest-side, rgba(255,255,255,.0), rgba(255,255,255,0)),
+                  radial-gradient(closest-side, rgba(5,150,105,.22), transparent 70%);
+      filter: blur(44px);
+      opacity: .55;
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-slate-50/50 text-slate-950 antialiased">
+  <div class="bg-orb"></div>
   <main class="grid min-h-screen place-items-center px-4 py-12">
     <section class="w-full max-w-xl rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:p-12">
       <div class="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-emerald-600 text-white shadow-lg">

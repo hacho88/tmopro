@@ -171,6 +171,11 @@ $totalRetail = array_sum(array_map(fn($p) => (float)($p['price_base'] ?? 0), $pr
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Админка tmopro.ru</title>
+<meta name="theme-color" content="<?= e($themeColor) ?>">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; }
 body { font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif; background: #f6f7fb; color: #0f172a; line-height: 1.5; }
@@ -221,8 +226,56 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
 .text-sm { font-size: 14px; }
 .font-bold { font-weight: 700; }
 </style>
+<style>
+:root {
+  --accent: <?= e($themeColor) ?>;
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow-sm: 0 10px 30px rgba(15,23,42,.06);
+  --shadow-md: 0 24px 80px rgba(15,23,42,.12);
+}
+
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+.wrap { max-width: 1180px; padding: 28px 16px; }
+@media (min-width: 768px) { .wrap { padding: 40px 24px; } }
+.card { border-radius: 28px; box-shadow: var(--shadow-sm); border: 1px solid rgba(226,232,240,.75); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 16px; font-weight: 900; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; box-shadow: 0 18px 50px rgba(15,23,42,.14); }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
+.btn:active { transform: translateY(0px); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(79,70,229,.16), 0 18px 50px rgba(15,23,42,.14); }
+.btn-dark { background: #020617; }
+.btn-ghost { background: #f1f5f9; color: #334155; box-shadow: none; }
+.btn-ghost:hover { background: #fff; box-shadow: var(--shadow-sm); }
+.field { border-radius: 18px; padding: 14px 16px; font-weight: 800; }
+.field:focus { box-shadow: 0 0 0 4px rgba(79,70,229,.14); }
+.msg { border-radius: 18px; font-weight: 900; border: 1px solid transparent; }
+.msg.ok { border-color: #d1fae5; }
+.msg.err { border-color: #fee2e2; }
+.sticky-save { border-radius: 22px; background: rgba(255,255,255,.92); border: 1px solid rgba(226,232,240,.9); backdrop-filter: blur(16px); box-shadow: var(--shadow-md); }
+
+.bg-orb { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+.bg-orb::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -240px;
+  width: 820px;
+  height: 520px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(closest-side, rgba(255,255,255,.0), rgba(255,255,255,0)),
+              radial-gradient(closest-side, rgba(79,70,229,.22), transparent 70%);
+  filter: blur(44px);
+  opacity: .55;
+}
+</style>
 </head>
 <body>
+
+<div class="bg-orb"></div>
 
 <?php if (!$isAuthorized): ?>
 <div class="login-box">
@@ -245,7 +298,7 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <a href="index.php" target="_blank" class="btn btn-dark" style="text-decoration:none;">Открыть сайт</a>
-      <a href="panel.php?logout=1" style="padding:10px 16px;border-radius:12px;background:#f1f5f9;color:#475569;font-weight:700;font-size:14px;text-decoration:none;">Выйти</a>
+      <a href="panel.php?logout=1" class="btn btn-ghost" style="text-decoration:none;">Выйти</a>
     </div>
   </div>
 
