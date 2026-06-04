@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=dark-premium-c">
+  <link rel="stylesheet" href="style.css?v=lux-gold-a">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -20,10 +20,10 @@
     [v-cloak] { display: none !important; }
   </style>
 </head>
-<body>
+<body class="theme-luxury">
   <div id="app" v-cloak class="min-h-screen">
     <!-- Header -->
-    <header class="sticky top-0 z-40 glass border-b" style="border-color: rgba(0,0,0,0.05);">
+    <header class="sticky top-0 z-40 lux-header">
       <div class="container flex items-center justify-between py-4 gap-4">
         <a href="index.php" class="flex items-center gap-3">
           <span v-if="settings.logo_type === 'image' && settings.logo_url" class="grid place-items-center overflow-hidden rounded-xl bg-white shadow-md" style="width: 44px; height: 44px;">
@@ -38,67 +38,70 @@
           </span>
         </a>
 
+        <nav class="hidden lg:flex items-center gap-8 lux-nav">
+          <a href="#catalog" class="lux-nav-link">Продукция</a>
+          <a href="#catalog" class="lux-nav-link">Решения</a>
+          <a href="#catalog" class="lux-nav-link">Ресурсы</a>
+          <a href="#catalog" class="lux-nav-link">О нас</a>
+          <a href="#catalog" class="lux-nav-link">Контакты</a>
+        </nav>
+
         <div class="hidden md:flex items-center gap-6">
-          <a :href="'tel:' + settings.phone" class="text-sm font-semibold text-gray-700 transition hover:text-primary">{{ settings.phone }}</a>
-          <a :href="'mailto:' + settings.email_manager" class="text-sm font-semibold text-gray-500 transition hover:text-gray-900">{{ settings.email_manager }}</a>
+          <a :href="'tel:' + settings.phone" class="lux-meta-link">{{ settings.phone }}</a>
+          <a :href="'mailto:' + settings.email_manager" class="lux-meta-link">{{ settings.email_manager }}</a>
         </div>
 
-        <a href="checkout.php" class="relative flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold shadow-sm transition hover-lift">
-          <span :class="['grid place-items-center rounded-lg text-white', accentBg]" style="width: 32px; height: 32px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-          </span>
-          <span class="hidden sm:block">Корзина</span>
-          <span :class="['badge text-white', accentBg]" style="font-size: 11px; padding: 2px 8px;">{{ cartCount }}</span>
-        </a>
+        <div class="flex items-center gap-3">
+          <a href="checkout.php" class="relative lux-cart">
+            <span class="lux-cart-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+            </span>
+            <span class="hidden sm:block">Корзина</span>
+            <span class="lux-cart-badge">{{ cartCount }}</span>
+          </a>
+          <a href="#catalog" class="hidden sm:inline-flex lux-btn-gold">
+            <span>Запросить расчет</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+          </a>
+        </div>
       </div>
     </header>
 
     <!-- Hero -->
-    <section class="hero-gradient text-white relative">
-      <div class="hero-grid"></div>
-      <div class="container relative z-10 py-14 lg:py-16">
-        <div class="grid gap-10 lg:grid-cols-2 items-center">
-          <div class="animate-fadeUp">
-            <div class="inline-flex items-center gap-2 badge badge-primary mb-6" style="background: rgba(0,138,78,0.2); color: #4ade80; border: 1px solid rgba(74,222,128,0.2);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              B2B-каталог с мгновенным расчетом опта
-            </div>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight" style="max-width: 20ch;">
-              {{ settings.hero_title }}
-            </h1>
-            <p class="text-base sm:text-lg text-gray-400 mb-8 max-w-xl leading-relaxed">
-              {{ settings.hero_subtitle }}
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <a href="#catalog" class="btn btn-lg btn-primary">Перейти в каталог</a>
-              <a :href="'tel:' + settings.phone" class="btn btn-lg btn-secondary">Позвонить нам</a>
-            </div>
-            <a href="#catalog" class="inline-flex items-center gap-2 mt-6 text-sm font-bold text-gray-300 transition" style="opacity:.9;">
-              <span>Смотреть позиции и цены</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    <section class="lux-hero">
+      <div class="container lux-hero-inner">
+        <div class="lux-hero-copy">
+          <div class="lux-kicker">Премиальные решения для водоснабжения и отопления</div>
+          <h1 class="lux-title">
+            <span class="lux-title-strong">СОЗДАНО ДЛЯ</span>
+            <span class="lux-title-accent">ПРОФЕССИОНАЛОВ</span>
+          </h1>
+          <p class="lux-subtitle">{{ settings.hero_subtitle }}</p>
+          <div class="lux-hero-actions">
+            <a href="#catalog" class="lux-btn-gold">
+              <span>Получить расчет</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+            </a>
+            <a href="#catalog" class="lux-btn-ghost">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Скачать каталог</span>
             </a>
           </div>
-          <div class="hidden lg:block animate-fadeUp delay-2">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="card p-6 animate-fadeUp delay-1" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
-                <div class="text-3xl font-black text-primary mb-1">99+</div>
-                <div class="text-sm text-gray-400">SKU в наличии</div>
-              </div>
-              <div class="card p-6 animate-fadeUp delay-2 mt-8" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
-                <div class="text-3xl font-black text-primary mb-1">TMOPRO</div>
-                <div class="text-sm text-gray-400">Собственный бренд</div>
-              </div>
-              <div class="card p-6 animate-fadeUp delay-3" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
-                <div class="text-3xl font-black text-accent mb-1">-30%</div>
-                <div class="text-sm text-gray-400">Опт от 10 шт</div>
-              </div>
-              <div class="card p-6 animate-fadeUp delay-4 mt-8" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
-                <div class="text-3xl font-black text-primary mb-1">24/7</div>
-                <div class="text-sm text-gray-400">Поддержка клиентов</div>
-              </div>
-            </div>
-          </div>
         </div>
+        <div class="lux-hero-media" aria-hidden="true">
+          <img v-if="settings.background_image" :src="settings.background_image" alt="">
+          <div v-else class="lux-hero-media-placeholder"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container lux-featured">
+      <div class="lux-featured-grid">
+        <a v-for="cat in topCategories.slice(0, 3)" :key="cat.name" href="#catalog" @click.prevent="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });" class="lux-feature-card">
+          <div class="lux-feature-title">{{ cat.name }}</div>
+          <div class="lux-feature-desc">{{ cat.count }} позиций</div>
+          <div class="lux-feature-link">Посмотреть товары →</div>
+        </a>
       </div>
     </section>
 
@@ -231,7 +234,8 @@
                 <tr v-for="product in filteredProducts" :key="product.id" class="animate-fadeIn">
                   <td>
                     <div class="flex items-center gap-3">
-                      <img v-if="product.image" :src="product.image" class="rounded-lg object-cover" style="width: 48px; height: 48px;">
+                      <img v-if="product.image" :src="product.image" @error="onProductImgError(product)" class="rounded-lg object-cover" style="width: 48px; height: 48px;">
+                      <span v-else class="table-img-placeholder" aria-hidden="true"></span>
                       <div>
                         <div class="font-extrabold text-gray-900">{{ product.name }}</div>
                         <div class="mt-1 text-xs font-bold text-gray-400">{{ product.article }}</div>
@@ -255,8 +259,9 @@
           <!-- Grid View -->
           <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
             <article v-for="product in filteredProducts" :key="product.id" class="card-product animate-fadeIn">
-              <div v-if="product.image" class="overflow-hidden" style="height: 200px;">
-                <img :src="product.image" class="product-img">
+              <div class="product-media">
+                <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
+                <div v-else class="product-img-placeholder" aria-hidden="true"></div>
               </div>
               <div class="p-5">
                 <div class="flex items-start justify-between gap-3 mb-3">
@@ -379,13 +384,18 @@
       computed: {
         categoryList() { return this.categories; },
         topCategories() {
-          const all = [];
+          const byName = new Map();
           (this.categories || []).forEach(cat => {
             (cat.subcategories || []).forEach(sub => {
-              all.push({ name: sub.name, count: this.countBy('category', sub.name) });
+              const name = (sub && sub.name) ? String(sub.name) : '';
+              if (!name) return;
+              const count = this.countBy('category', name);
+              if (!byName.has(name) || (byName.get(name).count || 0) < (count || 0)) {
+                byName.set(name, { name, count });
+              }
             });
           });
-          return all.sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 9);
+          return Array.from(byName.values()).sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 9);
         },
         brands() { return [...new Set(this.products.map(item => item.brand))]; },
         cart() { return JSON.parse(localStorage.getItem('tmopro_cart') || '[]'); },
@@ -417,6 +427,7 @@
       },
       methods: {
         money(value) { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value); },
+        onProductImgError(product) { try { product.image = ''; } catch (e) {} },
         setQty(id, value) { this.qty[id] = Math.max(1, parseInt(value || 1, 10)); },
         toggleDense() {
           this.dense = !this.dense;
