@@ -1,8 +1,9 @@
-﻿const CACHE_NAME = 'tmopro-pwa-v2';
+﻿const CACHE_NAME = 'tmopro-pwa-v3';
 const APP_SHELL = [
   './',
   './index.php',
   './checkout.php',
+  './style.css',
   './vue.global.prod.js',
   './settings.json',
   './products.json',
@@ -28,6 +29,10 @@ self.addEventListener('fetch', event => {
   }
 
   const url = new URL(event.request.url);
+  if (url.pathname.endsWith('/style.css') || url.pathname.endsWith('/index.php')) {
+    event.respondWith(fetch(event.request, { cache: 'reload' }));
+    return;
+  }
   if (url.pathname.endsWith('/admin.php')) {
     event.respondWith(fetch(event.request));
     return;
