@@ -56,7 +56,7 @@
     <!-- Hero -->
     <section class="hero-gradient text-white relative">
       <div class="hero-grid"></div>
-      <div class="container relative z-10 py-16 lg:py-20">
+      <div class="container relative z-10 py-14 lg:py-16">
         <div class="grid gap-10 lg:grid-cols-2 items-center">
           <div class="animate-fadeUp">
             <div class="inline-flex items-center gap-2 badge badge-primary mb-6" style="background: rgba(0,138,78,0.2); color: #4ade80; border: 1px solid rgba(74,222,128,0.2);">
@@ -99,7 +99,7 @@
     </section>
 
     <!-- Catalog -->
-    <main id="catalog" class="container py-10 lg:py-16">
+    <main id="catalog" class="container py-10 lg:py-16 catalog-shell">
       <div class="grid gap-8 lg:grid-cols-sidebar">
         <!-- Sidebar Filters -->
         <aside class="h-fit lg:sticky lg:top-24">
@@ -159,7 +159,7 @@
 
           <!-- Table View -->
           <div v-else-if="view === 'table'" class="table-wrap">
-            <table class="table min-w-[900px]">
+            <table class="table min-w-900">
               <thead>
                 <tr>
                   <th>Товар</th>
