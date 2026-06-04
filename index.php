@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=lux-gold-a">
+  <link rel="stylesheet" href="style.css?v=lux-gold-b">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -69,6 +69,12 @@
 
     <!-- Hero -->
     <section class="lux-hero">
+      <div class="lux-hero-bg" aria-hidden="true">
+        <picture v-if="settings.background_image">
+          <source v-if="settings.background_image_mobile" media="(max-width: 1024px)" :srcset="settings.background_image_mobile">
+          <img :src="settings.background_image" alt="">
+        </picture>
+      </div>
       <div class="container lux-hero-inner">
         <div class="lux-hero-copy">
           <div class="lux-kicker">Премиальные решения для водоснабжения и отопления</div>
@@ -89,11 +95,7 @@
           </div>
         </div>
         <div class="lux-hero-media" aria-hidden="true">
-          <picture v-if="settings.background_image">
-            <source v-if="settings.background_image_mobile" media="(max-width: 1024px)" :srcset="settings.background_image_mobile">
-            <img :src="settings.background_image" alt="">
-          </picture>
-          <div v-else class="lux-hero-media-placeholder"></div>
+          <div class="lux-hero-media-placeholder"></div>
         </div>
       </div>
     </section>
