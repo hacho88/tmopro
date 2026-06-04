@@ -6,7 +6,7 @@
   "phone3": "+7 (926) 869-04-28",
   "email_manager": "info@tmopro.ru",
   "theme_color": "emerald",
-  "default_view": "table",
+  "default_view": "grid",
   "logo_type": "image",
   "logo_text": "TMOPRO",
   "logo_url": "logo.svg",
