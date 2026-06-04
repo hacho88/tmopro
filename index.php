@@ -89,7 +89,10 @@
           </div>
         </div>
         <div class="lux-hero-media" aria-hidden="true">
-          <img v-if="settings.background_image" :src="settings.background_image" alt="">
+          <picture v-if="settings.background_image">
+            <source v-if="settings.background_image_mobile" media="(max-width: 1024px)" :srcset="settings.background_image_mobile">
+            <img :src="settings.background_image" alt="">
+          </picture>
           <div v-else class="lux-hero-media-placeholder"></div>
         </div>
       </div>
@@ -368,7 +371,7 @@
       components: { QtyControl, PriceBlock },
       data() {
         return {
-          settings: { site_name: 'TMOPRO — Сантехника Оптом', site_short_name: 'TMOPRO', phone: '+7 (966) 085-34-70', email_manager: 'info@tmopro.ru', theme_color: 'emerald', default_view: 'table', logo_type: 'text', logo_text: 'TMO', logo_url: '', background_type: 'gradient', background_color: '#f8fafc', background_image: '', hero_title: 'Сантехника оптом от производителя. Все на одной площадке.', hero_subtitle: 'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.' },
+          settings: { site_name: 'TMOPRO — Сантехника Оптом', site_short_name: 'TMOPRO', phone: '+7 (966) 085-34-70', email_manager: 'info@tmopro.ru', theme_color: 'emerald', default_view: 'table', logo_type: 'text', logo_text: 'TMO', logo_url: '', background_type: 'gradient', background_color: '#f8fafc', background_image: '', background_image_mobile: '', hero_title: 'Сантехника оптом от производителя. Все на одной площадке.', hero_subtitle: 'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.' },
           products: [],
           categories: [],
           qty: {},
