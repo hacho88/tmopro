@@ -266,6 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         $pdo = tmopro_db_safe();
         $orderId = (int)($_POST['order_id'] ?? 0);
         $status = trim((string)($_POST['status'] ?? ''));
+        $note = trim((string)($_POST['status_note'] ?? ''));
         $allowed = ['new','processing','invoiced','shipped','done','cancelled'];
         if (!$pdo) {
             $error = 'База не подключена (проверь TMOPRO_DB_*).';
@@ -273,8 +274,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
             $error = 'Некорректные данные для статуса заказа.';
         } else {
             try {
+                $old = $pdo->prepare('SELECT status, email, order_number, company_name FROM orders WHERE id = ?')->execute([$orderId]) ? $pdo->prepare('SELECT status, email, order_number, company_name FROM orders WHERE id = ?') : null;
+                $prev = $old ? $old->fetch(PDO::FETCH_ASSOC) : null;
+                $prevStatus = $prev['status'] ?? '';
+                $customerEmail = $prev['email'] ?? '';
+                $orderNumber = $prev['order_number'] ?? '';
+
                 $stmt = $pdo->prepare('UPDATE orders SET status = ? WHERE id = ?');
                 $stmt->execute([$status, $orderId]);
+
+                try {
+                    $pdo->exec("CREATE TABLE IF NOT EXISTS order_status_history (id INT AUTO_INCREMENT PRIMARY KEY, order_id INT NOT NULL, status VARCHAR(32) NOT NULL, note TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(order_id))");
+                    $hist = $pdo->prepare('INSERT INTO order_status_history (order_id, status, note) VALUES (?, ?, ?)');
+                    $hist->execute([$orderId, $status, $note]);
+                } catch (Throwable $e) {}
+
+                // Notify customer
+                if ($customerEmail !== '' && $prevStatus !== $status) {
+                    $statusLabels = ['new'=>'Новый','processing'=>'В работе','invoiced'=>'Счет выставлен','shipped'=>'Отгружен','done'=>'Закрыт','cancelled'=>'Отмена'];
+                    $subj = '=?UTF-8?B?' . base64_encode('Статус заказа №' . $orderNumber . ' изменен — ' . ($statusLabels[$status] ?? $status)) . '?=';
+                    $body = '<!doctype html><html lang="ru"><head><meta charset="utf-8"></head><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;"><div style="max-width:600px;margin:0 auto;padding:32px;"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;"><h1 style="font-size:22px;margin:0 0 12px;">Статус заказа обновлен</h1><p>Заказ №' . e($orderNumber) . ' компании <strong>' . e($prev['company_name'] ?? '') . '</strong></p><div style="margin:16px 0;padding:16px;background:#f1f5f9;border-radius:16px;font-size:18px;font-weight:900;">Новый статус: ' . e($statusLabels[$status] ?? $status) . '</div>' . ($note ? '<p style="color:#64748b;">Комментарий: ' . e($note) . '</p>' : '') . '<p><a href="https://tmopro.ru/invoice.php?order=' . e($orderNumber) . '" style="color:#059669;font-weight:900;">Открыть счет →</a></p></div></div></body></html>';
+                    $hdrs = ['MIME-Version: 1.0','Content-type: text/html; charset=UTF-8','From: noreply@tmopro.ru'];
+                    mail($customerEmail, $subj, $body, implode("\r\n", $hdrs));
+                }
+
                 $success = 'Статус заказа обновлен.';
             } catch (Throwable $e) {
                 $error = 'Ошибка обновления статуса заказа.';
@@ -297,6 +320,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
                 $in = implode(',', array_fill(0, count($ids), '?'));
                 $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id IN ($in)");
                 $stmt->execute(array_merge([$status], $ids));
+
+                try {
+                    $pdo->exec("CREATE TABLE IF NOT EXISTS order_status_history (id INT AUTO_INCREMENT PRIMARY KEY, order_id INT NOT NULL, status VARCHAR(32) NOT NULL, note TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(order_id))");
+                    $hist = $pdo->prepare('INSERT INTO order_status_history (order_id, status, note) VALUES (?, ?, ?)');
+                    foreach ($ids as $oid) { $hist->execute([$oid, $status, 'Массовое изменение']); }
+                } catch (Throwable $e) {}
+
                 $success = 'Статус обновлен у ' . count($ids) . ' заказов.';
             } catch (Throwable $e) {
                 $error = 'Ошибка массового обновления статуса.';
@@ -753,19 +783,28 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       $statusMap = ['new'=>'Новый','processing'=>'В работе','invoiced'=>'Счет выставлен','shipped'=>'Отгружен','done'=>'Закрыт','cancelled'=>'Отмена'];
       $statusColors = ['new'=>'#3b82f6','processing'=>'#f59e0b','invoiced'=>'#8b5cf6','shipped'=>'#0ea5e9','done'=>'#059669','cancelled'=>'#ef4444'];
       $filterStatus = $_GET['order_status'] ?? '';
+      $searchOrder = trim((string)($_GET['q'] ?? ''));
       $pdo = tmopro_db_safe();
       $orders = [];
       $itemsByOrder = [];
+      $historyByOrder = [];
       $statusCounts = [];
       if ($pdo) {
         try {
           $statusCounts = $pdo->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
           $sql = 'SELECT id, order_number, status, company_name, inn, contact_person, phone, email, total_base, total, created_at FROM orders';
           $params = [];
+          $where = [];
           if ($filterStatus && isset($statusMap[$filterStatus])) {
-            $sql .= ' WHERE status = ?';
+            $where[] = 'status = ?';
             $params[] = $filterStatus;
           }
+          if ($searchOrder !== '') {
+            $where[] = '(order_number LIKE ? OR company_name LIKE ? OR inn LIKE ? OR phone LIKE ?)';
+            $like = '%' . $searchOrder . '%';
+            $params = array_merge($params, [$like, $like, $like, $like]);
+          }
+          if (!empty($where)) $sql .= ' WHERE ' . implode(' AND ', $where);
           $sql .= ' ORDER BY id DESC LIMIT 50';
           $stmt = $pdo->prepare($sql);
           $stmt->execute($params);
@@ -780,6 +819,16 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
               if (!isset($itemsByOrder[$oid])) $itemsByOrder[$oid] = [];
               $itemsByOrder[$oid][] = $it;
             }
+            // Load status history
+            try {
+              $histStmt = $pdo->prepare('SELECT order_id, status, note, created_at FROM order_status_history WHERE order_id IN (' . $in . ') ORDER BY created_at DESC');
+              $histStmt->execute($ids);
+              foreach ($histStmt->fetchAll() as $h) {
+                $oid = (int)$h['order_id'];
+                if (!isset($historyByOrder[$oid])) $historyByOrder[$oid] = [];
+                $historyByOrder[$oid][] = $h;
+              }
+            } catch (Throwable $e) {}
           }
         } catch (Throwable $e) {
           $orders = [];
@@ -794,9 +843,17 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         </div>
       </div>
 
+      <form method="get" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="hidden" name="tab" value="orders">
+        <?php if ($filterStatus !== ''): ?><input type="hidden" name="order_status" value="<?= e($filterStatus) ?>"><?php endif; ?>
+        <input name="q" value="<?= e($searchOrder) ?>" class="field" style="flex:1;max-width:320px;height:40px;font-size:13px;" placeholder="Поиск по номеру, компании, ИНН, телефону...">
+        <button type="submit" class="btn btn-dark" style="height:40px;">Найти</button>
+        <?php if ($searchOrder !== ''): ?><a href="panel.php?tab=orders<?= $filterStatus !== '' ? '&order_status=' . e($filterStatus) : '' ?>" class="btn" style="height:40px;">Сброс</a><?php endif; ?>
+      </form>
+
       <!-- Status Filter -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-        <a href="panel.php?tab=orders" class="chip <?= $filterStatus==='' ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;">Все <?= array_sum($statusCounts) ?></a>
+        <a href="panel.php?tab=orders<?= $searchOrder !== '' ? '&q=' . e($searchOrder) : '' ?>" class="chip <?= $filterStatus==='' ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;">Все <?= array_sum($statusCounts) ?></a>
         <?php foreach ($statusMap as $k => $v): ?>
           <a href="panel.php?tab=orders&order_status=<?= e($k) ?>" class="chip <?= $filterStatus===$k ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;<?= $filterStatus===$k ? '' : 'border-left:3px solid '.e($statusColors[$k]).';' ?>">
             <?= e($v) ?> <?= (int)($statusCounts[$k] ?? 0) ?>
@@ -843,15 +900,18 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                   <div>Розница</div>
                   <div><?= e(number_format((float)$o['total_base'], 0, ',', ' ')) ?> ₽</div>
                 </div>
-                <form method="post" style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+                <form method="post" style="margin-top:10px;">
                   <input type="hidden" name="action" value="update_order_status">
                   <input type="hidden" name="order_id" value="<?= e($oid) ?>">
-                  <select name="status" class="field" style="height:42px;">
-                    <?php foreach (['new'=>'Новый','processing'=>'В работе','invoiced'=>'Счет выставлен','shipped'=>'Отгружен','done'=>'Закрыт','cancelled'=>'Отмена'] as $k=>$v): ?>
-                      <option value="<?= e($k) ?>" <?= ($o['status'] ?? '')===$k?'selected':'' ?>><?= e($v) ?></option>
-                    <?php endforeach; ?>
-                  </select>
-                  <button class="btn btn-dark" style="height:42px;">Обновить</button>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <select name="status" class="field" style="height:42px;">
+                      <?php foreach ($statusMap as $k=>$v): ?>
+                        <option value="<?= e($k) ?>" <?= ($o['status'] ?? '')===$k?'selected':'' ?>><?= e($v) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                    <button class="btn btn-dark" style="height:42px;">Обновить</button>
+                  </div>
+                  <input name="status_note" class="field" style="margin-top:6px;height:36px;font-size:12px;" placeholder="Комментарий к статусу (виден клиенту в письме)">
                 </form>
               </div>
             </div>
@@ -878,6 +938,22 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                 <?php endforeach; ?>
               </div>
             <?php endif; ?>
+
+            <?php $hist = $historyByOrder[$oid] ?? []; ?>
+            <?php if (!empty($hist)): ?>
+              <div style="margin-top:10px;font-size:12px;">
+                <div style="font-weight:900;color:#64748b;margin-bottom:6px;">История статусов</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <?php foreach ($hist as $h): ?>
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#fff;border:1px solid #e2e8f0;color:#334155;font-weight:800;">
+                      <span style="width:6px;height:6px;border-radius:50%;background:<?= e($statusColors[$h['status']] ?? '#cbd5e1') ?>;"></span>
+                      <?= e($statusMap[$h['status']] ?? $h['status']) ?> · <?= e($h['created_at']) ?>
+                      <?php if (!empty($h['note'])): ?><span style="color:#64748b;">(<?= e($h['note']) ?>)</span><?php endif; ?>
+                    </span>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            <?php endif; ?>
           </div>
         <?php endforeach; ?>
       <?php endif; ?>
@@ -894,12 +970,20 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       </div>
 
       <?php
+        $searchClient = trim((string)($_GET['q'] ?? ''));
         $pdo = tmopro_db_safe();
         $accounts = [];
         $usersByAccount = [];
         if ($pdo) {
           try {
-            $accounts = $pdo->query('SELECT * FROM b2b_accounts ORDER BY id DESC')->fetchAll();
+            if ($searchClient !== '') {
+              $like = '%' . $searchClient . '%';
+              $stmt = $pdo->prepare('SELECT * FROM b2b_accounts WHERE company_name LIKE ? OR inn LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY id DESC');
+              $stmt->execute([$like, $like, $like, $like]);
+              $accounts = $stmt->fetchAll();
+            } else {
+              $accounts = $pdo->query('SELECT * FROM b2b_accounts ORDER BY id DESC')->fetchAll();
+            }
             if (!empty($accounts)) {
               $aids = array_map(fn($a)=>(int)$a['id'], $accounts);
               $placeholders = implode(',', array_fill(0, count($aids), '?'));
@@ -916,6 +1000,13 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           }
         }
       ?>
+
+      <form method="get" style="margin-bottom:16px;display:flex;gap:8px;">
+        <input type="hidden" name="tab" value="clients">
+        <input name="q" value="<?= e($searchClient) ?>" class="field" style="flex:1;max-width:400px;height:40px;font-size:13px;" placeholder="Поиск по компании, ИНН, email, телефону...">
+        <button type="submit" class="btn btn-dark" style="height:40px;">Найти</button>
+        <?php if ($searchClient !== ''): ?><a href="panel.php?tab=clients" class="btn" style="height:40px;">Сброс</a><?php endif; ?>
+      </form>
 
       <!-- Create Account Form -->
       <form method="post" class="card" style="margin-bottom:16px;background:#f8fafc;">
@@ -1123,8 +1214,18 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
   <?php if ($tab === 'products'): ?>
     <?php
-      $lowStock = array_filter($products, fn($p) => (int)($p['stock'] ?? 0) > 0 && (int)($p['stock'] ?? 0) < 10);
-      $outStock = array_filter($products, fn($p) => (int)($p['stock'] ?? 0) <= 0);
+      $searchQ = trim((string)($_GET['q'] ?? ''));
+      $filteredProducts = $products;
+      if ($searchQ !== '') {
+        $lq = mb_strtolower($searchQ);
+        $filteredProducts = array_filter($products, fn($p) =>
+          mb_strpos(mb_strtolower($p['name'] ?? ''), $lq) !== false ||
+          mb_strpos(mb_strtolower($p['article'] ?? ''), $lq) !== false ||
+          mb_strpos(mb_strtolower($p['brand'] ?? ''), $lq) !== false
+        );
+      }
+      $lowStock = array_filter($filteredProducts, fn($p) => (int)($p['stock'] ?? 0) > 0 && (int)($p['stock'] ?? 0) < 10);
+      $outStock = array_filter($filteredProducts, fn($p) => (int)($p['stock'] ?? 0) <= 0);
     ?>
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
@@ -1134,6 +1235,13 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         </div>
         <form method="post"><input type="hidden" name="action" value="add_product"><button class="btn btn-dark">+ Добавить</button></form>
       </div>
+
+      <form method="get" style="margin-bottom:16px;display:flex;gap:8px;">
+        <input type="hidden" name="tab" value="products">
+        <input name="q" value="<?= e($searchQ) ?>" class="field" style="flex:1;max-width:400px;height:40px;font-size:13px;" placeholder="Поиск по названию, артикулу, бренду...">
+        <button type="submit" class="btn btn-dark" style="height:40px;">Найти</button>
+        <?php if ($searchQ !== ''): ?><a href="panel.php?tab=products" class="btn" style="height:40px;">Сброс</a><?php endif; ?>
+      </form>
 
       <?php if (!empty($lowStock) || !empty($outStock)): ?>
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1154,7 +1262,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
       <form method="post" id="prodForm" enctype="multipart/form-data">
         <input type="hidden" name="action" value="save_products">
-        <?php foreach ($products as $i => $product): ?>
+        <?php foreach ($filteredProducts as $i => $product): ?>
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
               <span style="font-size:12px;font-weight:700;color:#64748b;">ID <?= e($product['id'] ?? $i+1) ?></span>
