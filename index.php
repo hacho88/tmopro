@@ -115,6 +115,10 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
               {{ t('login') }}
             </a>
           <?php endif; ?>
+          <a href="orders.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-500 hover:text-emerald-700 transition" title="Мои заказы">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Заказы
+          </a>
           <a href="checkout.php" class="relative lux-cart">
             <span class="lux-cart-icon" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
@@ -403,6 +407,18 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
               </div>
               <button @click="compareModal = true" class="btn btn-sm btn-primary w-full mt-3" style="font-size:12px;">Сравнить</button>
             </div>
+
+            <!-- Recently Viewed -->
+            <div v-if="recentViews.length" class="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">🕘 Недавно просмотрены</div>
+              <div class="space-y-2">
+                <a v-for="rid in recentViews" :key="rid" :href="'product.php?id=' + rid" @click.prevent="recordView(productById(rid)); window.location.href='product.php?id=' + rid" class="flex items-center gap-2 text-xs font-extrabold text-slate-700 hover:text-emerald-600 transition">
+                  <img v-if="productById(rid)?.image" :src="productById(rid).image" class="w-8 h-8 rounded-lg object-cover" style="min-width:32px;">
+                  <span v-else class="w-8 h-8 rounded-lg bg-slate-200 inline-block"></span>
+                  <span class="truncate">{{ productById(rid)?.name || rid }}</span>
+                </a>
+              </div>
+            </div>
           </div>
         </aside>
 
@@ -514,7 +530,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                   <td>
                     <div class="flex items-center gap-2">
                       <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">{{ t('addToCart') }}</button>
-                      <button type="button" @click.stop.prevent="quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" :title="t('searchPlaceholder')">
+                      <button type="button" @click.stop.prevent="recordView(product); quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" :title="t('searchPlaceholder')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                       </button>
                       <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
@@ -530,7 +546,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           <!-- Grid View -->
           <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
             <article v-for="product in paginatedProducts" :key="product.id" class="card-product animate-fadeIn">
-              <a :href="'product.php?id=' + product.id" class="block">
+              <a :href="'product.php?id=' + product.id" class="block" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
                 <div class="product-media">
                   <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
                   <div v-else class="product-img-placeholder" aria-hidden="true"></div>
@@ -540,7 +556,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                 <div class="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">{{ product.article }}</div>
-                    <a :href="'product.php?id=' + product.id" class="block" style="text-decoration:none;">
+                    <a :href="'product.php?id=' + product.id" class="block" style="text-decoration:none;" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
                       <h3 class="text-lg font-extrabold leading-snug text-gray-900 hover:underline">{{ product.name }}</h3>
                     </a>
                   </div>
@@ -564,7 +580,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                 </div>
                 <div class="flex gap-2">
                   <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
-                  <button @click="quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" :title="t('searchPlaceholder')">
+                  <button @click="recordView(product); quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" :title="t('searchPlaceholder')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                   </button>
                 </div>
@@ -842,7 +858,8 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           page: 1,
           perPage: 24,
           compareList: JSON.parse(localStorage.getItem('tmopro_compare') || '[]'),
-          compareModal: false
+          compareModal: false,
+          recentViews: JSON.parse(localStorage.getItem('tmopro_recent') || '[]')
         };
       },
       computed: {
@@ -954,6 +971,14 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           }
           localStorage.setItem('tmopro_compare', JSON.stringify(this.compareList));
         },
+        recordView(product) {
+          if (!product || !product.id) return;
+          let list = this.recentViews.filter(rid => rid !== product.id);
+          list.unshift(product.id);
+          this.recentViews = list.slice(0, 8);
+          localStorage.setItem('tmopro_recent', JSON.stringify(this.recentViews));
+        },
+        productById(id) { return this.products.find(p => p.id === id) || null; },
         t(key) { return (this.langDict[this.lang] && this.langDict[this.lang][key]) ? this.langDict[this.lang][key] : (this.langDict['ru'] && this.langDict['ru'][key] ? this.langDict['ru'][key] : key); },
         setLang(l) {
           this.lang = l;

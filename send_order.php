@@ -292,5 +292,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0
       </div>
     </section>
   </main>
+  <script>
+    try {
+      const addr = <?= json_encode(array_merge($delivery, ['company'=>trim((string)($_POST['company'] ?? '')), 'inn'=>trim((string)($_POST['inn'] ?? '')), 'contact_person'=>trim((string)($_POST['contact_person'] ?? '')), 'phone'=>trim((string)($_POST['phone'] ?? '')), 'email'=>trim((string)($_POST['email'] ?? ''))]), JSON_UNESCAPED_UNICODE) ?>;
+      localStorage.setItem('tmopro_last_address', JSON.stringify(addr));
+    } catch(e) {}
+  </script>
 </body>
 </html>

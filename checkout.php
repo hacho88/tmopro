@@ -142,6 +142,7 @@
         this.settings = await settingsResponse.json();
         const rgbMap = { indigo: '79,70,229', emerald: '5,150,105', slate: '15,23,42' };
         document.documentElement.style.setProperty('--tmo-accent-rgb', rgbMap[this.settings.theme_color] || '79,70,229');
+        this.fillFromLastOrder();
       },
       methods: {
         unitPrice(item) { return Number(item.qty) >= 10 ? Number(item.price_wholesale) : Number(item.price_base); },
@@ -153,6 +154,17 @@
         },
         prepareSubmit() {
           localStorage.removeItem('tmopro_cart');
+        },
+        fillFromLastOrder() {
+          const addr = JSON.parse(localStorage.getItem('tmopro_last_address') || '{}');
+          if (!addr || !Object.keys(addr).length) return;
+          const map = { company:'company', inn:'inn', contact_person:'contact_person', phone:'phone', email:'email', city:'city', address:'address', zip:'zip', delivery_note:'delivery_note' };
+          setTimeout(() => {
+            Object.entries(map).forEach(([key, name]) => {
+              const el = document.querySelector(`input[name="${name}"]`);
+              if (el && addr[key]) el.value = addr[key];
+            });
+          }, 0);
         }
       }
     }).mount('#app');
