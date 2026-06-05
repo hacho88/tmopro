@@ -34,6 +34,18 @@ function handle_upload($field, $subfolder) {
     return 'err_move';
 }
 
+function tmopro_db_safe() {
+    $dbPath = __DIR__ . '/db.php';
+    if (!file_exists($dbPath)) return null;
+    require_once $dbPath;
+    if (!function_exists('tmopro_db')) return null;
+    try {
+        return tmopro_db();
+    } catch (Throwable $e) {
+        return null;
+    }
+}
+
 $settingsPath = __DIR__ . '/settings.json';
 $productsPath = __DIR__ . '/products.json';
 $categoriesPath = __DIR__ . '/categories.json';
@@ -247,6 +259,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         }
         $tab = 'categories';
     }
+
+    if ($action === 'update_order_status') {
+        $pdo = tmopro_db_safe();
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        $status = trim((string)($_POST['status'] ?? ''));
+        $allowed = ['new','processing','invoiced','shipped','done','cancelled'];
+        if (!$pdo) {
+            $error = 'База не подключена (проверь TMOPRO_DB_*).';
+        } elseif ($orderId <= 0 || !in_array($status, $allowed, true)) {
+            $error = 'Некорректные данные для статуса заказа.';
+        } else {
+            try {
+                $stmt = $pdo->prepare('UPDATE orders SET status = ? WHERE id = ?');
+                $stmt->execute([$status, $orderId]);
+                $success = 'Статус заказа обновлен.';
+            } catch (Throwable $e) {
+                $error = 'Ошибка обновления статуса заказа.';
+            }
+        }
+        $tab = 'orders';
+    }
 }
 
 $themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
@@ -397,6 +430,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <a href="panel.php?tab=overview" class="<?= $tab==='overview'?'active':'' ?>">Обзор</a>
     <a href="panel.php?tab=settings" class="<?= $tab==='settings'?'active':'' ?>">Настройки сайта</a>
     <a href="panel.php?tab=categories" class="<?= $tab==='categories'?'active':'' ?>">Категории</a>
+    <a href="panel.php?tab=orders" class="<?= $tab==='orders'?'active':'' ?>">Заказы</a>
     <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
   </div>
 
@@ -422,6 +456,104 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <p style="margin-top:6px;color:#64748b;font-size:14px;">Откройте сайт и проверьте, как покупатель видит каталог.</p>
         </a>
       </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'orders'): ?>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:20px;">Заказы</h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Заявки из корзины. Если список пуст — проверь подключение MySQL и что таблицы созданы.</p>
+        </div>
+      </div>
+
+      <?php
+        $pdo = tmopro_db_safe();
+        $orders = [];
+        $itemsByOrder = [];
+        if ($pdo) {
+          try {
+            $orders = $pdo->query('SELECT id, order_number, status, company_name, inn, contact_person, phone, email, total_base, total, created_at FROM orders ORDER BY id DESC LIMIT 50')->fetchAll();
+            if (!empty($orders)) {
+              $ids = array_map(fn($o) => (int)$o['id'], $orders);
+              $in = implode(',', array_fill(0, count($ids), '?'));
+              $stmt = $pdo->prepare('SELECT order_id, article, name, brand, category, qty, unit_price, line_total FROM order_items WHERE order_id IN (' . $in . ') ORDER BY id ASC');
+              $stmt->execute($ids);
+              foreach ($stmt->fetchAll() as $it) {
+                $oid = (int)$it['order_id'];
+                if (!isset($itemsByOrder[$oid])) $itemsByOrder[$oid] = [];
+                $itemsByOrder[$oid][] = $it;
+              }
+            }
+          } catch (Throwable $e) {
+            $orders = [];
+          }
+        }
+      ?>
+
+      <?php if (!$pdo): ?>
+        <div class="msg err">База не подключена. Нужно задать переменные окружения TMOPRO_DB_HOST / TMOPRO_DB_NAME / TMOPRO_DB_USER / TMOPRO_DB_PASS.</div>
+      <?php endif; ?>
+
+      <?php if (empty($orders)): ?>
+        <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;">Пока нет заказов.</div>
+      <?php else: ?>
+        <?php foreach ($orders as $o): $oid = (int)$o['id']; ?>
+          <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:12px;font-weight:900;color:#64748b;">Заказ #<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
+                <div style="font-size:18px;font-weight:1000;margin-top:6px;"><?= e($o['company_name'] ?: '—') ?></div>
+                <div style="margin-top:6px;font-size:13px;color:#64748b;font-weight:800;">ИНН: <?= e($o['inn'] ?: '—') ?> · Контакт: <?= e($o['contact_person'] ?: '—') ?> · <?= e($o['phone'] ?: '—') ?> · <?= e($o['email'] ?: '—') ?></div>
+              </div>
+              <div style="min-width:260px;flex:0 0 auto;">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-weight:1000;">
+                  <div style="color:#64748b;">Итого</div>
+                  <div><?= e(number_format((float)$o['total'], 0, ',', ' ')) ?> ₽</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#059669;font-weight:900;margin-top:6px;">
+                  <div>Розница</div>
+                  <div><?= e(number_format((float)$o['total_base'], 0, ',', ' ')) ?> ₽</div>
+                </div>
+                <form method="post" style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+                  <input type="hidden" name="action" value="update_order_status">
+                  <input type="hidden" name="order_id" value="<?= e($oid) ?>">
+                  <select name="status" class="field" style="height:42px;">
+                    <?php foreach (['new'=>'Новый','processing'=>'В работе','invoiced'=>'Счет выставлен','shipped'=>'Отгружен','done'=>'Закрыт','cancelled'=>'Отмена'] as $k=>$v): ?>
+                      <option value="<?= e($k) ?>" <?= ($o['status'] ?? '')===$k?'selected':'' ?>><?= e($v) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                  <button class="btn btn-dark" style="height:42px;">Обновить</button>
+                </form>
+              </div>
+            </div>
+
+            <?php $items = $itemsByOrder[$oid] ?? []; ?>
+            <?php if (!empty($items)): ?>
+              <div style="margin-top:14px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
+                <div style="display:grid;grid-template-columns:1.2fr 90px 120px 120px;gap:0;">
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;">Товар</div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:center;">Кол-во</div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:right;">Цена</div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:right;">Сумма</div>
+                </div>
+                <?php foreach ($items as $it): ?>
+                  <div style="display:grid;grid-template-columns:1.2fr 90px 120px 120px;border-top:1px solid #e2e8f0;">
+                    <div style="padding:12px;">
+                      <div style="font-weight:1000;"><?= e($it['name'] ?? '') ?></div>
+                      <div style="font-size:12px;color:#64748b;font-weight:800;margin-top:3px;"><?= e($it['article'] ?? '') ?> · <?= e($it['brand'] ?? '') ?> · <?= e($it['category'] ?? '') ?></div>
+                    </div>
+                    <div style="padding:12px;text-align:center;font-weight:1000;"><?= e($it['qty'] ?? 0) ?></div>
+                    <div style="padding:12px;text-align:right;font-weight:1000;"><?= e(number_format((float)($it['unit_price'] ?? 0), 0, ',', ' ')) ?> ₽</div>
+                    <div style="padding:12px;text-align:right;font-weight:1000;"><?= e(number_format((float)($it['line_total'] ?? 0), 0, ',', ' ')) ?> ₽</div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 

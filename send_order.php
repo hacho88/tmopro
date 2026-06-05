@@ -7,6 +7,60 @@ function money($value) {
     return number_format((float)$value, 0, ',', ' ') . ' ₽';
 }
 
+function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart) {
+    $dbPath = __DIR__ . '/db.php';
+    if (!file_exists($dbPath)) return;
+    require_once $dbPath;
+    if (!function_exists('tmopro_db')) return;
+    $pdo = tmopro_db();
+    if (!$pdo) return;
+
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, company_name, inn, contact_person, phone, email, total_base, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([
+            $orderNumber,
+            'site',
+            'new',
+            $company,
+            ($inn !== '' ? $inn : null),
+            ($contactPerson !== '' ? $contactPerson : null),
+            ($phone !== '' ? $phone : null),
+            ($email !== '' ? $email : null),
+            (float)$baseTotal,
+            (float)$total,
+        ]);
+        $orderId = (int)$pdo->lastInsertId();
+
+        $itemStmt = $pdo->prepare('INSERT INTO order_items (order_id, product_id, article, name, brand, category, qty, price_base, price_wholesale, unit_price, line_total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        foreach ($cart as $item) {
+            $qty = max(1, (int)($item['qty'] ?? 1));
+            $priceBase = (float)($item['price_base'] ?? 0);
+            $priceWholesale = (float)($item['price_wholesale'] ?? 0);
+            $unitPrice = $qty >= 10 ? $priceWholesale : $priceBase;
+            $lineTotal = $unitPrice * $qty;
+
+            $itemStmt->execute([
+                $orderId,
+                isset($item['id']) ? (int)$item['id'] : null,
+                (string)($item['article'] ?? ''),
+                (string)($item['name'] ?? ''),
+                (string)($item['brand'] ?? ''),
+                (string)($item['category'] ?? ''),
+                $qty,
+                $priceBase,
+                $priceWholesale,
+                $unitPrice,
+                $lineTotal,
+            ]);
+        }
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        try { $pdo->rollBack(); } catch (Throwable $e2) {}
+    }
+}
+
 $settingsPath = __DIR__ . '/settings.json';
 $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
 $managerEmail = $settings['email_manager'] ?? 'info@tmopro.ru';
@@ -84,6 +138,7 @@ $headers[] = 'From: noreply@tmopro.ru';
 $headers[] = 'Reply-To: ' . ($email !== '' ? $email : 'noreply@tmopro.ru');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0) {
+    db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart);
     mail($managerEmail, '=?UTF-8?B?' . base64_encode($subject) . '?=', $message, implode("\r\n", $headers));
 }
 ?>
