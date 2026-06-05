@@ -551,37 +551,38 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                 <div class="product-media">
                   <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
                   <div v-else class="product-img-placeholder" aria-hidden="true"></div>
+                  <div class="product-media-info">
+                    <div class="product-media-brand">{{ product.brand }}</div>
+                    <div class="product-media-price">{{ product.price_base.toLocaleString('ru-RU') }} ₽</div>
+                  </div>
                 </div>
               </a>
               <div class="p-5">
-                <div class="flex items-start justify-between gap-3 mb-3">
-                  <div>
-                    <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">{{ product.article }}</div>
-                    <a :href="'product.php?id=' + product.id" class="block" style="text-decoration:none;" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
-                      <h3 class="text-lg font-extrabold leading-snug text-gray-900 hover:underline">{{ product.name }}</h3>
+                <div class="flex items-start justify-between gap-3 mb-2">
+                  <div class="min-w-0">
+                    <div style="font-size:11px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">{{ product.article }}</div>
+                    <a :href="'product.php?id=' + product.id" style="text-decoration:none;" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
+                      <h3 style="font-size:16px;font-weight:900;color:#0f172a;line-height:1.3;letter-spacing:-0.01em;" class="hover:underline">{{ product.name }}</h3>
                     </a>
                   </div>
-                  <div class="flex items-center gap-2 flex-shrink-0">
-                    <button type="button" @click.stop.prevent="toggleCompare(product.id)" class="flex items-center justify-center" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isInCompare(product.id) ? 'color:#3b82f6;' : 'color:#cbd5e1;'" title="Сравнить">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M8 8l4-4 4 4"/><path d="M8 16l4 4 4-4"/></svg>
-                    </button>
+                  <div class="flex items-center gap-1 flex-shrink-0">
                     <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'" @mousedown="$event.target.style.transform='scale(0.9)'" @mouseup="$event.target.style.transform='scale(1)'">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </button>
-                    <span class="badge badge-primary">{{ product.brand }}</span>
                   </div>
                 </div>
-                <div class="flex items-center justify-between mb-4 p-3 rounded-xl bg-gray-50">
-                  <span class="text-sm font-bold text-gray-500">{{ product.category }}</span>
-                  <span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
+                <div class="flex items-center gap-2 mb-4">
+                  <span style="font-size:12px;font-weight:800;color:#64748b;">{{ product.category }}</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:#cbd5e1;"></span>
+                  <span :class="['text-xs font-extrabold', stockStatus(product.stock).cls]" style="padding:2px 8px;border-radius:8px;">{{ stockStatus(product.stock).label }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-4 mb-4">
                   <price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
                   <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                 </div>
                 <div class="flex gap-2">
-                  <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;">Добавить в заявку</button>
-                  <button @click="recordView(product); quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" :title="'Быстрый просмотр'">
+                  <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;border-radius:16px;font-weight:900;">В заявку</button>
+                  <button @click="recordView(product); quickViewProduct = product" style="flex-shrink:0;padding:0 14px;border-radius:16px;border:none;background:#0f172a;color:#fff;cursor:pointer;font-weight:900;" :title="'Быстрый просмотр'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                   </button>
                 </div>
