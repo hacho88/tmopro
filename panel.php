@@ -283,6 +283,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         $tab = 'orders';
     }
 
+    if ($action === 'bulk_update_order_status') {
+        $pdo = tmopro_db_safe();
+        $ids = array_filter(array_map('intval', (array)($_POST['bulk_order_ids'] ?? [])));
+        $status = trim((string)($_POST['bulk_status'] ?? ''));
+        $allowed = ['new','processing','invoiced','shipped','done','cancelled'];
+        if (!$pdo) {
+            $error = 'База не подключена (проверь TMOPRO_DB_*).';
+        } elseif (empty($ids) || !in_array($status, $allowed, true)) {
+            $error = 'Выберите заказы и статус.';
+        } else {
+            try {
+                $in = implode(',', array_fill(0, count($ids), '?'));
+                $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id IN ($in)");
+                $stmt->execute(array_merge([$status], $ids));
+                $success = 'Статус обновлен у ' . count($ids) . ' заказов.';
+            } catch (Throwable $e) {
+                $error = 'Ошибка массового обновления статуса.';
+            }
+        }
+        $tab = 'orders';
+    }
+
     if ($action === 'create_b2b_account') {
         $pdo = tmopro_db_safe();
         $company = trim((string)($_POST['company_name'] ?? ''));
@@ -406,6 +428,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         save_json($pagesPath, $pages);
         $success = 'Страница удалена.';
         $tab = 'pages';
+    }
+
+    if ($action === 'create_coupon') {
+        $couponsPath = __DIR__ . '/coupons.json';
+        $coupons = file_exists($couponsPath) ? json_decode(file_get_contents($couponsPath), true) : [];
+        if (!is_array($coupons)) $coupons = [];
+        $code = strtoupper(trim((string)($_POST['coupon_code'] ?? '')));
+        $type = in_array($_POST['coupon_type'] ?? '', ['percent','fixed'], true) ? $_POST['coupon_type'] : 'percent';
+        $value = (float)($_POST['coupon_value'] ?? 0);
+        $min = (float)($_POST['coupon_min'] ?? 0);
+        $expires = trim((string)($_POST['coupon_expires'] ?? ''));
+        if ($code === '' || $value <= 0) {
+            $error = 'Заполните код и значение скидки.';
+        } elseif (count(array_filter($coupons, fn($c) => ($c['code'] ?? '') === $code)) > 0) {
+            $error = 'Промокод с таким кодом уже есть.';
+        } else {
+            $coupons[] = ['code' => $code, 'type' => $type, 'value' => $value, 'min_order' => $min, 'expires' => $expires, 'active' => true];
+            save_json($couponsPath, $coupons);
+            $success = 'Промокод добавлен.';
+        }
+        $tab = 'coupons';
+    }
+
+    if ($action === 'save_coupons') {
+        $couponsPath = __DIR__ . '/coupons.json';
+        $codes = (array)($_POST['code'] ?? []);
+        $types = (array)($_POST['type'] ?? []);
+        $values = (array)($_POST['value'] ?? []);
+        $mins = (array)($_POST['min_order'] ?? []);
+        $expires = (array)($_POST['expires'] ?? []);
+        $newCoupons = [];
+        foreach ($codes as $i => $code) {
+            $newCoupons[] = [
+                'code' => strtoupper(trim((string)$code)),
+                'type' => in_array($types[$i] ?? '', ['percent','fixed'], true) ? $types[$i] : 'percent',
+                'value' => (float)($values[$i] ?? 0),
+                'min_order' => (float)($mins[$i] ?? 0),
+                'expires' => trim((string)($expires[$i] ?? '')),
+                'active' => !empty($_POST['active'][$i])
+            ];
+        }
+        save_json($couponsPath, $newCoupons);
+        $success = 'Промокоды сохранены.';
+        $tab = 'coupons';
+    }
+
+    if ($action === 'delete_coupon') {
+        $did = trim((string)($_POST['delete_code'] ?? ''));
+        $couponsPath = __DIR__ . '/coupons.json';
+        $coupons = file_exists($couponsPath) ? json_decode(file_get_contents($couponsPath), true) : [];
+        $coupons = is_array($coupons) ? array_values(array_filter($coupons, fn($c) => ($c['code'] ?? '') !== $did)) : [];
+        save_json($couponsPath, $coupons);
+        $success = 'Промокод удален.';
+        $tab = 'coupons';
     }
 
     if ($action === 'import_products_csv') {
@@ -640,6 +716,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <a href="panel.php?tab=import" class="<?= $tab==='import'?'active':'' ?>">Импорт/Экспорт</a>
     <a href="panel.php?tab=pages" class="<?= $tab==='pages'?'active':'' ?>">Страницы</a>
     <a href="panel.php?tab=analytics" class="<?= $tab==='analytics'?'active':'' ?>">Аналитика</a>
+    <a href="panel.php?tab=coupons" class="<?= $tab==='coupons'?'active':'' ?>">Промокоды</a>
   </div>
 
   <?php if ($tab === 'overview'): ?>
@@ -672,37 +749,60 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   <?php endif; ?>
 
   <?php if ($tab === 'orders'): ?>
+    <?php
+      $statusMap = ['new'=>'Новый','processing'=>'В работе','invoiced'=>'Счет выставлен','shipped'=>'Отгружен','done'=>'Закрыт','cancelled'=>'Отмена'];
+      $statusColors = ['new'=>'#3b82f6','processing'=>'#f59e0b','invoiced'=>'#8b5cf6','shipped'=>'#0ea5e9','done'=>'#059669','cancelled'=>'#ef4444'];
+      $filterStatus = $_GET['order_status'] ?? '';
+      $pdo = tmopro_db_safe();
+      $orders = [];
+      $itemsByOrder = [];
+      $statusCounts = [];
+      if ($pdo) {
+        try {
+          $statusCounts = $pdo->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
+          $sql = 'SELECT id, order_number, status, company_name, inn, contact_person, phone, email, total_base, total, created_at FROM orders';
+          $params = [];
+          if ($filterStatus && isset($statusMap[$filterStatus])) {
+            $sql .= ' WHERE status = ?';
+            $params[] = $filterStatus;
+          }
+          $sql .= ' ORDER BY id DESC LIMIT 50';
+          $stmt = $pdo->prepare($sql);
+          $stmt->execute($params);
+          $orders = $stmt->fetchAll();
+          if (!empty($orders)) {
+            $ids = array_map(fn($o) => (int)$o['id'], $orders);
+            $in = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $pdo->prepare('SELECT order_id, article, name, brand, category, qty, unit_price, line_total FROM order_items WHERE order_id IN (' . $in . ') ORDER BY id ASC');
+            $stmt->execute($ids);
+            foreach ($stmt->fetchAll() as $it) {
+              $oid = (int)$it['order_id'];
+              if (!isset($itemsByOrder[$oid])) $itemsByOrder[$oid] = [];
+              $itemsByOrder[$oid][] = $it;
+            }
+          }
+        } catch (Throwable $e) {
+          $orders = [];
+        }
+      }
+    ?>
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div>
           <h2 style="font-size:20px;">Заказы</h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;">Заявки из корзины. Если список пуст — проверь подключение MySQL и что таблицы созданы.</p>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Заявки из корзины. <?= count($orders) ?> на экране.</p>
         </div>
       </div>
 
-      <?php
-        $pdo = tmopro_db_safe();
-        $orders = [];
-        $itemsByOrder = [];
-        if ($pdo) {
-          try {
-            $orders = $pdo->query('SELECT id, order_number, status, company_name, inn, contact_person, phone, email, total_base, total, created_at FROM orders ORDER BY id DESC LIMIT 50')->fetchAll();
-            if (!empty($orders)) {
-              $ids = array_map(fn($o) => (int)$o['id'], $orders);
-              $in = implode(',', array_fill(0, count($ids), '?'));
-              $stmt = $pdo->prepare('SELECT order_id, article, name, brand, category, qty, unit_price, line_total FROM order_items WHERE order_id IN (' . $in . ') ORDER BY id ASC');
-              $stmt->execute($ids);
-              foreach ($stmt->fetchAll() as $it) {
-                $oid = (int)$it['order_id'];
-                if (!isset($itemsByOrder[$oid])) $itemsByOrder[$oid] = [];
-                $itemsByOrder[$oid][] = $it;
-              }
-            }
-          } catch (Throwable $e) {
-            $orders = [];
-          }
-        }
-      ?>
+      <!-- Status Filter -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <a href="panel.php?tab=orders" class="chip <?= $filterStatus==='' ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;">Все <?= array_sum($statusCounts) ?></a>
+        <?php foreach ($statusMap as $k => $v): ?>
+          <a href="panel.php?tab=orders&order_status=<?= e($k) ?>" class="chip <?= $filterStatus===$k ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;<?= $filterStatus===$k ? '' : 'border-left:3px solid '.e($statusColors[$k]).';' ?>">
+            <?= e($v) ?> <?= (int)($statusCounts[$k] ?? 0) ?>
+          </a>
+        <?php endforeach; ?>
+      </div>
 
       <?php if (!$pdo): ?>
         <div class="msg err">База не подключена. Нужно задать переменные окружения TMOPRO_DB_HOST / TMOPRO_DB_NAME / TMOPRO_DB_USER / TMOPRO_DB_PASS.</div>
@@ -711,13 +811,28 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <?php if (empty($orders)): ?>
         <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;">Пока нет заказов.</div>
       <?php else: ?>
+        <form method="post" id="bulkStatusForm" style="margin-bottom:12px;">
+          <input type="hidden" name="action" value="bulk_update_order_status">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select name="bulk_status" class="field" style="height:40px;">
+              <?php foreach ($statusMap as $k=>$v): ?>
+                <option value="<?= e($k) ?>"><?= e($v) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <button type="submit" class="btn btn-dark" style="height:40px;" onclick="return confirm('Изменить статус выбранных заказов?')">Применить к выбранным</button>
+          </div>
+        </form>
+
         <?php foreach ($orders as $o): $oid = (int)$o['id']; ?>
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-              <div>
-                <div style="font-size:12px;font-weight:900;color:#64748b;">Заказ #<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <input type="checkbox" name="bulk_order_ids[]" value="<?= e($oid) ?>" form="bulkStatusForm" style="margin-top:4px; width:18px; height:18px; accent-color:#0f172a; cursor:pointer;">
+                <div>
+                  <div style="font-size:12px;font-weight:900;color:#64748b;">Заказ #<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
                 <div style="font-size:18px;font-weight:1000;margin-top:6px;"><?= e($o['company_name'] ?: '—') ?></div>
                 <div style="margin-top:6px;font-size:13px;color:#64748b;font-weight:800;">ИНН: <?= e($o['inn'] ?: '—') ?> · Контакт: <?= e($o['contact_person'] ?: '—') ?> · <?= e($o['phone'] ?: '—') ?> · <?= e($o['email'] ?: '—') ?></div>
+                </div>
               </div>
               <div style="min-width:260px;flex:0 0 auto;">
                 <div style="display:flex;justify-content:space-between;gap:12px;font-weight:1000;">
@@ -1355,6 +1470,68 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
             <?php endif; ?>
           </div>
         </div>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'coupons'): ?>
+    <?php
+      $couponsPath = __DIR__ . '/coupons.json';
+      $coupons = file_exists($couponsPath) ? json_decode(file_get_contents($couponsPath), true) : [];
+      if (!is_array($coupons)) $coupons = [];
+    ?>
+    <div class="card">
+      <h2 style="font-size:20px;margin-bottom:16px;">Промокоды</h2>
+      <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Скидочные коды для клиентов. Процент или фиксированная сумма.</p>
+
+      <form method="post" style="margin-bottom:24px;">
+        <input type="hidden" name="action" value="create_coupon">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:flex-end;">
+          <label><span>Код *</span><input name="coupon_code" class="field" placeholder="SUMMER2024" required></label>
+          <label><span>Тип</span>
+            <select name="coupon_type" class="field">
+              <option value="percent">Процент (%)</option>
+              <option value="fixed">Фикс. сумма (₽)</option>
+            </select>
+          </label>
+          <label><span>Значение *</span><input name="coupon_value" type="number" step="0.01" class="field" placeholder="10" required></label>
+          <label><span>Мин. сумма заказа</span><input name="coupon_min" type="number" step="0.01" class="field" placeholder="0"></label>
+          <label><span>Действует до</span><input name="coupon_expires" type="date" class="field"></label>
+          <button class="btn btn-dark" style="height:46px;">+ Добавить</button>
+        </div>
+      </form>
+
+      <?php if (empty($coupons)): ?>
+        <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;">Пока нет промокодов.</div>
+      <?php else: ?>
+        <form method="post">
+          <input type="hidden" name="action" value="save_coupons">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <?php foreach ($coupons as $i => $c): ?>
+              <div style="display:grid;grid-template-columns:1.5fr 100px 100px 120px 140px 80px 40px;gap:10px;align-items:center;background:#f8fafc;border-radius:12px;padding:12px;">
+                <input name="code[]" value="<?= e($c['code'] ?? '') ?>" class="field" style="font-weight:900;">
+                <select name="type[]" class="field">
+                  <option value="percent" <?= ($c['type']??'')==='percent'?'selected':'' ?>>%</option>
+                  <option value="fixed" <?= ($c['type']??'')==='fixed'?'selected':'' ?>>₽</option>
+                </select>
+                <input name="value[]" type="number" step="0.01" value="<?= e($c['value'] ?? 0) ?>" class="field">
+                <input name="min_order[]" type="number" step="0.01" value="<?= e($c['min_order'] ?? 0) ?>" class="field" placeholder="мин.">
+                <input name="expires[]" type="date" value="<?= e($c['expires'] ?? '') ?>" class="field">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;cursor:pointer;">
+                  <input type="checkbox" name="active[<?= $i ?>]" <?= !empty($c['active']) ? 'checked' : '' ?>> Активен
+                </label>
+                <button type="submit" form="delCoupon<?= $i ?>" class="btn btn-red" style="padding:6px 10px;font-size:12px;" onclick="return confirm('Удалить?')">×</button>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <button class="btn" style="margin-top:12px;">Сохранить промокоды</button>
+        </form>
+        <?php foreach ($coupons as $i => $c): ?>
+          <form method="post" id="delCoupon<?= $i ?>" style="display:none;">
+            <input type="hidden" name="action" value="delete_coupon">
+            <input type="hidden" name="delete_code" value="<?= e($c['code'] ?? '') ?>">
+          </form>
+        <?php endforeach; ?>
       <?php endif; ?>
     </div>
   <?php endif; ?>

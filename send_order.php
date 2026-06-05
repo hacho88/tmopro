@@ -9,7 +9,7 @@ function money($value) {
     return number_format((float)$value, 0, ',', ' ') . ' ₽';
 }
 
-function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart) {
+function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart, $couponCode = '', $couponDiscount = 0) {
     $dbPath = __DIR__ . '/db.php';
     if (!file_exists($dbPath)) return;
     require_once $dbPath;
@@ -21,7 +21,8 @@ function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone,
 
     try {
         $pdo->beginTransaction();
-        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, account_id, company_name, inn, contact_person, phone, email, total_base, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        try { $pdo->exec("ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(32) DEFAULT NULL, ADD COLUMN coupon_discount DECIMAL(12,2) DEFAULT 0"); } catch (Throwable $e) {}
+        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, account_id, company_name, inn, contact_person, phone, email, total_base, total, coupon_code, coupon_discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute([
             $orderNumber,
             'site',
@@ -34,6 +35,8 @@ function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone,
             ($email !== '' ? $email : null),
             (float)$baseTotal,
             (float)$total,
+            ($couponCode !== '' ? $couponCode : null),
+            (float)$couponDiscount,
         ]);
         $orderId = (int)$pdo->lastInsertId();
 
@@ -108,6 +111,37 @@ foreach ($cart as $item) {
 
 $savings = max(0, $baseTotal - $total);
 
+// Coupon discount
+$couponCode = strtoupper(trim((string)($_POST['coupon_code'] ?? '')));
+$couponDiscount = 0;
+$couponApplied = '';
+if ($couponCode !== '') {
+    $couponsPath = __DIR__ . '/coupons.json';
+    $coupons = file_exists($couponsPath) ? json_decode(file_get_contents($couponsPath), true) : [];
+    $coupon = null;
+    foreach ($coupons as $c) {
+        if (($c['code'] ?? '') === $couponCode && !empty($c['active'])) {
+            $exp = $c['expires'] ?? '';
+            if ($exp === '' || $exp >= date('Y-m-d')) {
+                $min = (float)($c['min_order'] ?? 0);
+                if ($total >= $min) {
+                    $coupon = $c;
+                    break;
+                }
+            }
+        }
+    }
+    if ($coupon) {
+        if (($coupon['type'] ?? '') === 'percent') {
+            $couponDiscount = round($total * ((float)$coupon['value'] / 100), 2);
+        } else {
+            $couponDiscount = min((float)$coupon['value'], $total);
+        }
+        $total = max(0, $total - $couponDiscount);
+        $couponApplied = $couponCode;
+    }
+}
+
 $subject = 'Заказ №' . $orderNumber . ' с сайта tmopro.ru';
 $message = '<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>' . e($subject) . '</title></head>';
 $message .= '<body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">';
@@ -132,6 +166,9 @@ $message .= '</table>';
 $message .= '<div style="margin-top:24px;background:#f8fafc;border-radius:18px;padding:18px;">';
 $message .= '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#64748b;"><span>Сумма по рознице</span><strong>' . money($baseTotal) . '</strong></div>';
 $message .= '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#059669;"><span>Оптовая экономия</span><strong>−' . money($savings) . '</strong></div>';
+if ($couponDiscount > 0) {
+    $message .= '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#8b5cf6;"><span>Промокод ' . e($couponApplied) . '</span><strong>−' . money($couponDiscount) . '</strong></div>';
+}
 $message .= '<div style="display:flex;justify-content:space-between;font-size:22px;"><span><strong>Итого</strong></span><strong>' . money($total) . '</strong></div>';
 $message .= '</div>';
 $message .= '</div></div></body></html>';
@@ -167,6 +204,9 @@ $customerMsg .= '<thead><tr style="background:#f8fafc;color:#64748b;font-size:12
 $customerMsg .= '<tbody>' . $rows . '</tbody>';
 $customerMsg .= '</table>';
 $customerMsg .= '<div style="margin-top:24px;background:#f8fafc;border-radius:18px;padding:18px;">';
+if ($couponDiscount > 0) {
+    $customerMsg .= '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#8b5cf6;"><span>Промокод ' . e($couponApplied) . '</span><strong>−' . money($couponDiscount) . '</strong></div>';
+}
 $customerMsg .= '<div style="display:flex;justify-content:space-between;font-size:20px;"><span><strong>Итого</strong></span><strong>' . money($total) . '</strong></div>';
 $customerMsg .= '</div>';
 $customerMsg .= '<div style="margin-top:24px;text-align:center;">';
@@ -177,7 +217,7 @@ $customerMsg .= 'Если у вас есть вопросы, позвоните:
 $customerMsg .= '</div></div></body></html>';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0) {
-    db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart);
+    db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart, $couponApplied, $couponDiscount);
     mail($managerEmail, '=?UTF-8?B?' . base64_encode($subject) . '?=', $managerMsg, implode("\r\n", $headers));
     if ($email !== '') {
         mail($email, '=?UTF-8?B?' . base64_encode($customerSubject) . '?=', $customerMsg, implode("\r\n", $headers));
@@ -225,6 +265,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0
       <div class="mb-3 inline-flex rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 ring-1 ring-inset ring-emerald-100">Заявка отправлена</div>
       <h1 class="text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">Заказ №<?= e($orderNumber) ?> успешно принят!</h1>
       <p class="mt-4 text-lg leading-8 text-slate-600">Менеджер сформирует счет и свяжется с вами для подтверждения резерва.</p>
+      <div class="mt-8 rounded-2xl bg-slate-50 p-6 text-left">
+        <div class="flex justify-between text-sm text-slate-500 mb-2"><span>Сумма по рознице</span><span class="font-extrabold"><?= money($baseTotal) ?></span></div>
+        <?php if ($savings > 0): ?>
+          <div class="flex justify-between text-sm text-emerald-600 mb-2"><span>Оптовая экономия</span><span class="font-extrabold">−<?= money($savings) ?></span></div>
+        <?php endif; ?>
+        <?php if ($couponDiscount > 0): ?>
+          <div class="flex justify-between text-sm text-violet-600 mb-2"><span>Промокод <?= e($couponApplied) ?></span><span class="font-extrabold">−<?= money($couponDiscount) ?></span></div>
+        <?php endif; ?>
+        <div class="flex justify-between text-lg font-extrabold text-slate-900 pt-2 border-t border-slate-200"><span>Итого</span><span><?= money($total) ?></span></div>
+      </div>
       <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
         <a href="invoice.php?order=<?= e($orderNumber) ?>" target="_blank" class="inline-flex rounded-2xl bg-emerald-600 px-6 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:shadow-lg">Открыть счет →</a>
         <a href="index.php" class="inline-flex rounded-2xl bg-slate-950 px-6 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:shadow-lg">Вернуться в каталог</a>
