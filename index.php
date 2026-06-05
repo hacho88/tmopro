@@ -302,7 +302,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                     </div>
                   </td>
                   <td><span class="badge badge-gray">{{ product.category }}</span></td>
-                  <td class="text-sm font-bold text-gray-500">{{ product.stock }} шт</td>
+                  <td><span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span></td>
                   <td><price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block></td>
                   <td>
                     <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
@@ -346,7 +346,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                 </div>
                 <div class="flex items-center justify-between mb-4 p-3 rounded-xl bg-gray-50">
                   <span class="text-sm font-bold text-gray-500">{{ product.category }}</span>
-                  <span class="text-sm font-bold text-gray-500">{{ product.stock }} {{ t('pieces') }}</span>
+                  <span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-4 mb-4">
                   <price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
@@ -634,6 +634,12 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
       },
       methods: {
         money(value) { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value); },
+        stockStatus(stock) {
+          const n = Number(stock) || 0;
+          if (n <= 0) return { label: this.lang === 'en' ? 'Out of stock' : 'Нет в наличии', cls: 'bg-red-50 text-red-700' };
+          if (n < 10) return { label: this.lang === 'en' ? 'Low stock' : 'Заканчивается', cls: 'bg-amber-50 text-amber-700' };
+          return { label: this.lang === 'en' ? 'In stock' : 'В наличии', cls: 'bg-emerald-50 text-emerald-700' };
+        },
         onProductImgError(product) { try { product.image = ''; } catch (e) {} },
         setQty(id, value) { this.qty[id] = Math.max(1, parseInt(value || 1, 10)); },
         toggleDense() {

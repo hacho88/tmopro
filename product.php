@@ -122,6 +122,9 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
     .pd-price-current { font-size: 36px; font-weight: 900; letter-spacing: -0.03em; }
     .pd-price-wholesale { font-size: 14px; font-weight: 900; color: #059669; }
     .pd-badge { display:inline-flex; align-items:center; gap:6px; padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); font-size: 12px; font-weight: 900; color: #cbd5e1; }
+    .pd-badge-green { display:inline-flex; align-items:center; gap:6px; padding: 6px 14px; border-radius: 999px; background: #ecfdf5; border: 1px solid #a7f3d0; font-size: 12px; font-weight: 900; color: #047857; }
+    .pd-badge-amber { display:inline-flex; align-items:center; gap:6px; padding: 6px 14px; border-radius: 999px; background: #fffbeb; border: 1px solid #fcd34d; font-size: 12px; font-weight: 900; color: #b45309; }
+    .pd-badge-red { display:inline-flex; align-items:center; gap:6px; padding: 6px 14px; border-radius: 999px; background: #fef2f2; border: 1px solid #fecaca; font-size: 12px; font-weight: 900; color: #b91c1c; }
     .pd-tag { display:inline-flex; padding: 6px 12px; border-radius: 999px; background: #f1f5f9; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 900; color: #334155; }
     .pd-desc { line-height: 1.75; color: #334155; }
     .pd-desc p { margin-bottom: 12px; }
@@ -165,10 +168,14 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
 
     <!-- Info -->
     <div>
+      <?php
+        $stockLabel = $productStock <= 0 ? 'Нет в наличии' : ($productStock < 10 ? 'Заканчивается' : 'В наличии');
+        $stockCls = $productStock <= 0 ? 'pd-badge-red' : ($productStock < 10 ? 'pd-badge-amber' : 'pd-badge-green');
+      ?>
       <div class="flex flex-wrap gap-2 mb-4">
         <span class="pd-badge">Артикул: <?= e($productArticle) ?></span>
         <span class="pd-badge">Бренд: <?= e($productBrand) ?></span>
-        <span class="pd-badge">В наличии: <?= e($productStock) ?> шт</span>
+        <span class="<?= e($stockCls) ?>"><?= e($stockLabel) ?>: <?= e($productStock) ?> шт</span>
       </div>
 
       <h1 class="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 mb-6" style="line-height:1.15;"><?= e($productName) ?></h1>
@@ -233,6 +240,38 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
       </div>
     </div>
   </div>
+
+  <!-- Related Products -->
+  <?php
+    $related = array_filter($products, fn($p) => ($p['category'] ?? '') === $productCategory && ($p['id'] ?? 0) !== $productId);
+    $related = array_slice($related, 0, 4);
+  ?>
+  <?php if (!empty($related)): ?>
+    <div class="container pb-12">
+      <h2 class="text-xl font-black text-gray-900 mb-6">Похожие товары</h2>
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <?php foreach ($related as $rp):
+          $rpStock = (int)($rp['stock'] ?? 0);
+          $rpStockLabel = $rpStock <= 0 ? 'Нет в наличии' : ($rpStock < 10 ? 'Заканчивается' : 'В наличии');
+          $rpStockCls = $rpStock <= 0 ? 'pd-badge-red' : ($rpStock < 10 ? 'pd-badge-amber' : 'pd-badge-green');
+        ?>
+          <a href="product.php?id=<?= e($rp['id'] ?? 0) ?>" style="text-decoration:none; display:block; background:#fff; border-radius:20px; border:1px solid #e2e8f0; padding:16px; transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(15,23,42,.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="aspect-ratio:1; background:#f1f5f9; border-radius:16px; overflow:hidden; margin-bottom:12px;">
+              <?php if (!empty($rp['image'])): ?>
+                <img src="<?= e($rp['image']) ?>" style="width:100%;height:100%;object-fit:contain; padding:12px;">
+              <?php endif; ?>
+            </div>
+            <div style="font-size:11px; font-weight:900; color:#94a3b8; margin-bottom:4px;"><?= e($rp['article'] ?? '') ?></div>
+            <div style="font-size:14px; font-weight:900; color:#0f172a; margin-bottom:8px; line-height:1.3;"><?= e($rp['name'] ?? '') ?></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:16px; font-weight:900; color:#0f172a;"><?= e(money($rp['price_base'] ?? 0)) ?></span>
+              <span class="<?= e($rpStockCls) ?>" style="font-size:11px;"><?= e($rpStockLabel) ?></span>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  <?php endif; ?>
 </main>
 
 <footer class="container pb-12 text-center text-sm font-bold text-gray-400">

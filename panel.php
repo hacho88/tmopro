@@ -1007,6 +1007,10 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   <?php endif; ?>
 
   <?php if ($tab === 'products'): ?>
+    <?php
+      $lowStock = array_filter($products, fn($p) => (int)($p['stock'] ?? 0) > 0 && (int)($p['stock'] ?? 0) < 10);
+      $outStock = array_filter($products, fn($p) => (int)($p['stock'] ?? 0) <= 0);
+    ?>
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
         <div>
@@ -1015,6 +1019,23 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         </div>
         <form method="post"><input type="hidden" name="action" value="add_product"><button class="btn btn-dark">+ Добавить</button></form>
       </div>
+
+      <?php if (!empty($lowStock) || !empty($outStock)): ?>
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <?php if (!empty($lowStock)): ?>
+            <div style="flex:1;min-width:220px;background:#fffbeb;border:1px solid #fcd34d;border-radius:16px;padding:14px 18px;">
+              <div style="font-size:13px;font-weight:900;color:#b45309;">⚠️ Заканчивается: <?= count($lowStock) ?> товаров</div>
+              <div style="font-size:12px;color:#92400e;font-weight:700;margin-top:4px;">Остаток менее 10 шт</div>
+            </div>
+          <?php endif; ?>
+          <?php if (!empty($outStock)): ?>
+            <div style="flex:1;min-width:220px;background:#fef2f2;border:1px solid #fecaca;border-radius:16px;padding:14px 18px;">
+              <div style="font-size:13px;font-weight:900;color:#b91c1c;">❌ Нет в наличии: <?= count($outStock) ?> товаров</div>
+              <div style="font-size:12px;color:#991b1b;font-weight:700;margin-top:4px;">Остаток 0 шт</div>
+            </div>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
 
       <form method="post" id="prodForm" enctype="multipart/form-data">
         <input type="hidden" name="action" value="save_products">
