@@ -1,0 +1,6 @@
+{
+  "host": "localhost",
+  "name": "tmopro_db",
+  "user": "tmopro_user",
+  "pass": "your_password_here"
+}

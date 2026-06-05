@@ -22,7 +22,14 @@ function save_json($path, $data) {
 
 $token = getenv('DEEPSEEK_API_KEY') ?: '';
 if ($token === '') {
-    json_out(['ok' => false, 'error' => 'DEEPSEEK_API_KEY is not set'], 500);
+    $keyPath = __DIR__ . '/../deepseek_key.json';
+    if (file_exists($keyPath)) {
+        $cfg = json_decode(file_get_contents($keyPath), true);
+        $token = is_array($cfg) ? (string)($cfg['api_key'] ?? '') : '';
+    }
+}
+if ($token === '') {
+    json_out(['ok' => false, 'error' => 'DEEPSEEK_API_KEY is not set (env or deepseek_key.json)'], 500);
 }
 
 $id = (int)($_POST['id'] ?? 0);

@@ -9,6 +9,20 @@ function tmopro_db() {
     $user = getenv('TMOPRO_DB_USER') ?: '';
     $pass = getenv('TMOPRO_DB_PASS') ?: '';
 
+    // Fallback to db.json if env vars are not set
+    if ($host === '' || $name === '' || $user === '') {
+        $jsonPath = __DIR__ . '/db.json';
+        if (file_exists($jsonPath)) {
+            $cfg = json_decode(file_get_contents($jsonPath), true);
+            if (is_array($cfg)) {
+                $host = (string)($cfg['host'] ?? '');
+                $name = (string)($cfg['name'] ?? '');
+                $user = (string)($cfg['user'] ?? '');
+                $pass = (string)($cfg['pass'] ?? '');
+            }
+        }
+    }
+
     if ($host === '' || $name === '' || $user === '') {
         return null;
     }
