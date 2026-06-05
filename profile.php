@@ -178,6 +178,7 @@ $statusLabels = [
                   <div class="flex items-center gap-3 mb-1">
                     <span class="text-lg font-black text-gray-900">#<?= e($order['order_number']) ?></span>
                     <span class="order-badge <?= e($statusInfo['class']) ?>"><?= e($statusInfo['label']) ?></span>
+                    <a href="invoice.php?order=<?= e($order['order_number']) ?>" target="_blank" class="text-xs font-black text-emerald-600 hover:underline">Счет →</a>
                   </div>
                   <p class="text-sm font-bold text-gray-400"><?= date('d.m.Y H:i', strtotime($order['created_at'])) ?></p>
                 </div>
