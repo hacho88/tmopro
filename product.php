@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 function e($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
@@ -43,6 +45,18 @@ $productDescription = (string)($product['description'] ?? '');
 $productTags = is_array($product['tags'] ?? null) ? $product['tags'] : [];
 $priceBase = (float)($product['price_base'] ?? 0);
 $priceWholesale = (float)($product['price_wholesale'] ?? 0);
+
+$b2bTier = $_SESSION['b2b_price_tier'] ?? 'default';
+$tiersPath = __DIR__ . '/price_tiers.json';
+$priceTiers = file_exists($tiersPath) ? json_decode(file_get_contents($tiersPath), true) : [];
+$discount = isset($priceTiers[$b2bTier]['discount']) ? (float)$priceTiers[$b2bTier]['discount'] : 0;
+$b2bLabel = isset($priceTiers[$b2bTier]['label']) ? (string)$priceTiers[$b2bTier]['label'] : '';
+
+function applyDiscount($price, $discount) {
+    return $discount > 0 ? round($price * (100 - $discount) / 100) : $price;
+}
+$priceBaseDisplay = applyDiscount($priceBase, $discount);
+$priceWholesaleDisplay = applyDiscount($priceWholesale, $discount);
 
 $themeColor = $settings['theme_color'] ?? 'emerald';
 $accentClass = $themeColor === 'indigo' ? 'text-indigo-600' : ($themeColor === 'slate' ? 'text-slate-900' : 'text-emerald-600');
@@ -160,8 +174,15 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
       <h1 class="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 mb-6" style="line-height:1.15;"><?= e($productName) ?></h1>
 
       <div class="mb-8">
-        <div class="pd-price-current <?= e($accentClass) ?>"><?= e(money($priceBase)) ?></div>
-        <div class="pd-price-wholesale mt-2">Опт от 10 шт: <span class="font-extrabold"><?= e(money($priceWholesale)) ?></span></div>
+        <?php if ($discount > 0): ?>
+          <div class="pd-price-old"><?= e(money($priceBase)) ?></div>
+          <div class="pd-price-current <?= e($accentClass) ?>"><?= e(money($priceBaseDisplay)) ?></div>
+          <div class="pd-price-wholesale mt-2">Опт от 10 шт: <span class="font-extrabold"><?= e(money($priceWholesaleDisplay)) ?></span></div>
+          <div class="mt-2 text-sm font-black text-emerald-600">Ваша скидка по тарифу <?= e($b2bLabel ?: $b2bTier) ?>: -<?= e($discount) ?>%</div>
+        <?php else: ?>
+          <div class="pd-price-current <?= e($accentClass) ?>"><?= e(money($priceBase)) ?></div>
+          <div class="pd-price-wholesale mt-2">Опт от 10 шт: <span class="font-extrabold"><?= e(money($priceWholesale)) ?></span></div>
+        <?php endif; ?>
       </div>
 
       <div class="mb-8">
@@ -199,8 +220,15 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
           <div class="pd-info-row"><span class="pd-info-label">Бренд</span><span class="pd-info-value"><?= e($productBrand) ?></span></div>
           <div class="pd-info-row"><span class="pd-info-label">Категория</span><span class="pd-info-value"><?= e($productCategory) ?></span></div>
           <div class="pd-info-row"><span class="pd-info-label">Остаток</span><span class="pd-info-value"><?= e($productStock) ?> шт</span></div>
-          <div class="pd-info-row"><span class="pd-info-label">Розничная цена</span><span class="pd-info-value"><?= e(money($priceBase)) ?></span></div>
-          <div class="pd-info-row"><span class="pd-info-label">Оптовая цена (от 10 шт)</span><span class="pd-info-value"><?= e(money($priceWholesale)) ?></span></div>
+          <?php if ($discount > 0): ?>
+            <div class="pd-info-row"><span class="pd-info-label">Розничная цена</span><span class="pd-info-value pd-price-old" style="font-size:14px;"><?= e(money($priceBase)) ?></span></div>
+            <div class="pd-info-row"><span class="pd-info-label">Ваша цена (<?= e($b2bLabel ?: $b2bTier) ?>)</span><span class="pd-info-value <?= e($accentClass) ?>"><?= e(money($priceBaseDisplay)) ?></span></div>
+            <div class="pd-info-row"><span class="pd-info-label">Оптовая цена (от 10 шт)</span><span class="pd-info-value"><?= e(money($priceWholesaleDisplay)) ?></span></div>
+            <div class="pd-info-row"><span class="pd-info-label">Скидка</span><span class="pd-info-value text-emerald-600">-<?= e($discount) ?>%</span></div>
+          <?php else: ?>
+            <div class="pd-info-row"><span class="pd-info-label">Розничная цена</span><span class="pd-info-value"><?= e(money($priceBase)) ?></span></div>
+            <div class="pd-info-row"><span class="pd-info-label">Оптовая цена (от 10 шт)</span><span class="pd-info-value"><?= e(money($priceWholesale)) ?></span></div>
+          <?php endif; ?>
         </div>
       </div>
     </div>

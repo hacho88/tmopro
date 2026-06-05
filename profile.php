@@ -20,6 +20,11 @@ $userName = $_SESSION['b2b_user_name'] ?? '';
 $companyName = $_SESSION['b2b_company'] ?? '';
 $priceTier = $_SESSION['b2b_price_tier'] ?? 'default';
 
+$tiersPath = __DIR__ . '/price_tiers.json';
+$priceTiers = file_exists($tiersPath) ? json_decode(file_get_contents($tiersPath), true) : [];
+$b2bDiscount = isset($priceTiers[$priceTier]['discount']) ? (float)$priceTiers[$priceTier]['discount'] : 0;
+$b2bTierLabel = isset($priceTiers[$priceTier]['label']) ? (string)$priceTiers[$priceTier]['label'] : $priceTier;
+
 $pdo = tmopro_db();
 $orders = [];
 $account = null;
@@ -116,7 +121,10 @@ $statusLabels = [
           <?php if ($account['phone']): ?>
             <div class="info-row"><span class="info-label">Телефон</span><span class="info-value"><?= e($account['phone']) ?></span></div>
           <?php endif; ?>
-          <div class="info-row" style="border:none;"><span class="info-label">Тариф</span><span class="info-value <?= e($accentClass) ?>"><?= e($account['price_tier']) ?></span></div>
+          <div class="info-row"><span class="info-label">Тариф</span><span class="info-value <?= e($accentClass) ?>"><?= e($b2bTierLabel) ?></span></div>
+          <?php if ($b2bDiscount > 0): ?>
+            <div class="info-row" style="border:none;"><span class="info-label">Скидка</span><span class="info-value text-emerald-600">-<?= e($b2bDiscount) ?>% на весь каталог</span></div>
+          <?php endif; ?>
         <?php else: ?>
           <p class="text-sm text-gray-400 font-bold">Данные недоступны</p>
         <?php endif; ?>

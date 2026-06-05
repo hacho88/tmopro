@@ -6,6 +6,13 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
 $pagesPath = __DIR__ . '/pages.json';
 $footerPages = file_exists($pagesPath) ? json_decode(file_get_contents($pagesPath), true) : [];
 $footerPages = is_array($footerPages) ? $footerPages : [];
+
+$tiersPath = __DIR__ . '/price_tiers.json';
+$priceTiers = file_exists($tiersPath) ? json_decode(file_get_contents($tiersPath), true) : [];
+$priceTiers = is_array($priceTiers) ? $priceTiers : [];
+
+$b2bTier = $_SESSION['b2b_price_tier'] ?? 'default';
+$priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (float)($t['discount'] ?? 0)], $priceTiers);
 ?>
 <!doctype html>
 <html lang="ru">
@@ -276,7 +283,7 @@ $footerPages = is_array($footerPages) ? $footerPages : [];
                   </td>
                   <td><span class="badge badge-gray">{{ product.category }}</span></td>
                   <td class="text-sm font-bold text-gray-500">{{ product.stock }} шт</td>
-                  <td><price-block :product="product" :qty="qty[product.id]"></price-block></td>
+                  <td><price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block></td>
                   <td>
                     <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                   </td>
@@ -312,7 +319,7 @@ $footerPages = is_array($footerPages) ? $footerPages : [];
                   <span class="text-sm font-bold text-gray-500">{{ product.stock }} шт</span>
                 </div>
                 <div class="flex items-center justify-between gap-4 mb-4">
-                  <price-block :product="product" :qty="qty[product.id]"></price-block>
+                  <price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
                   <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                 </div>
                 <button @click="addToCart(product)" class="btn btn-primary w-full">Добавить в заявку</button>
@@ -380,20 +387,30 @@ $footerPages = is_array($footerPages) ? $footerPages : [];
     };
 
     const PriceBlock = {
-      props: ['product', 'qty'],
+      props: ['product', 'qty', 'tier', 'tiers'],
       template: `
         <div style="min-width: 130px;">
           <div v-if="Number(qty) >= 10" class="flex flex-col">
             <span class="text-xs font-bold text-gray-400 line-through number-smooth">{{ money(product.price_base) }}</span>
-            <span class="text-lg font-extrabold text-primary number-smooth">{{ money(product.price_wholesale) }}</span>
+            <span class="text-lg font-extrabold text-primary number-smooth">{{ money(price(product.price_wholesale)) }}</span>
           </div>
           <div v-else class="flex flex-col">
-            <span class="text-lg font-extrabold text-gray-900 number-smooth">{{ money(product.price_base) }}</span>
-            <span class="text-xs font-bold text-gray-400">опт от 10 шт: {{ money(product.price_wholesale) }}</span>
+            <span class="text-lg font-extrabold text-gray-900 number-smooth">{{ money(price(product.price_base)) }}</span>
+            <span class="text-xs font-bold text-gray-400">опт от 10 шт: {{ money(price(product.price_wholesale)) }}</span>
           </div>
+          <span v-if="discount > 0" class="text-[10px] font-black text-emerald-600 mt-1">-{{ discount }}% B2B</span>
         </div>
       `,
+      computed: {
+        discount() {
+          return this.tier && this.tiers && this.tiers[this.tier] ? (this.tiers[this.tier].discount || 0) : 0;
+        }
+      },
       methods: {
+        price(value) {
+          const d = this.discount;
+          return d > 0 ? Math.round(value * (100 - d) / 100) : value;
+        },
         money(value) {
           return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
         }
@@ -516,6 +533,8 @@ $footerPages = is_array($footerPages) ? $footerPages : [];
       data() {
         return {
           settings: { site_name: 'TMOPRO — Сантехника Оптом', site_short_name: 'TMOPRO', phone: '+7 (966) 085-34-70', email_manager: 'info@tmopro.ru', theme_color: 'emerald', default_view: 'table', logo_type: 'text', logo_text: 'TMO', logo_url: '', background_type: 'gradient', background_color: '#f8fafc', background_image: '', background_image_mobile: '', hero_title: 'Сантехника оптом от производителя. Все на одной площадке.', hero_subtitle: 'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.' },
+          b2bTier: '<?= htmlspecialchars($b2bTier, ENT_QUOTES, 'UTF-8') ?>',
+          priceTiers: <?= json_encode($priceTiers, JSON_UNESCAPED_UNICODE) ?>,
           products: [],
           categories: [],
           qty: {},

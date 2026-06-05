@@ -1,0 +1,7 @@
+{
+  "default": { "label": "Стандарт", "discount": 0 },
+  "bronze": { "label": "Bronze", "discount": 2 },
+  "silver": { "label": "Silver", "discount": 5 },
+  "gold": { "label": "Gold", "discount": 10 },
+  "platinum": { "label": "Platinum", "discount": 15 }
+}
