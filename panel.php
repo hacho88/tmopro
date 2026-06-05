@@ -8,6 +8,26 @@ function e($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+// Admin translations
+$adminLangFile = __DIR__ . '/admin_lang.json';
+$adminLangData = file_exists($adminLangFile) ? json_decode(file_get_contents($adminLangFile), true) : [];
+if (!is_array($adminLangData)) $adminLangData = [];
+
+$allowedAdminLangs = ['ru','zh','ky'];
+$adminLang = 'ru';
+if (isset($_GET['admin_lang']) && in_array($_GET['admin_lang'], $allowedAdminLangs, true)) {
+    $adminLang = $_GET['admin_lang'];
+    setcookie('admin_lang', $adminLang, time() + 86400 * 365, '/');
+} elseif (isset($_COOKIE['admin_lang']) && in_array($_COOKIE['admin_lang'], $allowedAdminLangs, true)) {
+    $adminLang = $_COOKIE['admin_lang'];
+}
+
+function admin_t($key, $data = []) {
+    global $adminLangData, $adminLang;
+    $str = $adminLangData[$adminLang][$key] ?? ($adminLangData['ru'][$key] ?? $key);
+    return $str;
+}
+
 function read_json($path, $fallback) {
     if (!file_exists($path)) return $fallback;
     $data = json_decode(file_get_contents($path), true);
@@ -514,6 +534,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         $tab = 'coupons';
     }
 
+    if ($action === 'save_blocks') {
+        $blocksPath = __DIR__ . '/blocks.json';
+        $types = (array)($_POST['block_type'] ?? []);
+        $titles = (array)($_POST['block_title'] ?? []);
+        $subtitles = (array)($_POST['block_subtitle'] ?? []);
+        $contents = (array)($_POST['block_content'] ?? []);
+        $btns = (array)($_POST['block_button'] ?? []);
+        $links = (array)($_POST['block_link'] ?? []);
+        $newBlocks = [];
+        foreach ($types as $i => $type) {
+            $newBlocks[] = [
+                'type' => trim((string)$type),
+                'title' => trim((string)($titles[$i] ?? '')),
+                'subtitle' => trim((string)($subtitles[$i] ?? '')),
+                'content' => trim((string)($contents[$i] ?? '')),
+                'button_text' => trim((string)($btns[$i] ?? '')),
+                'button_link' => trim((string)($links[$i] ?? ''))
+            ];
+        }
+        save_json($blocksPath, $newBlocks);
+        $success = admin_t('save');
+        $tab = 'blocks';
+    }
+
+    if ($action === 'delete_block') {
+        $idx = (int)($_POST['block_idx'] ?? -1);
+        $blocksPath = __DIR__ . '/blocks.json';
+        $blocks = file_exists($blocksPath) ? json_decode(file_get_contents($blocksPath), true) : [];
+        if (is_array($blocks) && isset($blocks[$idx])) {
+            array_splice($blocks, $idx, 1);
+            save_json($blocksPath, array_values($blocks));
+            $success = admin_t('delete');
+        }
+        $tab = 'blocks';
+    }
+
+    if ($action === 'move_block') {
+        $idx = (int)($_POST['block_idx'] ?? -1);
+        $dir = ($_POST['direction'] ?? '') === 'up' ? -1 : 1;
+        $blocksPath = __DIR__ . '/blocks.json';
+        $blocks = file_exists($blocksPath) ? json_decode(file_get_contents($blocksPath), true) : [];
+        if (is_array($blocks) && isset($blocks[$idx]) && isset($blocks[$idx + $dir]) && ($idx + $dir) >= 0) {
+            $tmp = $blocks[$idx];
+            $blocks[$idx] = $blocks[$idx + $dir];
+            $blocks[$idx + $dir] = $tmp;
+            save_json($blocksPath, array_values($blocks));
+        }
+        $tab = 'blocks';
+    }
+
     if ($action === 'import_products_csv') {
         $file = $_FILES['csv_file'] ?? null;
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
@@ -727,9 +797,14 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <div style="font-size:12px;font-weight:700;color:#64748b;">Без MySQL · JSON CMS</div>
       <h1 style="font-size:28px;margin-top:4px;">Админ-панель</h1>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <a href="index.php" target="_blank" class="btn btn-dark" style="text-decoration:none;">Открыть сайт</a>
-      <a href="panel.php?logout=1" class="btn btn-ghost" style="text-decoration:none;">Выйти</a>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <form method="get" style="display:flex;gap:4px;align-items:center;">
+        <?php foreach ($allowedAdminLangs as $l): ?>
+          <button type="submit" name="admin_lang" value="<?= e($l) ?>" style="padding:4px 10px;border-radius:8px;border:1px solid <?= $adminLang===$l?'#0f172a':'#e2e8f0' ?>;background:<?= $adminLang===$l?'#0f172a':'#fff' ?>;color:<?= $adminLang===$l?'#fff':'#64748b' ?>;font-size:12px;font-weight:900;cursor:pointer;"><?= e(strtoupper($l)) ?></button>
+        <?php endforeach; ?>
+      </form>
+      <a href="index.php" target="_blank" class="btn btn-dark" style="text-decoration:none;">🌐 <?= admin_t('preview') ?></a>
+      <a href="panel.php?logout=1" class="btn btn-ghost" style="text-decoration:none;">🚪 <?= admin_t('logout') ?></a>
     </div>
   </div>
 
@@ -737,16 +812,17 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   <?php if ($error): ?><div class="msg err"><?= e($error) ?></div><?php endif; ?>
 
   <div class="nav">
-    <a href="panel.php?tab=overview" class="<?= $tab==='overview'?'active':'' ?>">Обзор</a>
-    <a href="panel.php?tab=settings" class="<?= $tab==='settings'?'active':'' ?>">Настройки сайта</a>
-    <a href="panel.php?tab=categories" class="<?= $tab==='categories'?'active':'' ?>">Категории</a>
-    <a href="panel.php?tab=orders" class="<?= $tab==='orders'?'active':'' ?>">Заказы</a>
-    <a href="panel.php?tab=clients" class="<?= $tab==='clients'?'active':'' ?>">Клиенты</a>
-    <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
-    <a href="panel.php?tab=import" class="<?= $tab==='import'?'active':'' ?>">Импорт/Экспорт</a>
-    <a href="panel.php?tab=pages" class="<?= $tab==='pages'?'active':'' ?>">Страницы</a>
-    <a href="panel.php?tab=analytics" class="<?= $tab==='analytics'?'active':'' ?>">Аналитика</a>
-    <a href="panel.php?tab=coupons" class="<?= $tab==='coupons'?'active':'' ?>">Промокоды</a>
+    <a href="panel.php?tab=overview" class="<?= $tab==='overview'?'active':'' ?>">📊 <?= admin_t('tab_overview') ?></a>
+    <a href="panel.php?tab=settings" class="<?= $tab==='settings'?'active':'' ?>">⚙️ <?= admin_t('tab_settings') ?></a>
+    <a href="panel.php?tab=categories" class="<?= $tab==='categories'?'active':'' ?>">📂 <?= admin_t('tab_categories') ?></a>
+    <a href="panel.php?tab=orders" class="<?= $tab==='orders'?'active':'' ?>">📦 <?= admin_t('tab_orders') ?></a>
+    <a href="panel.php?tab=clients" class="<?= $tab==='clients'?'active':'' ?>">👥 <?= admin_t('tab_clients') ?></a>
+    <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">🛒 <?= admin_t('tab_products') ?></a>
+    <a href="panel.php?tab=import" class="<?= $tab==='import'?'active':'' ?>">📤 <?= admin_t('tab_import') ?></a>
+    <a href="panel.php?tab=pages" class="<?= $tab==='pages'?'active':'' ?>">📄 <?= admin_t('tab_pages') ?></a>
+    <a href="panel.php?tab=analytics" class="<?= $tab==='analytics'?'active':'' ?>">📈 <?= admin_t('tab_analytics') ?></a>
+    <a href="panel.php?tab=coupons" class="<?= $tab==='coupons'?'active':'' ?>">🏷️ <?= admin_t('tab_coupons') ?></a>
+    <a href="panel.php?tab=blocks" class="<?= $tab==='blocks'?'active':'' ?>">🧩 <?= admin_t('tab_blocks') ?></a>
   </div>
 
   <?php if ($tab === 'overview'): ?>
@@ -756,23 +832,23 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <div class="card stat"><div class="lbl">Сумма цен</div><div class="num"><?= e(number_format($totalRetail,0,',',' ')) ?> ₽</div></div>
     </div>
     <div class="card">
-      <h2 style="font-size:20px;margin-bottom:12px;">Как работать</h2>
+      <h2 style="font-size:20px;margin-bottom:12px;">📖 <?= admin_t('overview_howto') ?></h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
         <a href="panel.php?tab=settings" class="card" style="text-decoration:none;">
-          <b>1. Настроить сайт</b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;">Название, телефон, почта, логотип, фон и главный экран.</p>
+          <b>1. <?= admin_t('tab_settings') ?></b>
+          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step1') ?></p>
         </a>
         <a href="panel.php?tab=products" class="card" style="text-decoration:none;">
-          <b>2. Заполнить товары</b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;">Артикулы, бренды, остатки, розничные и оптовые цены.</p>
+          <b>2. <?= admin_t('tab_products') ?></b>
+          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step2') ?></p>
         </a>
         <a href="index.php" target="_blank" class="card" style="text-decoration:none;">
-          <b>3. Проверить витрину</b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;">Откройте сайт и проверьте, как покупатель видит каталог.</p>
+          <b>3. <?= admin_t('preview') ?></b>
+          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step3') ?></p>
         </a>
         <a href="backup.php" target="_blank" class="card" style="text-decoration:none;">
-          <b>4. Сделать бэкап</b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;">Сохранит JSON файлы и SQL дамп базы в папку backups/.</p>
+          <b>4. <?= admin_t('backup') ?></b>
+          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step4') ?></p>
         </a>
       </div>
     </div>
@@ -1641,6 +1717,115 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           </form>
         <?php endforeach; ?>
       <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'blocks'): ?>
+    <?php
+      $blocksPath = __DIR__ . '/blocks.json';
+      $blocks = file_exists($blocksPath) ? json_decode(file_get_contents($blocksPath), true) : [];
+      if (!is_array($blocks)) $blocks = [];
+      $blockTypes = [
+        'hero' => admin_t('block_hero'),
+        'text' => admin_t('block_text'),
+        'features' => admin_t('block_features'),
+        'products' => admin_t('block_products'),
+        'categories' => admin_t('block_categories'),
+        'cta' => admin_t('block_cta')
+      ];
+    ?>
+    <div class="card">
+      <h2 style="font-size:20px;margin-bottom:8px;">🧩 <?= admin_t('blocks_title') ?></h2>
+      <p style="color:#64748b;font-size:13px;margin-bottom:20px;"><?= admin_t('blocks_desc') ?></p>
+
+      <form method="post" style="margin-bottom:24px;">
+        <input type="hidden" name="action" value="save_blocks">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <?php foreach ($blocks as $i => $b): ?>
+            <div style="background:#f8fafc;border-radius:16px;padding:20px;border:2px solid #e2e8f0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <span style="font-size:14px;font-weight:900;color:#0f172a;">#<?= $i+1 ?> <?= e($blockTypes[$b['type'] ?? ''] ?? $b['type'] ?? '') ?></span>
+                <div style="display:flex;gap:6px;">
+                  <?php if ($i > 0): ?>
+                    <button type="submit" form="moveUp<?= $i ?>" class="btn" style="padding:6px 10px;font-size:12px;">↑</button>
+                  <?php endif; ?>
+                  <?php if ($i < count($blocks) - 1): ?>
+                    <button type="submit" form="moveDown<?= $i ?>" class="btn" style="padding:6px 10px;font-size:12px;">↓</button>
+                  <?php endif; ?>
+                  <button type="submit" form="delBlock<?= $i ?>" class="btn btn-red" style="padding:6px 10px;font-size:12px;" onclick="return confirm('<?= admin_t('delete') ?>?')">🗑️</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                <input type="hidden" name="block_type[]" value="<?= e($b['type'] ?? '') ?>">
+                <label><span style="font-size:12px;font-weight:800;color:#64748b;">📝 <?= admin_t('name') ?></span>
+                  <input name="block_title[]" value="<?= e($b['title'] ?? '') ?>" class="field" placeholder="Заголовок блока">
+                </label>
+                <label><span style="font-size:12px;font-weight:800;color:#64748b;">📄 Подзаголовок / Описание</span>
+                  <input name="block_subtitle[]" value="<?= e($b['subtitle'] ?? '') ?>" class="field" placeholder="Подзаголовок">
+                </label>
+                <label style="grid-column:1/-1;"><span style="font-size:12px;font-weight:800;color:#64748b;">📝 Содержимое (HTML)</span>
+                  <textarea name="block_content[]" rows="4" class="field" placeholder="Текст, HTML, описание..."><?= e($b['content'] ?? '') ?></textarea>
+                </label>
+                <label><span style="font-size:12px;font-weight:800;color:#64748b;">🔘 Текст кнопки</span>
+                  <input name="block_button[]" value="<?= e($b['button_text'] ?? '') ?>" class="field" placeholder="Например: Перейти в каталог">
+                </label>
+                <label><span style="font-size:12px;font-weight:800;color:#64748b;">🔗 Ссылка кнопки</span>
+                  <input name="block_link[]" value="<?= e($b['button_link'] ?? '') ?>" class="field" placeholder="index.php или https://...">
+                </label>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+        <button class="btn" style="margin-top:12px;">💾 <?= admin_t('save') ?></button>
+      </form>
+
+      <!-- Add new block -->
+      <form method="post" class="card" style="background:#f1f5f9;padding:20px;">
+        <input type="hidden" name="action" value="save_blocks">
+        <h3 style="font-size:16px;margin-bottom:12px;">➕ <?= admin_t('add') ?> <?= admin_t('block_type') ?></h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+          <?php foreach ($blockTypes as $k => $v): ?>
+            <label style="display:flex;align-items:center;gap:8px;padding:12px;background:#fff;border-radius:12px;border:2px solid #e2e8f0;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="this.style.borderColor='#e2e8f0'">
+              <input type="radio" name="block_type[]" value="<?= e($k) ?>" required style="width:18px;height:18px;accent-color:#0f172a;">
+              <div>
+                <div style="font-weight:900;font-size:14px;"><?= e($v) ?></div>
+                <div style="font-size:11px;color:#64748b;font-weight:700;"><?= e($k) ?></div>
+              </div>
+            </label>
+          <?php endforeach; ?>
+        </div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <input name="block_title[]" class="field" placeholder="Заголовок">
+          <input name="block_subtitle[]" class="field" placeholder="Подзаголовок">
+        </div>
+        <textarea name="block_content[]" rows="3" class="field" style="margin-top:12px;" placeholder="Содержимое (HTML или текст)"></textarea>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <input name="block_button[]" class="field" placeholder="Текст кнопки">
+          <input name="block_link[]" class="field" placeholder="Ссылка кнопки">
+        </div>
+        <button class="btn btn-dark" style="margin-top:16px;">➕ <?= admin_t('add') ?></button>
+      </form>
+
+      <?php foreach ($blocks as $i => $b): ?>
+        <?php if ($i > 0): ?>
+          <form method="post" id="moveUp<?= $i ?>" style="display:none;">
+            <input type="hidden" name="action" value="move_block">
+            <input type="hidden" name="block_idx" value="<?= $i ?>">
+            <input type="hidden" name="direction" value="up">
+          </form>
+        <?php endif; ?>
+        <?php if ($i < count($blocks) - 1): ?>
+          <form method="post" id="moveDown<?= $i ?>" style="display:none;">
+            <input type="hidden" name="action" value="move_block">
+            <input type="hidden" name="block_idx" value="<?= $i ?>">
+            <input type="hidden" name="direction" value="down">
+          </form>
+        <?php endif; ?>
+        <form method="post" id="delBlock<?= $i ?>" style="display:none;">
+          <input type="hidden" name="action" value="delete_block">
+          <input type="hidden" name="block_idx" value="<?= $i ?>">
+        </form>
+      <?php endforeach; ?>
     </div>
   <?php endif; ?>
 
