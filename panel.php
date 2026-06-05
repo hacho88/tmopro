@@ -198,6 +198,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         $tab = 'products';
     }
 
+    if ($action === 'duplicate_product') {
+        $dupId = (int)($_POST['duplicate_id'] ?? 0);
+        $source = null;
+        foreach ($products as $p) {
+            if ((int)($p['id'] ?? 0) === $dupId) { $source = $p; break; }
+        }
+        if ($source) {
+            $maxId = 0;
+            foreach ($products as $p) $maxId = max($maxId, (int)($p['id'] ?? 0));
+            $newProduct = $source;
+            $newProduct['id'] = $maxId + 1;
+            $newProduct['name'] = ($source['name'] ?? '') . ' (copy)';
+            $newProduct['article'] = ($source['article'] ?? '') . '-COPY';
+            $newProduct['stock'] = 0;
+            $products[] = $newProduct;
+            if (save_json($productsPath, $products)) $success = admin_t('add');
+        }
+        $tab = 'products';
+    }
+
     if ($action === 'save_categories') {
         $nextSubId = 0;
         foreach ($categories as $cat) {
@@ -677,6 +697,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         }
         $tab = 'import';
     }
+
+    if ($action === 'export_orders_csv') {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=orders_' . date('Y-m-d') . '.csv');
+        $output = fopen('php://output', 'w');
+        fprintf($output, "\xEF\xBB\xBF");
+        fputcsv($output, ['order_number','company_name','inn','contact_person','phone','email','city','address','zip','delivery_note','status','total','total_base','created_at'], ';');
+        $pdo = tmopro_db_safe();
+        if ($pdo) {
+            $stmt = $pdo->query('SELECT order_number, company_name, inn, contact_person, phone, email, city, address, zip, delivery_note, status, total, total_base, created_at FROM orders ORDER BY id DESC');
+            while ($row = $stmt->fetch()) {
+                fputcsv($output, [
+                    $row['order_number'], $row['company_name'], $row['inn'] ?? '', $row['contact_person'] ?? '', $row['phone'] ?? '', $row['email'] ?? '',
+                    $row['city'] ?? '', $row['address'] ?? '', $row['zip'] ?? '', $row['delivery_note'] ?? '',
+                    $row['status'], $row['total'], $row['total_base'], $row['created_at']
+                ], ';');
+            }
+        }
+        fclose($output);
+        exit;
+    }
 }
 
 $themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
@@ -935,14 +976,18 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <h2 style="font-size:20px;">📦 <?= admin_t('tab_orders') ?></h2>
           <p style="color:#64748b;font-size:13px;margin-top:4px;"><?= count($orders) ?> <?= admin_t('tab_orders') ?></p>
         </div>
+        <form method="post" style="display:inline;">
+          <input type="hidden" name="action" value="export_orders_csv">
+          <button class="btn btn-dark">📥 <?= admin_t('export') ?> CSV</button>
+        </form>
       </div>
 
       <form method="get" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
         <input type="hidden" name="tab" value="orders">
         <?php if ($filterStatus !== ''): ?><input type="hidden" name="order_status" value="<?= e($filterStatus) ?>"><?php endif; ?>
-        <input name="q" value="<?= e($searchOrder) ?>" class="field" style="flex:1;max-width:320px;height:40px;font-size:13px;" placeholder="Поиск по номеру, компании, ИНН, телефону...">
-        <button type="submit" class="btn btn-dark" style="height:40px;">Найти</button>
-        <?php if ($searchOrder !== ''): ?><a href="panel.php?tab=orders<?= $filterStatus !== '' ? '&order_status=' . e($filterStatus) : '' ?>" class="btn" style="height:40px;">Сброс</a><?php endif; ?>
+        <input name="q" value="<?= e($searchOrder) ?>" class="field" style="flex:1;max-width:320px;height:40px;font-size:13px;" placeholder="<?= admin_t('search') ?>...">
+        <button type="submit" class="btn btn-dark" style="height:40px;"><?= admin_t('search_btn') ?></button>
+        <?php if ($searchOrder !== ''): ?><a href="panel.php?tab=orders<?= $filterStatus !== '' ? '&order_status=' . e($filterStatus) : '' ?>" class="btn" style="height:40px;"><?= admin_t('reset') ?></a><?php endif; ?>
       </form>
 
       <!-- Status Filter -->
@@ -1338,9 +1383,9 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
       <form method="get" style="margin-bottom:16px;display:flex;gap:8px;">
         <input type="hidden" name="tab" value="products">
-        <input name="q" value="<?= e($searchQ) ?>" class="field" style="flex:1;max-width:400px;height:40px;font-size:13px;" placeholder="Поиск по названию, артикулу, бренду...">
-        <button type="submit" class="btn btn-dark" style="height:40px;">Найти</button>
-        <?php if ($searchQ !== ''): ?><a href="panel.php?tab=products" class="btn" style="height:40px;">Сброс</a><?php endif; ?>
+        <input name="q" value="<?= e($searchQ) ?>" class="field" style="flex:1;max-width:400px;height:40px;font-size:13px;" placeholder="<?= admin_t('search') ?>...">
+        <button type="submit" class="btn btn-dark" style="height:40px;"><?= admin_t('search_btn') ?></button>
+        <?php if ($searchQ !== ''): ?><a href="panel.php?tab=products" class="btn" style="height:40px;"><?= admin_t('reset') ?></a><?php endif; ?>
       </form>
 
       <?php if (!empty($lowStock) || !empty($outStock)): ?>
@@ -1366,7 +1411,10 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
               <span style="font-size:12px;font-weight:700;color:#64748b;">ID <?= e($product['id'] ?? $i+1) ?></span>
-              <button type="submit" form="del<?= e($product['id'] ?? 0) ?>" class="btn btn-red" style="font-size:12px;padding:6px 12px;" onclick="return confirm('Удалить?')">Удалить</button>
+              <div style="display:flex;gap:6px;">
+                <button type="submit" form="dup<?= e($product['id'] ?? 0) ?>" class="btn" style="font-size:12px;padding:6px 12px;">📋 <?= admin_t('add') ?></button>
+                <button type="submit" form="del<?= e($product['id'] ?? 0) ?>" class="btn btn-red" style="font-size:12px;padding:6px 12px;" onclick="return confirm('<?= admin_t('delete') ?>?')">🗑️ <?= admin_t('delete') ?></button>
+              </div>
             </div>
             <input type="hidden" name="id[]" value="<?= e($product['id'] ?? $i+1) ?>">
             <div class="product-row">
@@ -1457,6 +1505,10 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <form method="post" id="del<?= e($product['id'] ?? 0) ?>">
           <input type="hidden" name="action" value="delete_product">
           <input type="hidden" name="delete_id" value="<?= e($product['id'] ?? 0) ?>">
+        </form>
+        <form method="post" id="dup<?= e($product['id'] ?? 0) ?>">
+          <input type="hidden" name="action" value="duplicate_product">
+          <input type="hidden" name="duplicate_id" value="<?= e($product['id'] ?? 0) ?>">
         </form>
       <?php endforeach; ?>
     </div>
