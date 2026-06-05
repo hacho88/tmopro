@@ -342,6 +342,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         }
         $tab = 'clients';
     }
+
+    if ($action === 'export_products_csv') {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=tmopro-products-' . date('Y-m-d') . '.csv');
+        $out = fopen('php://output', 'w');
+        fprintf($out, "\xEF\xBB\xBF");
+        fputcsv($out, ['id','article','name','category','brand','stock','price_base','price_wholesale','image','description'], ';');
+        foreach ($products as $p) {
+            fputcsv($out, [
+                $p['id'] ?? '', $p['article'] ?? '', $p['name'] ?? '', $p['category'] ?? '',
+                $p['brand'] ?? '', $p['stock'] ?? 0, $p['price_base'] ?? 0, $p['price_wholesale'] ?? 0,
+                $p['image'] ?? '', $p['description'] ?? ''
+            ], ';');
+        }
+        fclose($out);
+        exit;
+    }
+
+    if ($action === 'import_products_csv') {
+        $file = $_FILES['csv_file'] ?? null;
+        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+            $error = 'Ошибка загрузки файла.';
+        } else {
+            $handle = fopen($file['tmp_name'], 'r');
+            if (!$handle) { $error = 'Не удалось открыть файл.'; }
+            else {
+                $bom = fread($handle, 3);
+                if ($bom !== "\xEF\xBB\xBF") { rewind($handle); }
+                $headers = fgetcsv($handle, 0, ';');
+                $expected = ['id','article','name','category','brand','stock','price_base','price_wholesale','image','description'];
+                if ($headers !== $expected) {
+                    $error = 'Неверный формат CSV. Ожидаются колонки: ' . implode(', ', $expected);
+                } else {
+                    $updated = 0; $created = 0;
+                    $maxId = 0;
+                    foreach ($products as $p) $maxId = max($maxId, (int)($p['id'] ?? 0));
+                    while (($row = fgetcsv($handle, 0, ';')) !== false) {
+                        if (count($row) < 8) continue;
+                        $id = (int)($row[0] ?? 0);
+                        $article = trim($row[1] ?? '');
+                        $name = trim($row[2] ?? '');
+                        if ($article === '' || $name === '') continue;
+                        $category = trim($row[3] ?? 'Смесители для умывальника');
+                        $brand = trim($row[4] ?? 'TIM');
+                        $stock = (int)($row[5] ?? 0);
+                        $priceBase = (float)($row[6] ?? 0);
+                        $priceWholesale = (float)($row[7] ?? 0);
+                        $image = trim($row[8] ?? '');
+                        $description = trim($row[9] ?? '');
+
+                        $found = false;
+                        foreach ($products as &$p) {
+                            if ((int)($p['id'] ?? 0) === $id && $id > 0) {
+                                $p['article'] = $article;
+                                $p['name'] = $name;
+                                $p['category'] = $category;
+                                $p['brand'] = $brand;
+                                $p['stock'] = $stock;
+                                $p['price_base'] = $priceBase;
+                                $p['price_wholesale'] = $priceWholesale;
+                                if ($image !== '') $p['image'] = $image;
+                                if ($description !== '') $p['description'] = $description;
+                                $updated++;
+                                $found = true;
+                                break;
+                            }
+                        }
+                        unset($p);
+                        if (!$found) {
+                            $maxId++;
+                            $products[] = [
+                                'id' => $maxId,
+                                'article' => $article,
+                                'name' => $name,
+                                'category' => $category,
+                                'brand' => $brand,
+                                'stock' => $stock,
+                                'price_base' => $priceBase,
+                                'price_wholesale' => $priceWholesale,
+                                'image' => $image,
+                                'description' => $description,
+                                'tags' => []
+                            ];
+                            $created++;
+                        }
+                    }
+                    save_json($productsPath, $products);
+                    $success = "Импорт завершен. Создано: $created, обновлено: $updated.";
+                }
+                fclose($handle);
+            }
+        }
+        $tab = 'import';
+    }
 }
 
 $themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
@@ -495,6 +589,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <a href="panel.php?tab=orders" class="<?= $tab==='orders'?'active':'' ?>">Заказы</a>
     <a href="panel.php?tab=clients" class="<?= $tab==='clients'?'active':'' ?>">Клиенты</a>
     <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
+    <a href="panel.php?tab=import" class="<?= $tab==='import'?'active':'' ?>">Импорт/Экспорт</a>
   </div>
 
   <?php if ($tab === 'overview'): ?>
@@ -968,6 +1063,50 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
+
+  <?php if ($tab === 'import'): ?>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:20px;">Импорт / Экспорт товаров</h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Работа с CSV: скачать список товаров или загрузить обновления.</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
+        <!-- Export -->
+        <div class="card" style="background:#f8fafc;">
+          <h3 style="font-size:16px;margin-bottom:12px;">Экспорт CSV</h3>
+          <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Скачайте все товары в CSV для редактирования в Excel.</p>
+          <form method="post">
+            <input type="hidden" name="action" value="export_products_csv">
+            <button class="btn btn-dark">Скачать CSV (<?= count($products) ?> товаров)</button>
+          </form>
+          <div style="margin-top:12px;font-size:12px;color:#64748b;font-weight:700;">
+            Колонки: id, article, name, category, brand, stock, price_base, price_wholesale, image, description
+          </div>
+        </div>
+
+        <!-- Import -->
+        <div class="card" style="background:#f8fafc;">
+          <h3 style="font-size:16px;margin-bottom:12px;">Импорт CSV</h3>
+          <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Загрузите CSV для массового создания или обновления товаров. Если id заполнен — товар обновится, если пустой — создастся новый.</p>
+          <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="import_products_csv">
+            <label style="display:block;margin-bottom:12px;">
+              <span style="font-size:12px;font-weight:800;color:#64748b;">CSV файл (разделитель ;)</span>
+              <input type="file" name="csv_file" accept=".csv,text/csv" class="field" required style="padding:8px;">
+            </label>
+            <button class="btn">Загрузить и импортировать</button>
+          </form>
+          <div style="margin-top:12px;font-size:12px;color:#64748b;font-weight:700;">
+            Формат: id;article;name;category;brand;stock;price_base;price_wholesale;image;description
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
 </div>
 <?php endif; ?>
 
