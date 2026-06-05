@@ -25,6 +25,10 @@ $allProducts = is_array($allProducts) ? $allProducts : [];
 $categoriesPath = __DIR__ . '/categories.json';
 $allCategories = file_exists($categoriesPath) ? json_decode(file_get_contents($categoriesPath), true) : [];
 $allCategories = is_array($allCategories) ? $allCategories : [];
+
+$langPath = __DIR__ . '/lang.json';
+$langDict = file_exists($langPath) ? json_decode(file_get_contents($langPath), true) : [];
+$langDict = is_array($langDict) ? $langDict : [];
 ?>
 <!doctype html>
 <html lang="ru">
@@ -113,6 +117,8 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
           <div class="hidden sm:flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-1" style="height:36px;">
             <button @click="setLang('ru')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='ru' ? 'bg-emerald-600 text-white' : 'text-gray-500']">RU</button>
             <button @click="setLang('en')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='en' ? 'bg-emerald-600 text-white' : 'text-gray-500']">EN</button>
+            <button @click="setLang('zh')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='zh' ? 'bg-emerald-600 text-white' : 'text-gray-500']">ZH</button>
+            <button @click="setLang('ky')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='ky' ? 'bg-emerald-600 text-white' : 'text-gray-500']">KY</button>
           </div>
           <a href="#catalog" class="hidden sm:inline-flex lux-btn-gold">
             <span>{{ t('requestQuote') }}</span>
@@ -336,7 +342,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
               <button @click="resetFilters" class="text-xs font-bold text-gray-400 transition hover:text-gray-900">{{ t('reset') }}</button>
             </div>
 
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Поиск по артикулу</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">{{ t('searchPlaceholder') }}</label>
             <live-search v-model="search" @select="onSearchSelect"></live-search>
             <div class="mb-4"></div>
 
@@ -345,7 +351,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
                 :class="['chip w-full justify-between mb-2', showFavoritesOnly ? 'chip-active' : 'chip-default']">
                 <span class="flex items-center gap-2">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  Только избранное
+                  {{ t('favorites') }}
                 </span>
                 <span class="opacity-60" style="font-size: 11px;">{{ favoritesCount }}</span>
               </button>
@@ -386,28 +392,28 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
             </div>
             <div class="flex items-center gap-3 flex-wrap">
               <select v-model="sortBy" class="field" style="height:36px; font-size:13px; font-weight:800; padding:0 28px 0 12px; min-width:140px;">
-                <option value="default">{{ lang==='en' ? 'Default' : 'По умолчанию' }}</option>
-                <option value="price_asc">{{ lang==='en' ? 'Price: low to high' : 'Цена: по возрастанию' }}</option>
-                <option value="price_desc">{{ lang==='en' ? 'Price: high to low' : 'Цена: по убыванию' }}</option>
-                <option value="stock_asc">{{ lang==='en' ? 'Stock: low first' : 'Остаток: мало' }}</option>
-                <option value="name_asc">{{ lang==='en' ? 'Name: A-Z' : 'Название: А-Я' }}</option>
+                <option value="default">{{ t('default') }}</option>
+                <option value="price_asc">{{ t('price_asc') }}</option>
+                <option value="price_desc">{{ t('price_desc') }}</option>
+                <option value="stock_asc">{{ t('stock_asc') }}</option>
+                <option value="name_asc">{{ t('name_asc') }}</option>
               </select>
               <label class="flex items-center gap-2 text-xs font-extrabold text-gray-600 cursor-pointer select-none">
                 <input type="checkbox" v-model="showInStockOnly" class="accent-emerald-600" style="width:16px;height:16px;">
-                {{ lang==='en' ? 'In stock only' : 'Только в наличии' }}
+                {{ t('in_stock_only') }}
               </label>
               <div class="flex items-center gap-2">
-                <input v-model.number="minPrice" type="number" placeholder="от ₽" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
+                <input v-model.number="minPrice" type="number" :placeholder="t('from') + ' ₽'" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
                 <span class="text-xs font-bold text-gray-400">—</span>
-                <input v-model.number="maxPrice" type="number" placeholder="до ₽" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
+                <input v-model.number="maxPrice" type="number" :placeholder="t('to') + ' ₽'" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
               </div>
               <button type="button" @click="toggleDense" :class="['density-toggle', dense ? 'is-on' : '']">
                 <span class="density-dot" aria-hidden="true"></span>
-                <span>Плотно</span>
+                <span>{{ t('dense') }}</span>
               </button>
               <div class="segmented">
-                <button @click="view = 'grid'" :class="['segmented-item', view === 'grid' ? 'is-active' : '']">Плитка</button>
-                <button @click="view = 'table'" :class="['segmented-item', view === 'table' ? 'is-active' : '']">Таблица</button>
+                <button @click="view = 'grid'" :class="['segmented-item', view === 'grid' ? 'is-active' : '']">{{ t('grid') }}</button>
+                <button @click="view = 'table'" :class="['segmented-item', view === 'table' ? 'is-active' : '']">{{ t('table') }}</button>
               </div>
             </div>
           </div>
@@ -415,7 +421,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
           <!-- Loading -->
           <div v-if="loading" class="card p-12 text-center">
             <div :class="['mx-auto mb-4 animate-spin rounded-full border-4 border-t-transparent', accentBorder]" style="width: 40px; height: 40px;"></div>
-            <p class="font-bold text-gray-500">Загружаем каталог...</p>
+            <p class="font-bold text-gray-500">{{ t('catalog') }}...</p>
           </div>
 
           <!-- Table View -->
@@ -423,11 +429,11 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
             <table class="table min-w-900">
               <thead>
                 <tr>
-                  <th>Товар</th>
-                  <th>Категория</th>
-                  <th>Остаток</th>
-                  <th>Цена</th>
-                  <th>Кол-во</th>
+                  <th>{{ t('article') }}</th>
+                  <th>{{ t('category') }}</th>
+                  <th>{{ t('stock') }}</th>
+                  <th>{{ t('price') }}</th>
+                  <th>{{ t('qty') }}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -454,7 +460,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
                   <td>
                     <div class="flex items-center gap-2">
                       <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">{{ t('addToCart') }}</button>
-                      <button type="button" @click.stop.prevent="quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" title="Быстрый просмотр">
+                      <button type="button" @click.stop.prevent="quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" :title="t('searchPlaceholder')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                       </button>
                       <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
@@ -501,7 +507,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
                 </div>
                 <div class="flex gap-2">
                   <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
-                  <button @click="quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" title="Быстрый просмотр">
+                  <button @click="quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" :title="t('searchPlaceholder')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                   </button>
                 </div>
@@ -561,7 +567,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
               <qty-control :model-value="qty[quickViewProduct.id]" @update:model-value="setQty(quickViewProduct.id, $event)"></qty-control>
               <button @click="addToCart(quickViewProduct); quickViewProduct = null" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
             </div>
-            <a :href="'product.php?id=' + quickViewProduct.id" class="text-sm font-extrabold text-emerald-600 hover:underline">Подробнее →</a>
+            <a :href="'product.php?id=' + quickViewProduct.id" class="text-sm font-extrabold text-emerald-600 hover:underline">{{ t('catalog') }} →</a>
           </div>
         </div>
       </div>
@@ -687,7 +693,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
             </a>
           </div>
           <div v-else-if="show && query.length >= 2 && !loading && !results.length" class="live-search-dropdown">
-            <div class="live-search-empty">Ничего не найдено</div>
+            <div class="live-search-empty">{{ t('searchPlaceholder') }}</div>
           </div>
         </div>
       `,
@@ -766,6 +772,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
           toasts: [],
           toastId: 0,
           lang: localStorage.getItem('tmopro_lang') || 'ru',
+          langDict: <?= json_encode($langDict, JSON_UNESCAPED_UNICODE) ?>,
           sortBy: 'default',
           quickViewProduct: null
         };
@@ -833,12 +840,13 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
         }
       },
       methods: {
+        t(key) { return (this.langDict[this.lang] && this.langDict[this.lang][key]) ? this.langDict[this.lang][key] : (this.langDict['ru'][key] || key); },
         money(value) { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value); },
         stockStatus(stock) {
           const n = Number(stock) || 0;
-          if (n <= 0) return { label: this.lang === 'en' ? 'Out of stock' : 'Нет в наличии', cls: 'bg-red-50 text-red-700' };
-          if (n < 10) return { label: this.lang === 'en' ? 'Low stock' : 'Заканчивается', cls: 'bg-amber-50 text-amber-700' };
-          return { label: this.lang === 'en' ? 'In stock' : 'В наличии', cls: 'bg-emerald-50 text-emerald-700' };
+          if (n <= 0) return { label: this.t('out_stock'), cls: 'bg-red-50 text-red-700' };
+          if (n < 10) return { label: this.t('low_stock'), cls: 'bg-amber-50 text-amber-700' };
+          return { label: this.t('inStock'), cls: 'bg-emerald-50 text-emerald-700' };
         },
         onProductImgError(product) { try { product.image = ''; } catch (e) {} },
         setQty(id, value) { this.qty[id] = Math.max(1, parseInt(value || 1, 10)); },
@@ -863,13 +871,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
           }
           localStorage.setItem('tmopro_favorites', JSON.stringify(this.favorites));
         },
-        t(key) {
-          const dict = {
-            ru: { filters: 'Фильтры', searchPlaceholder: 'Например, Cu001', favorites: 'Только избранное', category: 'Категория', brand: 'Бренд', found: 'Найдено', products: 'товаров', addToCart: 'В корзину', addToQuote: 'Добавить в заявку', inStock: 'В наличии', pieces: 'шт', grid: 'Сетка', table: 'Таблица', reset: 'Сбросить', viewCart: 'Корзина', requestQuote: 'Запросить расчет', login: 'Вход для клиентов', profile: 'Профиль', wholesale: 'опт от 10 шт' },
-            en: { filters: 'Filters', searchPlaceholder: 'e.g. Cu001', favorites: 'Favorites only', category: 'Category', brand: 'Brand', found: 'Found', products: 'products', addToCart: 'Add to cart', addToQuote: 'Add to quote', inStock: 'In stock', pieces: 'pcs', grid: 'Grid', table: 'Table', reset: 'Reset', viewCart: 'Cart', requestQuote: 'Request quote', login: 'Client login', profile: 'Profile', wholesale: 'wholesale from 10 pcs' }
-          };
-          return (dict[this.lang] || dict.ru)[key] || key;
-        },
+        t(key) { return (this.langDict[this.lang] && this.langDict[this.lang][key]) ? this.langDict[this.lang][key] : (this.langDict['ru'] && this.langDict['ru'][key] ? this.langDict['ru'][key] : key); },
         setLang(l) {
           this.lang = l;
           localStorage.setItem('tmopro_lang', l);
