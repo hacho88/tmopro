@@ -256,7 +256,18 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
             <div class="text-sm font-bold text-gray-500">
               {{ t('found') }}: <span class="text-gray-900 font-extrabold">{{ filteredProducts.length }}</span> {{ t('products') }}
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
+              <select v-model="sortBy" class="field" style="height:36px; font-size:13px; font-weight:800; padding:0 28px 0 12px; min-width:140px;">
+                <option value="default">{{ lang==='en' ? 'Default' : 'По умолчанию' }}</option>
+                <option value="price_asc">{{ lang==='en' ? 'Price: low to high' : 'Цена: по возрастанию' }}</option>
+                <option value="price_desc">{{ lang==='en' ? 'Price: high to low' : 'Цена: по убыванию' }}</option>
+                <option value="stock_asc">{{ lang==='en' ? 'Stock: low first' : 'Остаток: мало' }}</option>
+                <option value="name_asc">{{ lang==='en' ? 'Name: A-Z' : 'Название: А-Я' }}</option>
+              </select>
+              <label class="flex items-center gap-2 text-xs font-extrabold text-gray-600 cursor-pointer select-none">
+                <input type="checkbox" v-model="showInStockOnly" class="accent-emerald-600" style="width:16px;height:16px;">
+                {{ lang==='en' ? 'In stock only' : 'Только в наличии' }}
+              </label>
               <button type="button" @click="toggleDense" :class="['density-toggle', dense ? 'is-on' : '']">
                 <span class="density-dot" aria-hidden="true"></span>
                 <span>Плотно</span>
@@ -310,6 +321,9 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                   <td>
                     <div class="flex items-center gap-2">
                       <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">{{ t('addToCart') }}</button>
+                      <button type="button" @click.stop.prevent="quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" title="Быстрый просмотр">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                      </button>
                       <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                       </button>
@@ -352,7 +366,12 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                   <price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
                   <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                 </div>
-                <button @click="addToCart(product)" class="btn btn-primary w-full">{{ t('addToQuote') }}</button>
+                <div class="flex gap-2">
+                  <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
+                  <button @click="quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" title="Быстрый просмотр">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  </button>
+                </div>
               </div>
             </article>
           </div>
@@ -384,6 +403,37 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
     </nav>
 
     <!-- Footer spacer for mobile -->
+    <!-- Quick View Modal -->
+    <div v-if="quickViewProduct" style="position:fixed; inset:0; z-index:90; display:flex; align-items:center; justify-content:center; padding:16px;" @click.self="quickViewProduct = null">
+      <div style="position:absolute; inset:0; background:rgba(15,23,42,.5); backdrop-filter:blur(4px);"></div>
+      <div style="position:relative; background:#fff; border-radius:24px; max-width:720px; width:100%; max-height:90vh; overflow:auto; box-shadow:0 40px 100px rgba(15,23,42,.24); padding:28px;">
+        <button @click="quickViewProduct = null" style="position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:12px; border:none; background:#f1f5f9; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#64748b;">×</button>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div style="background:#f1f5f9; border-radius:20px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <img v-if="quickViewProduct.image" :src="quickViewProduct.image" style="width:100%; height:100%; object-fit:contain; padding:20px;">
+            <div v-else style="color:#94a3b8; font-size:14px; font-weight:900;">Нет фото</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">{{ quickViewProduct.article }}</div>
+            <h3 class="text-xl font-black text-gray-900 mb-4" style="line-height:1.25;">{{ quickViewProduct.name }}</h3>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="badge badge-primary">{{ quickViewProduct.brand }}</span>
+              <span class="badge badge-gray">{{ quickViewProduct.category }}</span>
+              <span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(quickViewProduct.stock).cls]">{{ stockStatus(quickViewProduct.stock).label }}</span>
+            </div>
+            <div class="mb-6">
+              <price-block :product="quickViewProduct" :qty="qty[quickViewProduct.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
+            </div>
+            <div class="flex items-center gap-3 mb-4">
+              <qty-control :model-value="qty[quickViewProduct.id]" @update:model-value="setQty(quickViewProduct.id, $event)"></qty-control>
+              <button @click="addToCart(quickViewProduct); quickViewProduct = null" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
+            </div>
+            <a :href="'product.php?id=' + quickViewProduct.id" class="text-sm font-extrabold text-emerald-600 hover:underline">Подробнее →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="md:hidden" style="height: 100px;"></div>
   </div>
 
@@ -576,10 +626,13 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           loading: true,
           cartBump: false,
           showFavoritesOnly: false,
+          showInStockOnly: false,
           favorites: [],
           toasts: [],
           toastId: 0,
-          lang: localStorage.getItem('tmopro_lang') || 'ru'
+          lang: localStorage.getItem('tmopro_lang') || 'ru',
+          sortBy: 'default',
+          quickViewProduct: null
         };
       },
       computed: {
@@ -606,13 +659,21 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
         cartCount() { return this.cart.reduce((sum, item) => sum + Number(item.qty), 0); },
         favoritesCount() { return this.favorites.length; },
         filteredProducts() {
-          return this.products.filter(product => {
+          let list = this.products.filter(product => {
             const byCategory = !this.selectedCategories.length || this.selectedCategories.includes(product.category);
             const byBrand = !this.selectedBrands.length || this.selectedBrands.includes(product.brand);
             const bySearch = !this.search || product.article.toLowerCase().includes(this.search.toLowerCase()) || product.name.toLowerCase().includes(this.search.toLowerCase());
             const byFav = !this.showFavoritesOnly || this.favorites.includes(product.id);
-            return byCategory && byBrand && bySearch && byFav;
+            const byStock = !this.showInStockOnly || (Number(product.stock) || 0) > 0;
+            return byCategory && byBrand && bySearch && byFav && byStock;
           });
+          switch (this.sortBy) {
+            case 'price_asc': list.sort((a, b) => (Number(a.price_base) || 0) - (Number(b.price_base) || 0)); break;
+            case 'price_desc': list.sort((a, b) => (Number(b.price_base) || 0) - (Number(a.price_base) || 0)); break;
+            case 'stock_asc': list.sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0)); break;
+            case 'name_asc': list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru')); break;
+          }
+          return list;
         },
         accentBg() { return { indigo: 'bg-primary', emerald: 'bg-primary', slate: 'bg-dark-2' }[this.settings.theme_color] || 'bg-primary'; },
         accentBorder() { return { indigo: 'border-primary', emerald: 'border-primary', slate: 'border-dark-2' }[this.settings.theme_color] || 'border-primary'; }
