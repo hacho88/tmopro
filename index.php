@@ -88,18 +88,22 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           <?php else: ?>
             <a href="login.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-700 hover:text-emerald-700 transition">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              Вход для клиентов
+              {{ t('login') }}
             </a>
           <?php endif; ?>
           <a href="checkout.php" class="relative lux-cart">
             <span class="lux-cart-icon" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
             </span>
-            <span class="hidden sm:block">Корзина</span>
+            <span class="hidden sm:block">{{ t('viewCart') }}</span>
             <span class="lux-cart-badge">{{ cartCount }}</span>
           </a>
+          <div class="hidden sm:flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-1" style="height:36px;">
+            <button @click="setLang('ru')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='ru' ? 'bg-emerald-600 text-white' : 'text-gray-500']">RU</button>
+            <button @click="setLang('en')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='en' ? 'bg-emerald-600 text-white' : 'text-gray-500']">EN</button>
+          </div>
           <a href="#catalog" class="hidden sm:inline-flex lux-btn-gold">
-            <span>Запросить расчет</span>
+            <span>{{ t('requestQuote') }}</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
           </a>
         </div>
@@ -200,8 +204,8 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
         <aside class="h-fit lg:sticky lg:top-24">
           <div class="card p-5 lg:p-6 mb-6">
             <div class="flex items-center justify-between mb-5">
-              <h2 class="text-base font-extrabold">Фильтры</h2>
-              <button @click="resetFilters" class="text-xs font-bold text-gray-400 transition hover:text-gray-900">Сбросить</button>
+              <h2 class="text-base font-extrabold">{{ t('filters') }}</h2>
+              <button @click="resetFilters" class="text-xs font-bold text-gray-400 transition hover:text-gray-900">{{ t('reset') }}</button>
             </div>
 
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Поиск по артикулу</label>
@@ -220,7 +224,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
             </div>
 
             <div class="mb-6">
-              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Категория</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">{{ t('category') }}</div>
               <div class="space-y-2">
                 <div v-for="cat in categoryList" :key="cat.id">
                   <div class="text-xs font-bold text-gray-500 px-1 py-1">{{ cat.name }}</div>
@@ -234,7 +238,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
             </div>
 
             <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Бренд</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">{{ t('brand') }}</div>
               <div class="flex flex-wrap gap-2">
                 <button v-for="brand in brands" :key="brand" @click="toggleBrand(brand)"
                   :class="['chip', selectedBrands.includes(brand) ? 'chip-active' : 'chip-default']">
@@ -250,7 +254,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           <!-- Toolbar -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 p-4 toolbar-glass">
             <div class="text-sm font-bold text-gray-500">
-              Найдено: <span class="text-gray-900 font-extrabold">{{ filteredProducts.length }}</span> товаров
+              {{ t('found') }}: <span class="text-gray-900 font-extrabold">{{ filteredProducts.length }}</span> {{ t('products') }}
             </div>
             <div class="flex items-center gap-3">
               <button type="button" @click="toggleDense" :class="['density-toggle', dense ? 'is-on' : '']">
@@ -305,7 +309,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                   </td>
                   <td>
                     <div class="flex items-center gap-2">
-                      <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">В корзину</button>
+                      <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">{{ t('addToCart') }}</button>
                       <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                       </button>
@@ -342,13 +346,13 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                 </div>
                 <div class="flex items-center justify-between mb-4 p-3 rounded-xl bg-gray-50">
                   <span class="text-sm font-bold text-gray-500">{{ product.category }}</span>
-                  <span class="text-sm font-bold text-gray-500">{{ product.stock }} шт</span>
+                  <span class="text-sm font-bold text-gray-500">{{ product.stock }} {{ t('pieces') }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-4 mb-4">
                   <price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
                   <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                 </div>
-                <button @click="addToCart(product)" class="btn btn-primary w-full">Добавить в заявку</button>
+                <button @click="addToCart(product)" class="btn btn-primary w-full">{{ t('addToQuote') }}</button>
               </div>
             </article>
           </div>
@@ -373,7 +377,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
         </a>
         <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-          <span>Корзина</span>
+          <span>{{ t('viewCart') }}</span>
           <b :class="['absolute top-1 rounded-full px-1.5 text-white', accentBg]" style="font-size: 10px; right: 8px;">{{ cartCount }}</b>
         </a>
       </div>
@@ -574,7 +578,8 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           showFavoritesOnly: false,
           favorites: [],
           toasts: [],
-          toastId: 0
+          toastId: 0,
+          lang: localStorage.getItem('tmopro_lang') || 'ru'
         };
       },
       computed: {
@@ -651,6 +656,17 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
             this.showToast((product?.name || 'Товар') + ' добавлен в избранное');
           }
           localStorage.setItem('tmopro_favorites', JSON.stringify(this.favorites));
+        },
+        t(key) {
+          const dict = {
+            ru: { filters: 'Фильтры', searchPlaceholder: 'Например, Cu001', favorites: 'Только избранное', category: 'Категория', brand: 'Бренд', found: 'Найдено', products: 'товаров', addToCart: 'В корзину', addToQuote: 'Добавить в заявку', inStock: 'В наличии', pieces: 'шт', grid: 'Сетка', table: 'Таблица', reset: 'Сбросить', viewCart: 'Корзина', requestQuote: 'Запросить расчет', login: 'Вход для клиентов', profile: 'Профиль', wholesale: 'опт от 10 шт' },
+            en: { filters: 'Filters', searchPlaceholder: 'e.g. Cu001', favorites: 'Favorites only', category: 'Category', brand: 'Brand', found: 'Found', products: 'products', addToCart: 'Add to cart', addToQuote: 'Add to quote', inStock: 'In stock', pieces: 'pcs', grid: 'Grid', table: 'Table', reset: 'Reset', viewCart: 'Cart', requestQuote: 'Request quote', login: 'Client login', profile: 'Profile', wholesale: 'wholesale from 10 pcs' }
+          };
+          return (dict[this.lang] || dict.ru)[key] || key;
+        },
+        setLang(l) {
+          this.lang = l;
+          localStorage.setItem('tmopro_lang', l);
         },
         showToast(message) {
           const id = ++this.toastId;

@@ -663,6 +663,10 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <b>3. Проверить витрину</b>
           <p style="margin-top:6px;color:#64748b;font-size:14px;">Откройте сайт и проверьте, как покупатель видит каталог.</p>
         </a>
+        <a href="backup.php" target="_blank" class="card" style="text-decoration:none;">
+          <b>4. Сделать бэкап</b>
+          <p style="margin-top:6px;color:#64748b;font-size:14px;">Сохранит JSON файлы и SQL дамп базы в папку backups/.</p>
+        </a>
       </div>
     </div>
   <?php endif; ?>
