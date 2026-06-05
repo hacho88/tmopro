@@ -347,7 +347,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
     }
 
     if ($action === 'add_category') {
-        $name = trim((string)($_POST['cat_name'] ?? '');
+        $name = trim((string)($_POST['cat_name'] ?? ''));
         $slug = trim((string)($_POST['cat_slug'] ?? ''));
         if ($name === '' || $slug === '') {
             $error = 'Название и slug обязательны.';
