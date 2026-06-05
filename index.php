@@ -29,14 +29,21 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
 $langPath = __DIR__ . '/lang.json';
 $langDict = file_exists($langPath) ? json_decode(file_get_contents($langPath), true) : [];
 $langDict = is_array($langDict) ? $langDict : [];
+
+$settingsPath = __DIR__ . '/settings.json';
+$settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
+$settings = is_array($settings) ? $settings : [];
+$siteName = $settings['site_name'] ?? 'TMOPRO — Сантехника Оптом';
+$heroTitle = $settings['hero_title'] ?? 'Сантехника оптом от производителя';
+$heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения для водоснабжения и отопления';
 ?>
 <!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TMOPRO — Сантехника Оптом | Премиальные решения для водоснабжения и отопления</title>
-  <meta name="description" content="Премиальные решения для водоснабжения и отопления от производителя. Смесители, запорная арматура, трубы и фитинги оптом. Заявка на счет онлайн.">
+  <title><?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?> | <?= htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8') ?></title>
+  <meta name="description" content="<?= htmlspecialchars($heroSub, ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="сантехника оптом, смесители оптом, запорная арматура, трубы фитинги, водоснабжение, отопление, TIM, Riho, Kroner">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="TMOPRO">
@@ -60,6 +67,7 @@ $langDict = is_array($langDict) ? $langDict : [];
     .fallback p { margin: 0 0 20px; color: #64748b; line-height: 1.7; }
     .fallback a { display: inline-flex; margin-right: 10px; border-radius: 16px; background: #008A4E; color: #fff; padding: 13px 18px; font-weight: 800; text-decoration: none; }
     [v-cloak] { display: none !important; }
+    .lux-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226,232,240,0.6); }
   </style>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"TMOPRO","url":"https://tmopro.ru","logo":"https://tmopro.ru/logo.svg","contactPoint":{"@type":"ContactPoint","telephone":"+7-966-085-34-70","contactType":"sales","areaServed":"RU","availableLanguage":"Russian"},"sameAs":[]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"TMOPRO — Сантехника Оптом","url":"https://tmopro.ru","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://tmopro.ru/?search={search_term_string}"},"query-input":"required name=search_term_string"}}</script>

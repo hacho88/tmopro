@@ -218,6 +218,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         $tab = 'products';
     }
 
+    if ($action === 'bulk_delete_products') {
+        $ids = array_map('intval', $_POST['bulk_ids'] ?? []);
+        if ($ids) {
+            $products = array_values(array_filter($products, fn($p) => !in_array((int)($p['id'] ?? 0), $ids)));
+            if (save_json($productsPath, $products)) $success = 'Удалено: ' . count($ids);
+        }
+        $tab = 'products';
+    }
+
     if ($action === 'save_categories') {
         $nextSubId = 0;
         foreach ($categories as $cat) {
@@ -718,6 +727,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         fclose($output);
         exit;
     }
+
+    if ($action === 'bulk_update_orders_status') {
+        $ids = array_map('intval', $_POST['bulk_order_ids'] ?? []);
+        $newStatus = trim((string)($_POST['bulk_status'] ?? ''));
+        $pdo = tmopro_db_safe();
+        if ($ids && $newStatus !== '' && $pdo) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id IN ($placeholders)");
+            $stmt->execute(array_merge([$newStatus], $ids));
+            $success = 'Обновлено: ' . $stmt->rowCount();
+        }
+        $tab = 'orders';
+    }
 }
 
 $themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
@@ -1008,14 +1030,18 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;"><?= admin_t('tab_orders') ?> — 0</div>
       <?php else: ?>
         <form method="post" id="bulkStatusForm" style="margin-bottom:12px;">
-          <input type="hidden" name="action" value="bulk_update_order_status">
+          <input type="hidden" name="action" value="bulk_update_orders_status">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:800;color:#1e40af;">
+              <input type="checkbox" id="orderSelectAll" style="width:16px;height:16px;">
+              Выбрать все
+            </label>
             <select name="bulk_status" class="field" style="height:40px;">
               <?php foreach ($statusMap as $k=>$v): ?>
                 <option value="<?= e($k) ?>"><?= e($v) ?></option>
               <?php endforeach; ?>
             </select>
-            <button type="submit" class="btn btn-dark" style="height:40px;" onclick="return confirm('<?= admin_t('confirm') ?>?')"><?= admin_t('apply_selected') ?></button>
+            <button type="submit" class="btn btn-dark" style="height:40px;" onclick="return confirm('<?= admin_t('confirm') ?>?')"><?= admin_t('status') ?></button>
           </div>
         </form>
 
@@ -1023,7 +1049,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
               <div style="display:flex;align-items:flex-start;gap:10px;">
-                <input type="checkbox" name="bulk_order_ids[]" value="<?= e($oid) ?>" form="bulkStatusForm" style="margin-top:4px; width:18px; height:18px; accent-color:#0f172a; cursor:pointer;">
+                <input type="checkbox" name="bulk_order_ids[]" value="<?= e($oid) ?>" form="bulkStatusForm" class="order-bulk-cb" style="margin-top:4px; width:18px; height:18px; accent-color:#0f172a; cursor:pointer;">
                 <div>
                   <div style="font-size:12px;font-weight:900;color:#64748b;">#<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
                 <div style="font-size:18px;font-weight:1000;margin-top:6px;"><?= e($o['company_name'] ?: '—') ?></div>
@@ -1103,6 +1129,11 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <?php endforeach; ?>
       <?php endif; ?>
     </div>
+    <script>
+      document.getElementById('orderSelectAll')?.addEventListener('change', function(e) {
+        document.querySelectorAll('.order-bulk-cb').forEach(cb => cb.checked = e.target.checked);
+      });
+    </script>
   <?php endif; ?>
 
   <?php if ($tab === 'clients'): ?>
@@ -1407,10 +1438,20 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
       <form method="post" id="prodForm" enctype="multipart/form-data">
         <input type="hidden" name="action" value="save_products">
+        <div id="prodBulkBar" style="display:none;align-items:center;gap:12px;margin-bottom:12px;padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:800;color:#1e40af;">
+            <input type="checkbox" id="prodSelectAll" style="width:16px;height:16px;">
+            Выбрать все
+          </label>
+          <button type="submit" form="bulkDelProd" class="btn btn-red" style="font-size:12px;padding:6px 12px;" onclick="return confirm('<?= admin_t('delete') ?> ' + document.querySelectorAll('input[name=\"bulk_ids[]\"]:checked').length + '?')">🗑️ <?= admin_t('delete') ?> выбранные</button>
+        </div>
         <?php foreach ($filteredProducts as $i => $product): ?>
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-              <span style="font-size:12px;font-weight:700;color:#64748b;">ID <?= e($product['id'] ?? $i+1) ?></span>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" name="bulk_ids[]" value="<?= e($product['id'] ?? 0) ?>" class="prod-bulk-cb" style="width:16px;height:16px;" onchange="document.getElementById('prodBulkBar').style.display = document.querySelectorAll('.prod-bulk-cb:checked').length ? 'flex' : 'none';">
+                <span style="font-size:12px;font-weight:700;color:#64748b;">ID <?= e($product['id'] ?? $i+1) ?></span>
+              </label>
               <div style="display:flex;gap:6px;">
                 <button type="submit" form="dup<?= e($product['id'] ?? 0) ?>" class="btn" style="font-size:12px;padding:6px 12px;">📋 <?= admin_t('add') ?></button>
                 <button type="submit" form="del<?= e($product['id'] ?? 0) ?>" class="btn btn-red" style="font-size:12px;padding:6px 12px;" onclick="return confirm('<?= admin_t('delete') ?>?')">🗑️ <?= admin_t('delete') ?></button>
@@ -1501,6 +1542,15 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         }
       </script>
 
+      <form method="post" id="bulkDelProd">
+        <input type="hidden" name="action" value="bulk_delete_products">
+      </form>
+      <script>
+        document.getElementById('prodSelectAll')?.addEventListener('change', function(e) {
+          document.querySelectorAll('.prod-bulk-cb').forEach(cb => cb.checked = e.target.checked);
+          document.getElementById('prodBulkBar').style.display = e.target.checked ? 'flex' : 'none';
+        });
+      </script>
       <?php foreach ($products as $product): ?>
         <form method="post" id="del<?= e($product['id'] ?? 0) ?>">
           <input type="hidden" name="action" value="delete_product">
