@@ -1,5 +1,6 @@
 <?php
 session_start();
+function e($value) { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 $b2bUser = !empty($_SESSION['b2b_user_id']);
 $b2bName = $_SESSION['b2b_user_name'] ?? '';
 
