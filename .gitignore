@@ -1,0 +1,34 @@
+# Credentials (never commit)
+db.json
+deepseek_key.json
+
+# Uploads
+uploads/products/*.png
+uploads/products/*.jpg
+uploads/products/*.jpeg
+uploads/products/*.webp
+uploads/products/*.gif
+uploads/categories/*.png
+uploads/categories/*.jpg
+uploads/categories/*.jpeg
+uploads/categories/*.webp
+uploads/categories/*.gif
+uploads/backgrounds/*.png
+uploads/backgrounds/*.jpg
+uploads/backgrounds/*.jpeg
+uploads/backgrounds/*.webp
+uploads/logos/*.png
+uploads/logos/*.jpg
+uploads/logos/*.jpeg
+uploads/logos/*.webp
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs
+*.log
