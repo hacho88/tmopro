@@ -2,7 +2,8 @@
 session_start();
 header('Cache-Control: no-store');
 
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_LOGIN = 'admin';
+const ADMIN_PASSWORD = 'tatar';
 
 function e($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -108,13 +109,13 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_password'])) {
-    if (hash_equals(ADMIN_PASSWORD, (string)$_POST['login_password'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_name']) && isset($_POST['login_password'])) {
+    if (hash_equals(ADMIN_LOGIN, (string)$_POST['login_name']) && hash_equals(ADMIN_PASSWORD, (string)$_POST['login_password'])) {
         $_SESSION['tmopro_admin'] = true;
         header('Location: panel.php');
         exit;
     }
-    $error = 'Неверный пароль.';
+    $error = 'Неверный логин или пароль.';
 }
 
 $isAuthorized = !empty($_SESSION['tmopro_admin']);
@@ -915,6 +916,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   <p>Вход для администратора сайта</p>
   <?php if ($error): ?><div class="msg err"><?= e($error) ?></div><?php endif; ?>
   <form method="post">
+    <input type="text" name="login_name" placeholder="Логин" required class="field" value="admin" style="margin-bottom:12px;">
     <input type="password" name="login_password" placeholder="Пароль" required class="field">
     <button class="btn">Войти</button>
   </form>
