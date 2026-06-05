@@ -8,7 +8,15 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TMOPRO — Сантехника Оптом</title>
+  <title>TMOPRO — Сантехника Оптом | Премиальные решения для водоснабжения и отопления</title>
+  <meta name="description" content="Премиальные решения для водоснабжения и отопления от производителя. Смесители, запорная арматура, трубы и фитинги оптом. Заявка на счет онлайн.">
+  <meta name="keywords" content="сантехника оптом, смесители оптом, запорная арматура, трубы фитинги, водоснабжение, отопление, TIM, Riho, Kroner">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TMOPRO">
+  <meta property="og:title" content="TMOPRO — Сантехника Оптом">
+  <meta property="og:description" content="Премиальные решения для водоснабжения и отопления. Смесители, запорная арматура, трубы и фитинги оптом от производителя.">
+  <meta property="og:url" content="https://tmopro.ru/">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#008A4E">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -24,6 +32,8 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
     .fallback a { display: inline-flex; margin-right: 10px; border-radius: 16px; background: #008A4E; color: #fff; padding: 13px 18px; font-weight: 800; text-decoration: none; }
     [v-cloak] { display: none !important; }
   </style>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"TMOPRO","url":"https://tmopro.ru","logo":"https://tmopro.ru/logo.svg","contactPoint":{"@type":"ContactPoint","telephone":"+7-966-085-34-70","contactType":"sales","areaServed":"RU","availableLanguage":"Russian"},"sameAs":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"TMOPRO — Сантехника Оптом","url":"https://tmopro.ru","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://tmopro.ru/?search={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body class="theme-luxury">
   <div id="app" v-cloak class="min-h-screen">

@@ -53,15 +53,47 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= e($productName) ?> — <?= e($siteName) ?></title>
-  <meta name="description" content="<?= e($productName . ' ' . $productArticle . ' ' . $productBrand) ?>. Оптовые цены от производителя.">
+  <title><?= e($productName) ?> <?= e($productArticle) ?> — купить оптом | <?= e($siteName) ?></title>
+  <meta name="description" content="<?= e($productName . ' ' . $productArticle . ' ' . $productBrand) ?>. Оптовые цены от производителя. В наличии <?= e($productStock) ?> шт. Доставка по России.">
+  <?php if (!empty($productTags)): ?><meta name="keywords" content="<?= e(implode(', ', $productTags)) ?>"><?php endif; ?>
+  <link rel="canonical" href="https://tmopro.ru/product.php?id=<?= e($productId) ?>">
+  <meta property="og:type" content="product">
+  <meta property="og:site_name" content="TMOPRO">
+  <meta property="og:title" content="<?= e($productName . ' ' . $productArticle) ?>">
+  <meta property="og:description" content="<?= e($productName . ' ' . $productArticle . ' ' . $productBrand) ?>. Оптовые цены от производителя.">
+  <meta property="og:url" content="https://tmopro.ru/product.php?id=<?= e($productId) ?>">
+  <?php if ($productImage): ?><meta property="og:image" content="https://tmopro.ru/<?= e($productImage) ?>"><?php endif; ?>
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#008A4E">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=lux-gold-f">
+  <link rel="stylesheet" href="style.css?v=lux-gold-g">
   <script src="https://cdn.tailwindcss.com"></script>
+  <?php
+    $jsonLd = [
+      '@context' => 'https://schema.org',
+      '@type' => 'Product',
+      'name' => $productName . ' ' . $productArticle,
+      'image' => $productImage ? 'https://tmopro.ru/' . $productImage : '',
+      'description' => $productDescription ?: ($productName . ' ' . $productArticle . ' от бренда ' . $productBrand),
+      'brand' => ['@type' => 'Brand', 'name' => $productBrand],
+      'sku' => $productArticle,
+      'mpn' => $productArticle,
+      'offers' => [
+        '@type' => 'Offer',
+        'url' => 'https://tmopro.ru/product.php?id=' . $productId,
+        'priceCurrency' => 'RUB',
+        'price' => number_format($priceBase, 2, '.', ''),
+        'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+        'availability' => $productStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        'seller' => ['@type' => 'Organization', 'name' => 'TMOPRO']
+      ]
+    ];
+    if ($productTags) { $jsonLd['keywords'] = implode(', ', $productTags); }
+  ?>
+  <script type="application/ld+json"><?= json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
   <style>
     body { font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Arial; background: #f8fafc; }
     .pd-hero { background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: #fff; }
