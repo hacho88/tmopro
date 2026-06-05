@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 function e($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
@@ -15,13 +17,16 @@ function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone,
     $pdo = tmopro_db();
     if (!$pdo) return;
 
+    $accountId = !empty($_SESSION['b2b_account_id']) ? (int)$_SESSION['b2b_account_id'] : null;
+
     try {
         $pdo->beginTransaction();
-        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, company_name, inn, contact_person, phone, email, total_base, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, account_id, company_name, inn, contact_person, phone, email, total_base, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute([
             $orderNumber,
             'site',
             'new',
+            $accountId,
             $company,
             ($inn !== '' ? $inn : null),
             ($contactPerson !== '' ? $contactPerson : null),

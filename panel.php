@@ -280,6 +280,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         }
         $tab = 'orders';
     }
+
+    if ($action === 'create_b2b_account') {
+        $pdo = tmopro_db_safe();
+        $company = trim((string)($_POST['company_name'] ?? ''));
+        $inn = trim((string)($_POST['inn'] ?? ''));
+        $email = trim((string)($_POST['email'] ?? ''));
+        $phone = trim((string)($_POST['phone'] ?? ''));
+        $priceTier = trim((string)($_POST['price_tier'] ?? 'default'));
+        if (!$pdo) {
+            $error = 'База не подключена.';
+        } elseif ($company === '') {
+            $error = 'Укажите название компании.';
+        } else {
+            try {
+                $stmt = $pdo->prepare('INSERT INTO b2b_accounts (company_name, inn, email, phone, price_tier) VALUES (?, ?, ?, ?, ?)');
+                $stmt->execute([$company, $inn ?: null, $email ?: null, $phone ?: null, $priceTier]);
+                $success = 'Компания создана. ID: ' . $pdo->lastInsertId();
+            } catch (Throwable $e) {
+                $error = 'Ошибка создания компании.';
+            }
+        }
+        $tab = 'clients';
+    }
+
+    if ($action === 'create_b2b_user') {
+        $pdo = tmopro_db_safe();
+        $accountId = (int)($_POST['account_id'] ?? 0);
+        $name = trim((string)($_POST['user_name'] ?? ''));
+        $email = trim((string)($_POST['user_email'] ?? ''));
+        $password = (string)($_POST['user_password'] ?? '');
+        $role = trim((string)($_POST['user_role'] ?? 'buyer'));
+        if (!$pdo) {
+            $error = 'База не подключена.';
+        } elseif ($accountId <= 0 || $name === '' || $email === '' || strlen($password) < 6) {
+            $error = 'Заполните все поля (пароль мин. 6 символов).';
+        } else {
+            try {
+                $stmt = $pdo->prepare('INSERT INTO b2b_users (account_id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)');
+                $stmt->execute([$accountId, $name, $email, password_hash($password, PASSWORD_DEFAULT), $role]);
+                $success = 'Пользователь создан.';
+            } catch (Throwable $e) {
+                if ($e->getCode() == 23000) {
+                    $error = 'Email уже используется.';
+                } else {
+                    $error = 'Ошибка создания пользователя.';
+                }
+            }
+        }
+        $tab = 'clients';
+    }
+
+    if ($action === 'update_account_tier') {
+        $pdo = tmopro_db_safe();
+        $accountId = (int)($_POST['account_id'] ?? 0);
+        $priceTier = trim((string)($_POST['price_tier'] ?? 'default'));
+        if ($pdo && $accountId > 0) {
+            $stmt = $pdo->prepare('UPDATE b2b_accounts SET price_tier = ? WHERE id = ?');
+            $stmt->execute([$priceTier, $accountId]);
+            $success = 'Тариф обновлен.';
+        }
+        $tab = 'clients';
+    }
 }
 
 $themeColor = ['indigo' => '#4f46e5', 'emerald' => '#059669', 'slate' => '#0f172a'][$settings['theme_color']] ?? '#4f46e5';
@@ -431,6 +493,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <a href="panel.php?tab=settings" class="<?= $tab==='settings'?'active':'' ?>">Настройки сайта</a>
     <a href="panel.php?tab=categories" class="<?= $tab==='categories'?'active':'' ?>">Категории</a>
     <a href="panel.php?tab=orders" class="<?= $tab==='orders'?'active':'' ?>">Заказы</a>
+    <a href="panel.php?tab=clients" class="<?= $tab==='clients'?'active':'' ?>">Клиенты</a>
     <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
   </div>
 
@@ -553,6 +616,130 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
             <?php endif; ?>
           </div>
         <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'clients'): ?>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:20px;">B2B Клиенты</h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Управление компаниями и пользователями B2B портала.</p>
+        </div>
+      </div>
+
+      <?php
+        $pdo = tmopro_db_safe();
+        $accounts = [];
+        $usersByAccount = [];
+        if ($pdo) {
+          try {
+            $accounts = $pdo->query('SELECT * FROM b2b_accounts ORDER BY id DESC')->fetchAll();
+            if (!empty($accounts)) {
+              $aids = array_map(fn($a)=>(int)$a['id'], $accounts);
+              $placeholders = implode(',', array_fill(0, count($aids), '?'));
+              $stmt = $pdo->prepare("SELECT * FROM b2b_users WHERE account_id IN ($placeholders) ORDER BY id DESC");
+              $stmt->execute($aids);
+              foreach ($stmt->fetchAll() as $u) {
+                $aid = (int)$u['account_id'];
+                if (!isset($usersByAccount[$aid])) $usersByAccount[$aid] = [];
+                $usersByAccount[$aid][] = $u;
+              }
+            }
+          } catch (Throwable $e) {
+            echo '<div class="msg err">Ошибка загрузки клиентов: ' . e($e->getMessage()) . '</div>';
+          }
+        }
+      ?>
+
+      <!-- Create Account Form -->
+      <form method="post" class="card" style="margin-bottom:16px;background:#f8fafc;">
+        <input type="hidden" name="action" value="create_b2b_account">
+        <h3 style="font-size:16px;margin-bottom:12px;">Создать компанию</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+          <label><span>Название компании *</span><input name="company_name" class="field" required></label>
+          <label><span>ИНН</span><input name="inn" class="field"></label>
+          <label><span>Email</span><input type="email" name="email" class="field"></label>
+          <label><span>Телефон</span><input name="phone" class="field"></label>
+          <label><span>Тариф</span>
+            <select name="price_tier" class="field">
+              <option value="default">default</option>
+              <option value="bronze">bronze</option>
+              <option value="silver">silver</option>
+              <option value="gold">gold</option>
+              <option value="platinum">platinum</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn" style="margin-top:12px;">Создать компанию</button>
+      </form>
+
+      <?php if (empty($accounts)): ?>
+        <p style="color:#64748b;font-size:14px;">Пока нет B2B компаний. Создайте первую выше.</p>
+      <?php else: ?>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <?php foreach ($accounts as $acc): ?>
+            <?php $aid = (int)$acc['id']; $users = $usersByAccount[$aid] ?? []; ?>
+            <div class="card" style="padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                <div>
+                  <div style="font-size:16px;font-weight:1000;"><?= e($acc['company_name']) ?> <span style="color:#64748b;font-size:12px;">#<?= $aid ?></span></div>
+                  <div style="font-size:12px;color:#64748b;margin-top:4px;font-weight:700;">
+                    <?= e($acc['inn'] ?? '—') ?> · <?= e($acc['email'] ?? '—') ?> · <?= e($acc['phone'] ?? '—') ?>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <form method="post" style="display:flex;gap:8px;align-items:center;">
+                    <input type="hidden" name="action" value="update_account_tier">
+                    <input type="hidden" name="account_id" value="<?= $aid ?>">
+                    <select name="price_tier" class="field" style="height:36px;font-size:12px;min-width:100px;">
+                      <?php foreach (['default','bronze','silver','gold','platinum'] as $t): ?>
+                        <option value="<?= e($t) ?>" <?= ($acc['price_tier'] ?? '')===$t?'selected':'' ?>><?= e($t) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                    <button class="btn btn-dark" style="height:36px;font-size:12px;">Обновить</button>
+                  </form>
+                </div>
+              </div>
+
+              <?php if (!empty($users)): ?>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
+                  <div style="font-size:12px;font-weight:1000;color:#64748b;margin-bottom:8px;">Пользователи (<?= count($users) ?>)</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <?php foreach ($users as $u): ?>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#f8fafc;border-radius:10px;">
+                        <div>
+                          <span style="font-weight:800;font-size:13px;"><?= e($u['name']) ?></span>
+                          <span style="color:#64748b;font-size:12px;margin-left:8px;"><?= e($u['email']) ?></span>
+                        </div>
+                        <span style="font-size:11px;font-weight:900;padding:2px 8px;border-radius:999px;background:#e2e8f0;color:#475569;"><?= e($u['role']) ?></span>
+                      </div>
+                    <?php endforeach; ?>
+                  </div>
+                </div>
+              <?php endif; ?>
+
+              <!-- Add User Form -->
+              <form method="post" style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
+                <input type="hidden" name="action" value="create_b2b_user">
+                <input type="hidden" name="account_id" value="<?= $aid ?>">
+                <div style="font-size:12px;font-weight:1000;color:#64748b;margin-bottom:8px;">Добавить пользователя</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
+                  <input name="user_name" class="field" placeholder="Имя" required style="height:36px;font-size:13px;">
+                  <input type="email" name="user_email" class="field" placeholder="Email" required style="height:36px;font-size:13px;">
+                  <input type="password" name="user_password" class="field" placeholder="Пароль (мин. 6)" required minlength="6" style="height:36px;font-size:13px;">
+                  <select name="user_role" class="field" style="height:36px;font-size:13px;">
+                    <option value="buyer">buyer</option>
+                    <option value="manager">manager</option>
+                    <option value="admin">admin</option>
+                  </select>
+                </div>
+                <button class="btn btn-dark" style="margin-top:8px;height:32px;font-size:12px;">Добавить пользователя</button>
+              </form>
+            </div>
+          <?php endforeach; ?>
+        </div>
       <?php endif; ?>
     </div>
   <?php endif; ?>

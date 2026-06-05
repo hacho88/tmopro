@@ -1,3 +1,8 @@
+<?php
+session_start();
+$b2bUser = !empty($_SESSION['b2b_user_id']);
+$b2bName = $_SESSION['b2b_user_name'] ?? '';
+?>
 <!doctype html>
 <html lang="ru">
 <head>
@@ -52,6 +57,17 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <?php if ($b2bUser): ?>
+            <a href="profile.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-700 hover:text-emerald-700 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <?= htmlspecialchars($b2bName, ENT_QUOTES, 'UTF-8') ?>
+            </a>
+          <?php else: ?>
+            <a href="login.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-700 hover:text-emerald-700 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Вход для клиентов
+            </a>
+          <?php endif; ?>
           <a href="checkout.php" class="relative lux-cart">
             <span class="lux-cart-icon" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
