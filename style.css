@@ -444,15 +444,7 @@ img { max-width: 100%; display: block; }
 .category-tile-fallback {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%);
-}
-.category-tile-fallback::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 80%, rgba(10,163,107,0.25) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(201,163,94,0.18) 0%, transparent 50%);
+  background: linear-gradient(135deg, #334155 0%, #1e293b 50%, #0f172a 100%);
 }
 
 /* Premium product card (grid view) */
@@ -1022,9 +1014,8 @@ img { max-width: 100%; display: block; }
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle at 24% 20%, rgba(10,163,107,0.14) 0%, transparent 55%),
-    radial-gradient(circle at 74% 80%, rgba(201,163,94,0.14) 0%, transparent 58%),
-    linear-gradient(135deg, rgba(255,255,255,0.65), rgba(241,245,249,0.95));
+    radial-gradient(circle at 30% 30%, rgba(148,163,184,0.12) 0%, transparent 55%),
+    linear-gradient(135deg, #f1f5f9, #e2e8f0);
 }
 .product-img {
   width: 100%;
@@ -1089,10 +1080,7 @@ img { max-width: 100%; display: block; }
   height: 48px;
   border-radius: 12px;
   display: block;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(10,163,107,0.14) 0%, transparent 56%),
-    radial-gradient(circle at 70% 70%, rgba(201,163,94,0.14) 0%, transparent 56%),
-    linear-gradient(135deg, rgba(241,245,249,1), rgba(226,232,240,1));
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   border: 1px solid rgba(15,23,42,0.06);
 }
 .table th:first-child { padding-left: 20px; }
