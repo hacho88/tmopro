@@ -142,9 +142,46 @@ $headers[] = 'Content-type: text/html; charset=UTF-8';
 $headers[] = 'From: noreply@tmopro.ru';
 $headers[] = 'Reply-To: ' . ($email !== '' ? $email : 'noreply@tmopro.ru');
 
+$invoiceUrl = 'https://tmopro.ru/invoice.php?order=' . urlencode($orderNumber);
+
+// Manager email (add invoice link)
+$managerMsg = $message;
+$managerMsg = str_replace('</div></div></body></html>', '<div style="margin-top:20px;padding:16px;background:#ecfdf5;border-radius:14px;border:1px solid #a7f3d0;"><div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:8px;">Счет для клиента</div><a href="' . $invoiceUrl . '" style="color:#059669;font-weight:900;">' . $invoiceUrl . '</a></div></div></div></body></html>', $managerMsg);
+
+// Customer confirmation email
+$customerSubject = 'Ваш заказ №' . $orderNumber . ' принят — ' . e($siteName);
+$customerMsg = '<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>' . e($customerSubject) . '</title></head>';
+$customerMsg .= '<body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">';
+$customerMsg .= '<div style="max-width:600px;margin:0 auto;padding:32px;">';
+$customerMsg .= '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;box-shadow:0 8px 30px rgba(0,0,0,.04);">';
+$customerMsg .= '<div style="font-size:13px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.08em;">' . e($siteName) . '</div>';
+$customerMsg .= '<h1 style="margin:10px 0 6px;font-size:26px;line-height:1.15;">Заказ принят!</h1>';
+$customerMsg .= '<p style="margin:0 0 24px;color:#64748b;">Спасибо за заказ. Наш менеджер свяжется с вами в ближайшее время.</p>';
+$customerMsg .= '<div style="background:#f8fafc;border-radius:16px;padding:18px;margin-bottom:24px;">';
+$customerMsg .= '<div style="font-size:12px;font-weight:900;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Номер заказа</div>';
+$customerMsg .= '<div style="font-size:22px;font-weight:900;">' . e($orderNumber) . '</div>';
+$customerMsg .= '</div>';
+$customerMsg .= '<h2 style="font-size:16px;margin:0 0 12px;">Состав заказа</h2>';
+$customerMsg .= '<table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">';
+$customerMsg .= '<thead><tr style="background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.08em;"><th style="padding:14px;text-align:left;">Товар</th><th style="padding:14px;text-align:center;">Кол-во</th><th style="padding:14px;text-align:right;">Сумма</th></tr></thead>';
+$customerMsg .= '<tbody>' . $rows . '</tbody>';
+$customerMsg .= '</table>';
+$customerMsg .= '<div style="margin-top:24px;background:#f8fafc;border-radius:18px;padding:18px;">';
+$customerMsg .= '<div style="display:flex;justify-content:space-between;font-size:20px;"><span><strong>Итого</strong></span><strong>' . money($total) . '</strong></div>';
+$customerMsg .= '</div>';
+$customerMsg .= '<div style="margin-top:24px;text-align:center;">';
+$customerMsg .= '<a href="' . $invoiceUrl . '" style="display:inline-block;padding:14px 28px;background:#059669;color:#fff;border-radius:16px;font-weight:900;text-decoration:none;">Открыть счет →</a>';
+$customerMsg .= '</div>';
+$customerMsg .= '<div style="margin-top:24px;border-top:1px solid #e2e8f0;padding-top:16px;text-align:center;font-size:13px;color:#64748b;font-weight:700;">';
+$customerMsg .= 'Если у вас есть вопросы, позвоните: ' . e($settings['phone'] ?? '') . '<br>' . e($settings['email_manager'] ?? '') . '</div>';
+$customerMsg .= '</div></div></body></html>';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0) {
     db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart);
-    mail($managerEmail, '=?UTF-8?B?' . base64_encode($subject) . '?=', $message, implode("\r\n", $headers));
+    mail($managerEmail, '=?UTF-8?B?' . base64_encode($subject) . '?=', $managerMsg, implode("\r\n", $headers));
+    if ($email !== '') {
+        mail($email, '=?UTF-8?B?' . base64_encode($customerSubject) . '?=', $customerMsg, implode("\r\n", $headers));
+    }
 }
 ?>
 <!doctype html>
@@ -188,7 +225,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0
       <div class="mb-3 inline-flex rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 ring-1 ring-inset ring-emerald-100">Заявка отправлена</div>
       <h1 class="text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">Заказ №<?= e($orderNumber) ?> успешно принят!</h1>
       <p class="mt-4 text-lg leading-8 text-slate-600">Менеджер сформирует счет и свяжется с вами для подтверждения резерва.</p>
-      <a href="index.php" class="mt-8 inline-flex rounded-2xl bg-slate-950 px-6 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:shadow-lg">Вернуться в каталог</a>
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="invoice.php?order=<?= e($orderNumber) ?>" target="_blank" class="inline-flex rounded-2xl bg-emerald-600 px-6 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:shadow-lg">Открыть счет →</a>
+        <a href="index.php" class="inline-flex rounded-2xl bg-slate-950 px-6 py-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:shadow-lg">Вернуться в каталог</a>
+      </div>
     </section>
   </main>
 </body>
