@@ -13,6 +13,18 @@ $priceTiers = is_array($priceTiers) ? $priceTiers : [];
 
 $b2bTier = $_SESSION['b2b_price_tier'] ?? 'default';
 $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (float)($t['discount'] ?? 0)], $priceTiers);
+
+$blocksPath = __DIR__ . '/blocks.json';
+$blocks = file_exists($blocksPath) ? json_decode(file_get_contents($blocksPath), true) : [];
+$blocks = is_array($blocks) ? $blocks : [];
+
+$productsPath = __DIR__ . '/products.json';
+$allProducts = file_exists($productsPath) ? json_decode(file_get_contents($productsPath), true) : [];
+$allProducts = is_array($allProducts) ? $allProducts : [];
+
+$categoriesPath = __DIR__ . '/categories.json';
+$allCategories = file_exists($categoriesPath) ? json_decode(file_get_contents($categoriesPath), true) : [];
+$allCategories = is_array($allCategories) ? $allCategories : [];
 ?>
 <!doctype html>
 <html lang="ru">
@@ -115,38 +127,154 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
       <div v-for="(t, i) in toasts" :key="t.id" :class="['toast', t.visible ? 'show' : '']">{{ t.message }}</div>
     </div>
 
-    <!-- Hero -->
-    <section class="lux-hero">
-      <div class="lux-hero-bg" aria-hidden="true">
-        <picture v-if="settings.background_image">
-          <source v-if="settings.background_image_mobile" media="(max-width: 1024px)" :srcset="settings.background_image_mobile">
-          <img :src="settings.background_image" alt="">
-        </picture>
-      </div>
-      <div class="container lux-hero-inner">
-        <div class="lux-hero-copy">
-          <div class="lux-kicker">Премиальные решения для водоснабжения и отопления</div>
-          <h1 class="lux-title">
-            <span class="lux-title-strong">СОЗДАНО ДЛЯ</span>
-            <span class="lux-title-accent">ПРОФЕССИОНАЛОВ</span>
-          </h1>
-          <p class="lux-subtitle">{{ settings.hero_subtitle }}</p>
-          <div class="lux-hero-actions">
-            <a href="#catalog" class="lux-btn-gold">
-              <span>Получить расчет</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
-            </a>
-            <a href="#catalog" class="lux-btn-ghost">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Скачать каталог</span>
-            </a>
+    <!-- Dynamic Blocks -->
+    <?php if (empty($blocks)): ?>
+      <!-- Default Hero -->
+      <section class="lux-hero">
+        <div class="lux-hero-bg" aria-hidden="true">
+          <picture v-if="settings.background_image">
+            <source v-if="settings.background_image_mobile" media="(max-width: 1024px)" :srcset="settings.background_image_mobile">
+            <img :src="settings.background_image" alt="">
+          </picture>
+        </div>
+        <div class="container lux-hero-inner">
+          <div class="lux-hero-copy">
+            <div class="lux-kicker">Премиальные решения для водоснабжения и отопления</div>
+            <h1 class="lux-title">
+              <span class="lux-title-strong">СОЗДАНО ДЛЯ</span>
+              <span class="lux-title-accent">ПРОФЕССИОНАЛОВ</span>
+            </h1>
+            <p class="lux-subtitle">{{ settings.hero_subtitle }}</p>
+            <div class="lux-hero-actions">
+              <a href="#catalog" class="lux-btn-gold">
+                <span>Получить расчет</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+              </a>
+              <a href="#catalog" class="lux-btn-ghost">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Скачать каталог</span>
+              </a>
+            </div>
+          </div>
+          <div class="lux-hero-media" aria-hidden="true">
+            <div class="lux-hero-media-placeholder"></div>
           </div>
         </div>
-        <div class="lux-hero-media" aria-hidden="true">
-          <div class="lux-hero-media-placeholder"></div>
-        </div>
-      </div>
-    </section>
+      </section>
+    <?php else: ?>
+      <?php foreach ($blocks as $bi => $b):
+        $bt = $b['type'] ?? '';
+        $btitle = $b['title'] ?? '';
+        $bsub = $b['subtitle'] ?? '';
+        $bcont = $b['content'] ?? '';
+        $bbtn = $b['button_text'] ?? '';
+        $blink = $b['button_link'] ?? '';
+      ?>
+        <?php if ($bt === 'hero'): ?>
+          <section class="lux-hero" style="margin-bottom:0;">
+            <div class="container lux-hero-inner">
+              <div class="lux-hero-copy">
+                <?php if ($bsub): ?><div class="lux-kicker"><?= e($bsub) ?></div><?php endif; ?>
+                <h1 class="lux-title"><?= e($btitle) ?></h1>
+                <?php if ($bcont): ?><p class="lux-subtitle"><?= $bcont ?></p><?php endif; ?>
+                <?php if ($bbtn): ?>
+                  <div class="lux-hero-actions">
+                    <a href="<?= e($blink ?: '#catalog') ?>" class="lux-btn-gold">
+                      <span><?= e($bbtn) ?></span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </section>
+        <?php elseif ($bt === 'text'): ?>
+          <section class="container py-16">
+            <div class="max-w-3xl mx-auto text-center">
+              <?php if ($btitle): ?><h2 class="text-3xl font-black text-gray-900 mb-6"><?= e($btitle) ?></h2><?php endif; ?>
+              <?php if ($bsub): ?><p class="text-lg text-gray-500 font-bold mb-4"><?= e($bsub) ?></p><?php endif; ?>
+              <?php if ($bcont): ?><div class="text-gray-600 leading-relaxed"><?= $bcont ?></div><?php endif; ?>
+              <?php if ($bbtn): ?><a href="<?= e($blink ?: '#') ?>" class="btn btn-primary mt-8 inline-block"><?= e($bbtn) ?></a><?php endif; ?>
+            </div>
+          </section>
+        <?php elseif ($bt === 'features'): ?>
+          <section class="container py-16">
+            <?php if ($btitle): ?><h2 class="text-3xl font-black text-center text-gray-900 mb-12"><?= e($btitle) ?></h2><?php endif; ?>
+            <div class="grid md:grid-cols-3 gap-8">
+              <?php
+                $featLines = array_filter(array_map('trim', explode("\n", $bcont)));
+                $featIcons = ['💎','⚡','🛡️','📦','🔄','⭐'];
+                foreach ($featLines as $fi => $line):
+                  $parts = explode(':', $line, 2);
+                  $fTitle = trim($parts[0] ?? $line);
+                  $fDesc = trim($parts[1] ?? '');
+              ?>
+                <div class="text-center p-6 rounded-2xl bg-gray-50">
+                  <div style="font-size:40px;margin-bottom:12px;"><?= $featIcons[$fi % count($featIcons)] ?></div>
+                  <h3 class="text-lg font-extrabold text-gray-900 mb-2"><?= e($fTitle) ?></h3>
+                  <?php if ($fDesc): ?><p class="text-sm text-gray-500 font-bold"><?= e($fDesc) ?></p><?php endif; ?>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </section>
+        <?php elseif ($bt === 'products'): ?>
+          <section class="container py-16">
+            <?php if ($btitle): ?><h2 class="text-3xl font-black text-center text-gray-900 mb-12"><?= e($btitle) ?></h2><?php endif; ?>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <?php
+                $showProducts = array_slice($allProducts, 0, 4);
+                foreach ($showProducts as $p):
+                  $pStock = (int)($p['stock'] ?? 0);
+                  $pStockLabel = $pStock <= 0 ? 'Нет' : ($pStock < 10 ? 'Мало' : 'В наличии');
+                  $pStockCls = $pStock <= 0 ? 'bg-red-50 text-red-700' : ($pStock < 10 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700');
+              ?>
+                <a href="product.php?id=<?= e($p['id'] ?? 0) ?>" style="text-decoration:none;display:block;background:#fff;border-radius:20px;border:1px solid #e2e8f0;padding:16px;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(15,23,42,.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+                  <div style="aspect-ratio:1;background:#f1f5f9;border-radius:16px;overflow:hidden;margin-bottom:12px;">
+                    <?php if (!empty($p['image'])): ?><img src="<?= e($p['image']) ?>" style="width:100%;height:100%;object-fit:contain;padding:12px;"><?php endif; ?>
+                  </div>
+                  <div style="font-size:11px;font-weight:900;color:#94a3b8;margin-bottom:4px;"><?= e($p['article'] ?? '') ?></div>
+                  <div style="font-size:14px;font-weight:900;color:#0f172a;margin-bottom:8px;line-height:1.3;"><?= e($p['name'] ?? '') ?></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:16px;font-weight:900;color:#0f172a;"><?= number_format((float)($p['price_base'] ?? 0), 0, ',', ' ') ?> ₽</span>
+                    <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg <?= e($pStockCls) ?>"><?= e($pStockLabel) ?></span>
+                  </div>
+                </a>
+              <?php endforeach; ?>
+            </div>
+            <?php if ($bbtn): ?><div class="text-center mt-8"><a href="<?= e($blink ?: '#catalog') ?>" class="btn btn-primary"><?= e($bbtn) ?></a></div><?php endif; ?>
+          </section>
+        <?php elseif ($bt === 'categories'): ?>
+          <section class="container py-16">
+            <?php if ($btitle): ?><h2 class="text-3xl font-black text-center text-gray-900 mb-12"><?= e($btitle) ?></h2><?php endif; ?>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <?php
+                $showCats = [];
+                foreach ($allCategories as $cat) {
+                  foreach ($cat['subcategories'] ?? [] as $sub) {
+                    $showCats[] = $sub;
+                  }
+                }
+                $showCats = array_slice($showCats, 0, 8);
+                foreach ($showCats as $sc):
+              ?>
+                <div style="background:#f8fafc;border-radius:20px;padding:20px;text-align:center;border:1px solid #e2e8f0;">
+                  <div style="font-size:32px;margin-bottom:8px;">🏷️</div>
+                  <div style="font-weight:900;color:#0f172a;"><?= e($sc['name'] ?? '') ?></div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </section>
+        <?php elseif ($bt === 'cta'): ?>
+          <section style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:80px 0;">
+            <div class="container text-center">
+              <?php if ($btitle): ?><h2 class="text-3xl lg:text-4xl font-black text-white mb-6"><?= e($btitle) ?></h2><?php endif; ?>
+              <?php if ($bsub): ?><p class="text-lg text-gray-300 font-bold mb-8 max-w-2xl mx-auto"><?= e($bsub) ?></p><?php endif; ?>
+              <?php if ($bbtn): ?><a href="<?= e($blink ?: '#catalog') ?>" class="btn btn-primary" style="font-size:18px;padding:16px 32px;"><?= e($bbtn) ?></a><?php endif; ?>
+            </div>
+          </section>
+        <?php endif; ?>
+      <?php endforeach; ?>
+    <?php endif; ?>
 
     <section class="container py-10 lg:py-16">
       <div class="section-head mb-8">
