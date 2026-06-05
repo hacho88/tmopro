@@ -26,10 +26,6 @@ $categoriesPath = __DIR__ . '/categories.json';
 $allCategories = file_exists($categoriesPath) ? json_decode(file_get_contents($categoriesPath), true) : [];
 $allCategories = is_array($allCategories) ? $allCategories : [];
 
-$langPath = __DIR__ . '/lang.json';
-$langDict = file_exists($langPath) ? json_decode(file_get_contents($langPath), true) : [];
-$langDict = is_array($langDict) ? $langDict : [];
-
 $settingsPath = __DIR__ . '/settings.json';
 $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
 $settings = is_array($settings) ? $settings : [];
@@ -112,7 +108,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           <?php else: ?>
             <a href="login.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-700 hover:text-emerald-700 transition">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              {{ t('login') }}
+              Вход для клиентов
             </a>
           <?php endif; ?>
           <a href="orders.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-500 hover:text-emerald-700 transition" title="Мои заказы">
@@ -123,17 +119,11 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             <span class="lux-cart-icon" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
             </span>
-            <span class="hidden sm:block">{{ t('viewCart') }}</span>
+            <span class="hidden sm:block">Корзина</span>
             <span class="lux-cart-badge">{{ cartCount }}</span>
           </a>
-          <div class="hidden sm:flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-1" style="height:36px;">
-            <button @click="setLang('ru')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='ru' ? 'bg-emerald-600 text-white' : 'text-gray-500']">RU</button>
-            <button @click="setLang('en')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='en' ? 'bg-emerald-600 text-white' : 'text-gray-500']">EN</button>
-            <button @click="setLang('zh')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='zh' ? 'bg-emerald-600 text-white' : 'text-gray-500']">ZH</button>
-            <button @click="setLang('ky')" :class="['text-xs font-extrabold px-2 py-1 rounded-lg', lang==='ky' ? 'bg-emerald-600 text-white' : 'text-gray-500']">KY</button>
-          </div>
           <a href="#catalog" class="hidden sm:inline-flex lux-btn-gold">
-            <span>{{ t('requestQuote') }}</span>
+            <span>Запросить расчет</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
           </a>
         </div>
@@ -350,11 +340,11 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
         <aside class="h-fit lg:sticky lg:top-24">
           <div class="card p-5 lg:p-6 mb-6">
             <div class="flex items-center justify-between mb-5">
-              <h2 class="text-base font-extrabold">{{ t('filters') }}</h2>
-              <button @click="resetFilters" class="text-xs font-bold text-gray-400 transition hover:text-gray-900">{{ t('reset') }}</button>
+              <h2 class="text-base font-extrabold">Фильтры</h2>
+              <button @click="resetFilters" class="text-xs font-bold text-gray-400 transition hover:text-gray-900">Сбросить</button>
             </div>
 
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">{{ t('searchPlaceholder') }}</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Например, Cu001</label>
             <live-search v-model="search" @select="onSearchSelect"></live-search>
             <div class="mb-4"></div>
 
@@ -363,14 +353,14 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                 :class="['chip w-full justify-between mb-2', showFavoritesOnly ? 'chip-active' : 'chip-default']">
                 <span class="flex items-center gap-2">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  {{ t('favorites') }}
+                  Избранное
                 </span>
                 <span class="opacity-60" style="font-size: 11px;">{{ favoritesCount }}</span>
               </button>
             </div>
 
             <div class="mb-6">
-              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">{{ t('category') }}</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Категория</div>
               <div class="space-y-2">
                 <div v-for="cat in categoryList" :key="cat.id">
                   <div class="text-xs font-bold text-gray-500 px-1 py-1">{{ cat.name }}</div>
@@ -384,7 +374,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             </div>
 
             <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">{{ t('brand') }}</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Бренд</div>
               <div class="flex flex-wrap gap-2">
                 <button v-for="brand in brands" :key="brand" @click="toggleBrand(brand)"
                   :class="['chip', selectedBrands.includes(brand) ? 'chip-active' : 'chip-default']">
@@ -458,32 +448,32 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           <!-- Toolbar -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 p-4 toolbar-glass">
             <div class="text-sm font-bold text-gray-500">
-              {{ t('found') }}: <span class="text-gray-900 font-extrabold">{{ filteredProducts.length }}</span> {{ t('products') }}
+              Найдено: <span class="text-gray-900 font-extrabold">{{ filteredProducts.length }}</span> товаров
             </div>
             <div class="flex items-center gap-3 flex-wrap">
               <select v-model="sortBy" class="field" style="height:36px; font-size:13px; font-weight:800; padding:0 28px 0 12px; min-width:140px;">
-                <option value="default">{{ t('default') }}</option>
-                <option value="price_asc">{{ t('price_asc') }}</option>
-                <option value="price_desc">{{ t('price_desc') }}</option>
-                <option value="stock_asc">{{ t('stock_asc') }}</option>
-                <option value="name_asc">{{ t('name_asc') }}</option>
+                <option value="default">По умолчанию</option>
+                <option value="price_asc">Дешевле</option>
+                <option value="price_desc">Дороже</option>
+                <option value="stock_asc">По остатку</option>
+                <option value="name_asc">По названию</option>
               </select>
               <label class="flex items-center gap-2 text-xs font-extrabold text-gray-600 cursor-pointer select-none">
                 <input type="checkbox" v-model="showInStockOnly" class="accent-emerald-600" style="width:16px;height:16px;">
-                {{ t('in_stock_only') }}
+                Только в наличии
               </label>
               <div class="flex items-center gap-2">
-                <input v-model.number="minPrice" type="number" :placeholder="t('from') + ' ₽'" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
+                <input v-model.number="minPrice" type="number" placeholder="от ₽" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
                 <span class="text-xs font-bold text-gray-400">—</span>
-                <input v-model.number="maxPrice" type="number" :placeholder="t('to') + ' ₽'" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
+                <input v-model.number="maxPrice" type="number" placeholder="до ₽" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
               </div>
               <button type="button" @click="toggleDense" :class="['density-toggle', dense ? 'is-on' : '']">
                 <span class="density-dot" aria-hidden="true"></span>
-                <span>{{ t('dense') }}</span>
+                <span>Компактно</span>
               </button>
               <div class="segmented">
-                <button @click="view = 'grid'" :class="['segmented-item', view === 'grid' ? 'is-active' : '']">{{ t('grid') }}</button>
-                <button @click="view = 'table'" :class="['segmented-item', view === 'table' ? 'is-active' : '']">{{ t('table') }}</button>
+                <button @click="view = 'grid'" :class="['segmented-item', view === 'grid' ? 'is-active' : '']">Сетка</button>
+                <button @click="view = 'table'" :class="['segmented-item', view === 'table' ? 'is-active' : '']">Таблица</button>
               </div>
             </div>
           </div>
@@ -491,7 +481,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           <!-- Loading -->
           <div v-if="loading" class="card p-12 text-center">
             <div :class="['mx-auto mb-4 animate-spin rounded-full border-4 border-t-transparent', accentBorder]" style="width: 40px; height: 40px;"></div>
-            <p class="font-bold text-gray-500">{{ t('catalog') }}...</p>
+            <p class="font-bold text-gray-500">Загрузка...</p>
           </div>
 
           <!-- Table View -->
@@ -499,11 +489,11 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             <table class="table min-w-900">
               <thead>
                 <tr>
-                  <th>{{ t('article') }}</th>
-                  <th>{{ t('category') }}</th>
-                  <th>{{ t('stock') }}</th>
-                  <th>{{ t('price') }}</th>
-                  <th>{{ t('qty') }}</th>
+                  <th>Артикул</th>
+                  <th>Категория</th>
+                  <th>Остаток</th>
+                  <th>Цена</th>
+                  <th>Кол-во</th>
                   <th></th>
                 </tr>
               </thead>
@@ -529,8 +519,8 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                   </td>
                   <td>
                     <div class="flex items-center gap-2">
-                      <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">{{ t('addToCart') }}</button>
-                      <button type="button" @click.stop.prevent="recordView(product); quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" :title="t('searchPlaceholder')">
+                      <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">В корзину</button>
+                      <button type="button" @click.stop.prevent="recordView(product); quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" :title="'Быстрый просмотр'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                       </button>
                       <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
@@ -579,8 +569,8 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                   <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                 </div>
                 <div class="flex gap-2">
-                  <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
-                  <button @click="recordView(product); quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" :title="t('searchPlaceholder')">
+                  <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;">Добавить в заявку</button>
+                  <button @click="recordView(product); quickViewProduct = product" class="btn btn-dark" style="flex-shrink:0; padding:0 14px;" :title="'Быстрый просмотр'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                   </button>
                 </div>
@@ -615,7 +605,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
         </a>
         <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-          <span>{{ t('viewCart') }}</span>
+          <span>Корзина</span>
           <b :class="['absolute top-1 rounded-full px-1.5 text-white', accentBg]" style="font-size: 10px; right: 8px;">{{ cartCount }}</b>
         </a>
       </div>
@@ -645,9 +635,9 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             </div>
             <div class="flex items-center gap-3 mb-4">
               <qty-control :model-value="qty[quickViewProduct.id]" @update:model-value="setQty(quickViewProduct.id, $event)"></qty-control>
-              <button @click="addToCart(quickViewProduct); quickViewProduct = null" class="btn btn-primary" style="flex:1;">{{ t('addToQuote') }}</button>
+              <button @click="addToCart(quickViewProduct); quickViewProduct = null" class="btn btn-primary" style="flex:1;">Добавить в заявку</button>
             </div>
-            <a :href="'product.php?id=' + quickViewProduct.id" class="text-sm font-extrabold text-emerald-600 hover:underline">{{ t('catalog') }} →</a>
+            <a :href="'product.php?id=' + quickViewProduct.id" class="text-sm font-extrabold text-emerald-600 hover:underline">Подробнее →</a>
           </div>
         </div>
       </div>
@@ -773,7 +763,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             </a>
           </div>
           <div v-else-if="show && query.length >= 2 && !loading && !results.length" class="live-search-dropdown">
-            <div class="live-search-empty">{{ t('searchPlaceholder') }}</div>
+            <div class="live-search-empty">Например, Cu001</div>
           </div>
         </div>
       `,
@@ -851,8 +841,6 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           favorites: [],
           toasts: [],
           toastId: 0,
-          lang: localStorage.getItem('tmopro_lang') || 'ru',
-          langDict: <?= json_encode($langDict, JSON_UNESCAPED_UNICODE) ?>,
           sortBy: 'default',
           quickViewProduct: null,
           page: 1,
@@ -930,13 +918,12 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
         }
       },
       methods: {
-        t(key) { return (this.langDict[this.lang] && this.langDict[this.lang][key]) ? this.langDict[this.lang][key] : (this.langDict['ru'][key] || key); },
         money(value) { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value); },
         stockStatus(stock) {
           const n = Number(stock) || 0;
-          if (n <= 0) return { label: this.t('out_stock'), cls: 'bg-red-50 text-red-700' };
-          if (n < 10) return { label: this.t('low_stock'), cls: 'bg-amber-50 text-amber-700' };
-          return { label: this.t('inStock'), cls: 'bg-emerald-50 text-emerald-700' };
+          if (n <= 0) return { label: 'Нет в наличии', cls: 'bg-red-50 text-red-700' };
+          if (n < 10) return { label: 'Заканчивается', cls: 'bg-amber-50 text-amber-700' };
+          return { label: 'В наличии', cls: 'bg-emerald-50 text-emerald-700' };
         },
         onProductImgError(product) { try { product.image = ''; } catch (e) {} },
         setQty(id, value) { this.qty[id] = Math.max(1, parseInt(value || 1, 10)); },
@@ -979,11 +966,6 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           localStorage.setItem('tmopro_recent', JSON.stringify(this.recentViews));
         },
         productById(id) { return this.products.find(p => p.id === id) || null; },
-        t(key) { return (this.langDict[this.lang] && this.langDict[this.lang][key]) ? this.langDict[this.lang][key] : (this.langDict['ru'] && this.langDict['ru'][key] ? this.langDict['ru'][key] : key); },
-        setLang(l) {
-          this.lang = l;
-          localStorage.setItem('tmopro_lang', l);
-        },
         showToast(message) {
           const id = ++this.toastId;
           this.toasts.push({ id, message, visible: false });
