@@ -243,22 +243,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
     }
 
     if ($action === 'save_categories') {
-        $nextSubId = 0;
-        foreach ($categories as $cat) {
-            foreach (($cat['subcategories'] ?? []) as $sub) {
-                $nextSubId = max($nextSubId, (int)($sub['id'] ?? 0));
-            }
-        }
-        $nextSubId++;
-
         $updated = [];
         $missing = [];
 
         foreach ($categories as $cat) {
             $cid = (int)($cat['id'] ?? 0);
+            $cat['name'] = trim((string)($_POST['cat_name_' . $cid] ?? $cat['name']));
             $subs = [];
             foreach (($cat['subcategories'] ?? []) as $sub) {
                 $sid = (int)($sub['id'] ?? 0);
+                $sub['name'] = trim((string)($_POST['sub_name_' . $sid] ?? $sub['name']));
+                $sub['slug'] = trim((string)($_POST['sub_slug_' . $sid] ?? $sub['slug']));
                 $img = (string)($sub['image'] ?? '');
                 $fileKey = 'subcat_image_' . $sid;
                 if (!empty($_FILES[$fileKey]['tmp_name'])) {
@@ -268,7 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
                 }
                 $img = trim((string)$img);
                 if ($img === '') {
-                    $missing[] = (string)($sub['name'] ?? ('ID ' . $sid));
+                    $missing[] = (string)($sub['name'] ?: ('ID ' . $sid));
                 }
                 $sub['image'] = $img;
                 $subs[] = $sub;
@@ -322,6 +317,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
                 if (save_json($categoriesPath, $categories)) $success = 'Категория добавлена.';
                 else $error = 'Ошибка записи categories.json';
             }
+        }
+        $tab = 'categories';
+    }
+
+    if ($action === 'delete_subcategory') {
+        $catId = (int)($_POST['category_id'] ?? 0);
+        $subId = (int)($_POST['subcategory_id'] ?? 0);
+        $updated = [];
+        foreach ($categories as $cat) {
+            if ((int)($cat['id'] ?? 0) === $catId) {
+                $cat['subcategories'] = array_values(array_filter($cat['subcategories'] ?? [], fn($s) => (int)($s['id'] ?? 0) !== $subId));
+            }
+            $updated[] = $cat;
+        }
+        $categories = $updated;
+        if (save_json($categoriesPath, $categories)) $success = 'Подкатегория удалена.';
+        else $error = 'Ошибка записи categories.json';
+        $tab = 'categories';
+    }
+
+    if ($action === 'delete_category') {
+        $catId = (int)($_POST['category_id'] ?? 0);
+        $categories = array_values(array_filter($categories, fn($c) => (int)($c['id'] ?? 0) !== $catId));
+        if (save_json($categoriesPath, $categories)) $success = 'Категория удалена.';
+        else $error = 'Ошибка записи categories.json';
+        $tab = 'categories';
+    }
+
+    if ($action === 'add_category') {
+        $name = trim((string)($_POST['cat_name'] ?? '');
+        $slug = trim((string)($_POST['cat_slug'] ?? ''));
+        if ($name === '' || $slug === '') {
+            $error = 'Название и slug обязательны.';
+        } else {
+            $maxId = 0;
+            foreach ($categories as $cat) { $maxId = max($maxId, (int)($cat['id'] ?? 0)); }
+            $categories[] = ['id' => $maxId + 1, 'name' => $name, 'slug' => $slug, 'subcategories' => []];
+            if (save_json($categoriesPath, $categories)) $success = 'Категория добавлена.';
+            else $error = 'Ошибка записи categories.json';
         }
         $tab = 'categories';
     }
@@ -1299,9 +1333,19 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         </div>
       </div>
 
+      <form method="post" class="card" style="margin-bottom:16px;">
+        <input type="hidden" name="action" value="add_category">
+        <h3 style="font-size:16px;margin-bottom:12px;">➕ Добавить родительскую категорию</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+          <label><span>Название</span><input name="cat_name" class="field" required></label>
+          <label><span>Slug</span><input name="cat_slug" class="field" required placeholder="bytovaya-santehnika"></label>
+        </div>
+        <button class="btn" style="margin-top:12px;">Добавить категорию</button>
+      </form>
+
       <form method="post" class="card" enctype="multipart/form-data" style="margin-bottom:16px;">
         <input type="hidden" name="action" value="add_subcategory">
-        <h3 style="font-size:16px;margin-bottom:12px;">Добавить подкатегорию (обязательно с фото)</h3>
+        <h3 style="font-size:16px;margin-bottom:12px;">➕ Добавить подкатегорию (обязательно с фото)</h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
           <label><span>Родительская категория</span>
             <select name="parent_category_id" class="field" required>
@@ -1314,14 +1358,17 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <label><span>Slug</span><input name="sub_slug" class="field" required placeholder="latunnye-fitingi"></label>
           <label><span>Фото</span><input type="file" name="sub_image" class="field" accept="image/*" required style="padding:8px;"></label>
         </div>
-        <button class="btn" style="margin-top:12px;">Добавить</button>
+        <button class="btn" style="margin-top:12px;">Добавить подкатегорию</button>
       </form>
 
       <form method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="save_categories">
         <?php foreach ($categories as $cat): ?>
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
-            <div style="font-weight:900;margin-bottom:10px;"><?= e($cat['name'] ?? '') ?></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <label style="margin:0;flex:1;"><span>Название категории</span><input name="cat_name_<?= e($cat['id'] ?? 0) ?>" value="<?= e($cat['name'] ?? '') ?>" class="field"></label>
+              <button type="button" class="btn" style="margin-left:12px;background:#fee2e2;color:#991b1b;border-color:#fecaca;" onclick="if(confirm('Удалить категорию и все подкатегории?')){const f=document.createElement('form');f.method='post';f.innerHTML='<input type=hidden name=action value=delete_category><input type=hidden name=category_id value=<?= e($cat['id'] ?? 0) ?>';document.body.appendChild(f);f.submit();}">🗑 Удалить</button>
+            </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
               <?php foreach (($cat['subcategories'] ?? []) as $sub): ?>
                 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px;">
@@ -1329,9 +1376,9 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                     <div style="width:56px;height:44px;border-radius:12px;overflow:hidden;border:1px solid rgba(15,23,42,0.08);background:#f1f5f9;flex:0 0 auto;">
                       <?php if (!empty($sub['image'])): ?><img src="<?= e($sub['image']) ?>" style="width:100%;height:100%;object-fit:cover;" /><?php endif; ?>
                     </div>
-                    <div style="min-width:0;">
-                      <div style="font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= e($sub['name'] ?? '') ?></div>
-                      <div style="font-size:12px;color:#64748b;font-weight:700;">slug: <?= e($sub['slug'] ?? '') ?></div>
+                    <div style="min-width:0;flex:1;">
+                      <input name="sub_name_<?= e($sub['id'] ?? 0) ?>" value="<?= e($sub['name'] ?? '') ?>" class="field" style="margin-bottom:4px;font-weight:900;padding:6px 8px;font-size:13px;">
+                      <input name="sub_slug_<?= e($sub['id'] ?? 0) ?>" value="<?= e($sub['slug'] ?? '') ?>" class="field" style="padding:6px 8px;font-size:12px;color:#64748b;" placeholder="slug">
                     </div>
                   </div>
                   <div style="margin-top:10px;">
@@ -1339,6 +1386,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                       <input type="file" name="subcat_image_<?= e($sub['id'] ?? 0) ?>" accept="image/*" class="field" style="padding:8px;">
                     </label>
                     <div style="margin-top:8px;font-size:12px;color:#64748b;font-weight:700;">Текущее: <?= e($sub['image'] ?? '') ?></div>
+                    <button type="button" class="btn" style="margin-top:8px;background:#fee2e2;color:#991b1b;border-color:#fecaca;width:100%;" onclick="if(confirm('Удалить подкатегорию?')){const f=document.createElement('form');f.method='post';f.innerHTML='<input type=hidden name=action value=delete_subcategory><input type=hidden name=category_id value=<?= e($cat['id'] ?? 0) ?>><input type=hidden name=subcategory_id value=<?= e($sub['id'] ?? 0) ?>';document.body.appendChild(f);f.submit();}">🗑 Удалить подкатегорию</button>
                   </div>
                 </div>
               <?php endforeach; ?>
