@@ -127,6 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
                 $up = handle_upload($fileKey, 'products');
                 if ($up && !str_starts_with($up, 'err_')) $img = $up;
             }
+            $tagsRaw = (string)($_POST['tags'][$i] ?? '');
+            $tags = array_values(array_filter(array_map('trim', explode(',', $tagsRaw)), fn($t) => $t !== ''));
             $saved[] = [
                 'id' => (int)$id,
                 'article' => trim($_POST['article'][$i] ?? ''),
@@ -136,7 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
                 'stock' => max(0, (int)($_POST['stock'][$i] ?? 0)),
                 'price_base' => max(0, (float)($_POST['price_base'][$i] ?? 0)),
                 'price_wholesale' => max(0, (float)($_POST['price_wholesale'][$i] ?? 0)),
-                'image' => $img
+                'image' => $img,
+                'description' => trim((string)($_POST['description'][$i] ?? ($products[$i]['description'] ?? ''))),
+                'tags' => $tags
             ];
         }
         $products = $saved;
@@ -572,6 +576,18 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
               <label><span>Цена до 10</span><input name="price_base[]" type="number" step="0.01" value="<?= e($product['price_base'] ?? 0) ?>" class="field"></label>
               <label><span>Опт от 10</span><input name="price_wholesale[]" type="number" step="0.01" value="<?= e($product['price_wholesale'] ?? 0) ?>" class="field"></label>
             </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px;">
+              <label style="grid-column:1/-1;"><span>Описание (AI / ручное)</span>
+                <textarea name="description[]" rows="4" class="field"><?= e($product['description'] ?? '') ?></textarea>
+              </label>
+              <label style="grid-column:1/-1;"><span>Теги (через запятую)</span>
+                <input name="tags[]" value="<?= e(is_array($product['tags'] ?? null) ? implode(', ', $product['tags']) : '') ?>" class="field" placeholder="латунь, резьба, 1/2, водоснабжение">
+              </label>
+              <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <button type="button" class="btn btn-dark" onclick="tmoproGen(<?= e($product['id'] ?? 0) ?>, this)">Сгенерировать описание (DeepSeek)</button>
+                <span class="tmopro-gen-status" style="font-size:12px;color:#64748b;font-weight:800;"></span>
+              </div>
+            </div>
             <label style="margin-top:12px;"><span>Фото товара</span>
               <?php if (!empty($product['image'])): ?><div style="margin-bottom:8px;"><img src="<?= e($product['image']) ?>" style="max-height:80px;border-radius:8px;"></div><?php endif; ?>
               <input type="file" name="product_image_<?= e($product['id'] ?? 0) ?>" accept="image/*" class="field" style="padding:8px;">
@@ -580,6 +596,50 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <?php endforeach; ?>
         <div class="sticky-save"><button class="btn" style="width:100%;">Сохранить каталог</button></div>
       </form>
+
+      <script>
+        async function tmoproGen(id, btn) {
+          try {
+            const card = btn.closest('div[style*="background:#f8fafc"]');
+            const status = card ? card.querySelector('.tmopro-gen-status') : null;
+            if (status) status.textContent = 'Генерация…';
+            btn.disabled = true;
+
+            const nameEl = card ? card.querySelector('input[name="name[]"]') : null;
+            const articleEl = card ? card.querySelector('input[name="article[]"]') : null;
+            const brandEl = card ? card.querySelector('input[name="brand[]"]') : null;
+            const categoryEl = card ? card.querySelector('select[name="category[]"]') : null;
+
+            const name = nameEl ? nameEl.value : '';
+            const article = articleEl ? articleEl.value : '';
+            const brand = brandEl ? brandEl.value : '';
+            const category = categoryEl ? categoryEl.value : '';
+
+            const fd = new FormData();
+            fd.append('id', String(id));
+            fd.append('name', name);
+            fd.append('article', article);
+            fd.append('brand', brand);
+            fd.append('category', category);
+
+            const res = await fetch('api/deepseek_generate.php', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.error || 'Ошибка генерации');
+
+            const desc = card.querySelector('textarea[name="description[]"]');
+            const tags = card.querySelector('input[name="tags[]"]');
+            if (desc) desc.value = data.description || '';
+            if (tags) tags.value = Array.isArray(data.tags) ? data.tags.join(', ') : '';
+            if (status) status.textContent = 'Готово. Нажми «Сохранить каталог».';
+          } catch (e) {
+            const card = btn.closest('div[style*="background:#f8fafc"]');
+            const status = card ? card.querySelector('.tmopro-gen-status') : null;
+            if (status) status.textContent = 'Ошибка: ' + (e && e.message ? e.message : e);
+          } finally {
+            btn.disabled = false;
+          }
+        }
+      </script>
 
       <?php foreach ($products as $product): ?>
         <form method="post" id="del<?= e($product['id'] ?? 0) ?>">
