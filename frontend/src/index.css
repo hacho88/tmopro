@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-tech-blue text-white font-semibold rounded-xl transition-all duration-200;
+  }
+  .btn-primary:hover {
+    @apply bg-tech-blue-hover shadow-lg;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-slate-600 font-medium rounded-xl transition-all duration-200 hover:bg-slate-100;
+  }
+  .card-premium {
+    @apply bg-white rounded-3xl border border-slate-100 shadow-premium transition-all duration-300;
+  }
+  .card-premium:hover {
+    @apply shadow-premium-hover -translate-y-1;
+  }
+  .text-label {
+    @apply text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400;
+  }
+  .filter-chip {
+    @apply inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all duration-150 cursor-pointer select-none;
+  }
+  .filter-chip-inactive {
+    @apply bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50;
+  }
+  .filter-chip-active {
+    @apply bg-tech-blue border-tech-blue text-white;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out forwards;
+}
