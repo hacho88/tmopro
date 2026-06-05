@@ -380,8 +380,54 @@ $langDict = is_array($langDict) ? $langDict : [];
                 </button>
               </div>
             </div>
+
+            <!-- Compare -->
+            <div v-if="compareList.length" class="mt-6 p-4 rounded-2xl bg-blue-50 border border-blue-100">
+              <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-bold uppercase tracking-wider text-blue-400">⚖️ Сравнение ({{ compareList.length }})</div>
+                <button @click="compareList = []; localStorage.setItem('tmopro_compare', '[]');" class="text-xs font-bold text-blue-400 hover:text-blue-600">Очистить</button>
+              </div>
+              <div class="space-y-2">
+                <div v-for="cid in compareList" :key="cid" class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold text-blue-900 truncate" style="max-width: 160px;">{{ (products.find(p => p.id === cid)?.name || cid) }}</span>
+                  <button @click="toggleCompare(cid)" class="text-blue-400 hover:text-blue-600 text-xs">×</button>
+                </div>
+              </div>
+              <button @click="compareModal = true" class="btn btn-sm btn-primary w-full mt-3" style="font-size:12px;">Сравнить</button>
+            </div>
           </div>
         </aside>
+
+        <!-- Compare Modal -->
+        <div v-if="compareModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4" style="background: rgba(0,0,0,.5);" @click="compareModal = false">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-auto p-6" @click.stop>
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-black">Сравнение товаров</h3>
+              <button @click="compareModal = false" class="text-2xl font-bold text-gray-400 hover:text-gray-900">×</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="table w-full">
+                <thead>
+                  <tr>
+                    <th class="text-left">Параметр</th>
+                    <th v-for="cid in compareList" :key="cid" class="text-center" style="min-width:180px;">
+                      <a :href="'product.php?id=' + cid" class="font-extrabold text-emerald-600 hover:underline">{{ (products.find(p => p.id === cid)?.name || cid) }}</a>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td class="font-bold text-gray-500">Артикул</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold">{{ products.find(p => p.id === cid)?.article || '—' }}</td></tr>
+                  <tr><td class="font-bold text-gray-500">Бренд</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.brand || '—' }}</td></tr>
+                  <tr><td class="font-bold text-gray-500">Категория</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.category || '—' }}</td></tr>
+                  <tr><td class="font-bold text-gray-500">Цена</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold text-emerald-600">{{ money(products.find(p => p.id === cid)?.price_base || 0) }}</td></tr>
+                  <tr><td class="font-bold text-gray-500">Опт от 10 шт</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold">{{ money(products.find(p => p.id === cid)?.price_wholesale || 0) }}</td></tr>
+                  <tr><td class="font-bold text-gray-500">Остаток</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.stock || 0 }} шт</td></tr>
+                  <tr><td class="font-bold text-gray-500"></td><td v-for="cid in compareList" :key="cid" class="text-center"><button @click="addToCart(products.find(p => p.id === cid))" class="btn btn-sm btn-primary">В корзину</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
         <!-- Products -->
         <div>
@@ -438,7 +484,7 @@ $langDict = is_array($langDict) ? $langDict : [];
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="product in filteredProducts" :key="product.id" class="animate-fadeIn">
+                <tr v-for="product in paginatedProducts" :key="product.id" class="animate-fadeIn">
                   <td>
                     <div class="flex items-center gap-3">
                       <a :href="'product.php?id=' + product.id" class="shrink-0">
@@ -475,7 +521,7 @@ $langDict = is_array($langDict) ? $langDict : [];
 
           <!-- Grid View -->
           <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
-            <article v-for="product in filteredProducts" :key="product.id" class="card-product animate-fadeIn">
+            <article v-for="product in paginatedProducts" :key="product.id" class="card-product animate-fadeIn">
               <a :href="'product.php?id=' + product.id" class="block">
                 <div class="product-media">
                   <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
@@ -491,6 +537,9 @@ $langDict = is_array($langDict) ? $langDict : [];
                     </a>
                   </div>
                   <div class="flex items-center gap-2 flex-shrink-0">
+                    <button type="button" @click.stop.prevent="toggleCompare(product.id)" class="flex items-center justify-center" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isInCompare(product.id) ? 'color:#3b82f6;' : 'color:#cbd5e1;'" title="Сравнить">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M8 8l4-4 4 4"/><path d="M8 16l4 4 4-4"/></svg>
+                    </button>
                     <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'" @mousedown="$event.target.style.transform='scale(0.9)'" @mouseup="$event.target.style.transform='scale(1)'">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </button>
@@ -513,6 +562,13 @@ $langDict = is_array($langDict) ? $langDict : [];
                 </div>
               </div>
             </article>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
+            <button @click="page = Math.max(1, page - 1)" :disabled="page === 1" class="btn btn-sm btn-ghost" style="padding: 6px 12px;">←</button>
+            <button v-for="p in totalPages" :key="p" @click="page = p" :class="['btn btn-sm', page === p ? 'btn-dark' : 'btn-ghost']" style="padding: 6px 12px; min-width: 36px;">{{ p }}</button>
+            <button @click="page = Math.min(totalPages, page + 1)" :disabled="page === totalPages" class="btn btn-sm btn-ghost" style="padding: 6px 12px;">→</button>
           </div>
         </div>
       </div>
@@ -774,7 +830,11 @@ $langDict = is_array($langDict) ? $langDict : [];
           lang: localStorage.getItem('tmopro_lang') || 'ru',
           langDict: <?= json_encode($langDict, JSON_UNESCAPED_UNICODE) ?>,
           sortBy: 'default',
-          quickViewProduct: null
+          quickViewProduct: null,
+          page: 1,
+          perPage: 24,
+          compareList: JSON.parse(localStorage.getItem('tmopro_compare') || '[]'),
+          compareModal: false
         };
       },
       computed: {
@@ -821,6 +881,11 @@ $langDict = is_array($langDict) ? $langDict : [];
           }
           return list;
         },
+        paginatedProducts() {
+          const start = (this.page - 1) * this.perPage;
+          return this.filteredProducts.slice(start, start + this.perPage);
+        },
+        totalPages() { return Math.ceil(this.filteredProducts.length / this.perPage) || 1; },
         accentBg() { return { indigo: 'bg-primary', emerald: 'bg-primary', slate: 'bg-dark-2' }[this.settings.theme_color] || 'bg-primary'; },
         accentBorder() { return { indigo: 'border-primary', emerald: 'border-primary', slate: 'border-dark-2' }[this.settings.theme_color] || 'border-primary'; }
       },
@@ -854,11 +919,11 @@ $langDict = is_array($langDict) ? $langDict : [];
           this.dense = !this.dense;
           localStorage.setItem('tmopro_dense', this.dense ? '1' : '0');
         },
-        toggleCategory(category) { this.selectedCategories = this.toggle(this.selectedCategories, category); },
-        toggleBrand(brand) { this.selectedBrands = this.toggle(this.selectedBrands, brand); },
+        toggleCategory(category) { this.selectedCategories = this.toggle(this.selectedCategories, category); this.page = 1; },
+        toggleBrand(brand) { this.selectedBrands = this.toggle(this.selectedBrands, brand); this.page = 1; },
         toggle(list, value) { return list.includes(value) ? list.filter(item => item !== value) : [...list, value]; },
         countBy(field, value) { return this.products.filter(product => product[field] === value).length; },
-        resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; this.showFavoritesOnly = false; this.minPrice = ''; this.maxPrice = ''; this.showInStockOnly = false; },
+        resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; this.showFavoritesOnly = false; this.minPrice = ''; this.maxPrice = ''; this.showInStockOnly = false; this.page = 1; },
         isFavorite(id) { return this.favorites.includes(id); },
         toggleFavorite(id) {
           const product = this.products.find(p => p.id === id);
@@ -870,6 +935,16 @@ $langDict = is_array($langDict) ? $langDict : [];
             this.showToast((product?.name || 'Товар') + ' добавлен в избранное');
           }
           localStorage.setItem('tmopro_favorites', JSON.stringify(this.favorites));
+        },
+        isInCompare(id) { return this.compareList.includes(id); },
+        toggleCompare(id) {
+          if (this.compareList.includes(id)) {
+            this.compareList = this.compareList.filter(cid => cid !== id);
+          } else {
+            if (this.compareList.length >= 4) { this.showToast('Максимум 4 товара для сравнения'); return; }
+            this.compareList = [...this.compareList, id];
+          }
+          localStorage.setItem('tmopro_compare', JSON.stringify(this.compareList));
         },
         t(key) { return (this.langDict[this.lang] && this.langDict[this.lang][key]) ? this.langDict[this.lang][key] : (this.langDict['ru'] && this.langDict['ru'][key] ? this.langDict['ru'][key] : key); },
         setLang(l) {
@@ -925,5 +1000,9 @@ $langDict = is_array($langDict) ? $langDict : [];
     </div>
   </footer>
 
+  <!-- Floating WhatsApp Button -->
+  <a v-if="settings.phone" :href="'https://wa.me/' + settings.phone.replace(/\D/g, '')" target="_blank" class="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition" style="width:56px;height:56px;" title="WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
 </body>
 </html>
