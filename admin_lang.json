@@ -110,7 +110,9 @@
     "block_cta": "Призыв к действию",
     "move_up": "↑ Вверх",
     "move_down": "↓ Вниз",
-    "preview": "Предпросмотр"
+    "preview": "Предпросмотр",
+    "retail": "Розница",
+    "product": "Товар"
   },
   "zh": {
     "tab_overview": "概览",
@@ -223,7 +225,9 @@
     "block_cta": "行动号召",
     "move_up": "↑ 上移",
     "move_down": "↓ 下移",
-    "preview": "预览"
+    "preview": "预览",
+    "retail": "零售价",
+    "product": "产品"
   },
   "ky": {
     "tab_overview": "Башкы бөлүк",
@@ -336,6 +340,8 @@
     "block_cta": "Аргымаш",
     "move_up": "↑ Үстүнө",
     "move_down": "↓ Төмөн",
-    "preview": "Алдын ала көрүү"
+    "preview": "Алдын ала көрүү",
+    "retail": "Бөлүштүрүү",
+    "product": "Товар"
   }
 }

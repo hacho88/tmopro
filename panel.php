@@ -987,13 +987,19 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
               </div>
               <div style="min-width:260px;flex:0 0 auto;">
                 <div style="display:flex;justify-content:space-between;gap:12px;font-weight:1000;">
-                  <div style="color:#64748b;">Итого</div>
+                  <div style="color:#64748b;"><?= admin_t('total') ?></div>
                   <div><?= e(number_format((float)$o['total'], 0, ',', ' ')) ?> ₽</div>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#059669;font-weight:900;margin-top:6px;">
-                  <div>Розница</div>
+                  <div><?= admin_t('retail') ?></div>
                   <div><?= e(number_format((float)$o['total_base'], 0, ',', ' ')) ?> ₽</div>
                 </div>
+                <?php if (!empty($o['city']) || !empty($o['address'])): ?>
+                <div style="margin-top:8px;padding:8px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;color:#64748b;font-weight:800;">
+                  <span style="color:#0f172a;font-weight:900;">📍 <?= admin_t('delivery_address') ?>:</span> <?= e($o['city'] ?? '') ?><?= ($o['city'] && $o['address']) ? ', ' : '' ?><?= e($o['address'] ?? '') ?><?= ($o['zip']) ? ' (' . e($o['zip']) . ')' : '' ?>
+                  <?php if (!empty($o['delivery_note'])): ?><br><span style="color:#059669;">📝 <?= e($o['delivery_note']) ?></span><?php endif; ?>
+                </div>
+                <?php endif; ?>
                 <form method="post" style="margin-top:10px;">
                   <input type="hidden" name="action" value="update_order_status">
                   <input type="hidden" name="order_id" value="<?= e($oid) ?>">
@@ -1003,9 +1009,9 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                         <option value="<?= e($k) ?>" <?= ($o['status'] ?? '')===$k?'selected':'' ?>><?= e($v) ?></option>
                       <?php endforeach; ?>
                     </select>
-                    <button class="btn btn-dark" style="height:42px;">Обновить</button>
+                    <button class="btn btn-dark" style="height:42px;">💾 <?= admin_t('save') ?></button>
                   </div>
-                  <input name="status_note" class="field" style="margin-top:6px;height:36px;font-size:12px;" placeholder="Комментарий к статусу (виден клиенту в письме)">
+                  <input name="status_note" class="field" style="margin-top:6px;height:36px;font-size:12px;" placeholder="<?= admin_t('delivery_note') ?>">
                 </form>
               </div>
             </div>
@@ -1014,10 +1020,10 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
             <?php if (!empty($items)): ?>
               <div style="margin-top:14px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
                 <div style="display:grid;grid-template-columns:1.2fr 90px 120px 120px;gap:0;">
-                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;">Товар</div>
-                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:center;">Кол-во</div>
-                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:right;">Цена</div>
-                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:right;">Сумма</div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;"><?= admin_t('product') ?></div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:center;"><?= admin_t('qty') ?></div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:right;"><?= admin_t('price') ?></div>
+                  <div style="padding:10px 12px;color:#64748b;font-size:12px;font-weight:1000;text-align:right;"><?= admin_t('total') ?></div>
                 </div>
                 <?php foreach ($items as $it): ?>
                   <div style="display:grid;grid-template-columns:1.2fr 90px 120px 120px;border-top:1px solid #e2e8f0;">
