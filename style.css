@@ -50,6 +50,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 a { color: inherit; text-decoration: none; }
 button { border: 0; cursor: pointer; font: inherit; background: none; }
@@ -212,7 +213,7 @@ img { max-width: 100%; display: block; }
 .font-extrabold { font-weight: 800; }
 .font-black { font-weight: 900; }
 .tracking-tight { letter-spacing: -0.02em; }
-.tracking-tighter { letter-spacing: -0.04em; }
+.tracking-tighter { letter-spacing: -0.02em; }
 .tracking-wide { letter-spacing: 0.05em; }
 .tracking-wider { letter-spacing: 0.1em; }
 .text-center { text-align: center; }
@@ -403,7 +404,7 @@ img { max-width: 100%; display: block; }
     linear-gradient(135deg, rgba(241,245,249,1), rgba(226,232,240,1));
 }
 .category-body { min-width: 0; display: block; }
-.category-title { display: block; font-size: 14px; font-weight: 1000; color: var(--gray-900); letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.category-title { display: block; font-size: 14px; font-weight: 900; color: var(--gray-900); letter-spacing: -0.005em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .category-meta { display: block; margin-top: 4px; font-size: 12px; font-weight: 800; color: var(--gray-500); }
 .category-icon {
   width: 40px;
@@ -638,16 +639,16 @@ img { max-width: 100%; display: block; }
 .lux-kicker {
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(229,201,139,0.84);
   margin-bottom: 14px;
 }
 .lux-title {
   margin: 0;
-  line-height: 0.96;
-  letter-spacing: -0.02em;
-  font-weight: 1000;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-weight: 900;
   font-size: 56px;
 }
 .lux-title-strong { display: block; color: rgba(255,255,255,0.92); }
