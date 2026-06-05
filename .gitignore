@@ -30,5 +30,11 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Backups
+backups/
+
+# New product uploads
+uploads/products/new/
+
 # Logs
 *.log
