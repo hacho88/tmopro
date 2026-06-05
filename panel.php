@@ -914,8 +914,8 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h2 style="font-size:20px;">Заказы</h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;">Заявки из корзины. <?= count($orders) ?> на экране.</p>
+          <h2 style="font-size:20px;">📦 <?= admin_t('tab_orders') ?></h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;"><?= count($orders) ?> <?= admin_t('tab_orders') ?></p>
         </div>
       </div>
 
@@ -929,7 +929,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
       <!-- Status Filter -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-        <a href="panel.php?tab=orders<?= $searchOrder !== '' ? '&q=' . e($searchOrder) : '' ?>" class="chip <?= $filterStatus==='' ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;">Все <?= array_sum($statusCounts) ?></a>
+        <a href="panel.php?tab=orders<?= $searchOrder !== '' ? '&q=' . e($searchOrder) : '' ?>" class="chip <?= $filterStatus==='' ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;"><?= admin_t('all') ?> <?= array_sum($statusCounts) ?></a>
         <?php foreach ($statusMap as $k => $v): ?>
           <a href="panel.php?tab=orders&order_status=<?= e($k) ?>" class="chip <?= $filterStatus===$k ? 'chip-active' : 'chip-default' ?>" style="text-decoration:none;<?= $filterStatus===$k ? '' : 'border-left:3px solid '.e($statusColors[$k]).';' ?>">
             <?= e($v) ?> <?= (int)($statusCounts[$k] ?? 0) ?>
@@ -938,11 +938,11 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       </div>
 
       <?php if (!$pdo): ?>
-        <div class="msg err">База не подключена. Нужно задать переменные окружения TMOPRO_DB_HOST / TMOPRO_DB_NAME / TMOPRO_DB_USER / TMOPRO_DB_PASS.</div>
+        <div class="msg err">База не подключена.</div>
       <?php endif; ?>
 
       <?php if (empty($orders)): ?>
-        <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;">Пока нет заказов.</div>
+        <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;"><?= admin_t('tab_orders') ?> — 0</div>
       <?php else: ?>
         <form method="post" id="bulkStatusForm" style="margin-bottom:12px;">
           <input type="hidden" name="action" value="bulk_update_order_status">
@@ -952,7 +952,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                 <option value="<?= e($k) ?>"><?= e($v) ?></option>
               <?php endforeach; ?>
             </select>
-            <button type="submit" class="btn btn-dark" style="height:40px;" onclick="return confirm('Изменить статус выбранных заказов?')">Применить к выбранным</button>
+            <button type="submit" class="btn btn-dark" style="height:40px;" onclick="return confirm('<?= admin_t('confirm') ?>?')"><?= admin_t('apply_selected') ?></button>
           </div>
         </form>
 
@@ -962,9 +962,9 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
               <div style="display:flex;align-items:flex-start;gap:10px;">
                 <input type="checkbox" name="bulk_order_ids[]" value="<?= e($oid) ?>" form="bulkStatusForm" style="margin-top:4px; width:18px; height:18px; accent-color:#0f172a; cursor:pointer;">
                 <div>
-                  <div style="font-size:12px;font-weight:900;color:#64748b;">Заказ #<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
+                  <div style="font-size:12px;font-weight:900;color:#64748b;">#<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
                 <div style="font-size:18px;font-weight:1000;margin-top:6px;"><?= e($o['company_name'] ?: '—') ?></div>
-                <div style="margin-top:6px;font-size:13px;color:#64748b;font-weight:800;">ИНН: <?= e($o['inn'] ?: '—') ?> · Контакт: <?= e($o['contact_person'] ?: '—') ?> · <?= e($o['phone'] ?: '—') ?> · <?= e($o['email'] ?: '—') ?></div>
+                <div style="margin-top:6px;font-size:13px;color:#64748b;font-weight:800;"><?= admin_t('inn') ?>: <?= e($o['inn'] ?: '—') ?> · <?= admin_t('contact_person') ?>: <?= e($o['contact_person'] ?: '—') ?> · <?= e($o['phone'] ?: '—') ?> · <?= e($o['email'] ?: '—') ?></div>
                 </div>
               </div>
               <div style="min-width:260px;flex:0 0 auto;">
@@ -1306,10 +1306,10 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
         <div>
-          <h2 style="font-size:20px;">Товары</h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;">Одна карточка — один товар. После правок нажмите «Сохранить каталог».</p>
+          <h2 style="font-size:20px;">🛒 <?= admin_t('tab_products') ?></h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;"><?= admin_t('save_catalog') ?></p>
         </div>
-        <form method="post"><input type="hidden" name="action" value="add_product"><button class="btn btn-dark">+ Добавить</button></form>
+        <form method="post"><input type="hidden" name="action" value="add_product"><button class="btn btn-dark">+ <?= admin_t('add_product') ?></button></form>
       </div>
 
       <form method="get" style="margin-bottom:16px;display:flex;gap:8px;">
