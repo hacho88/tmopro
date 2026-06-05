@@ -584,6 +584,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         $tab = 'blocks';
     }
 
+    if ($action === 'reorder_blocks') {
+        $blocksPath = __DIR__ . '/blocks.json';
+        $blocks = file_exists($blocksPath) ? json_decode(file_get_contents($blocksPath), true) : [];
+        $order = array_map('intval', (array)($_POST['block_order'] ?? []));
+        if (is_array($blocks) && count($order) === count($blocks)) {
+            $newBlocks = [];
+            foreach ($order as $idx) {
+                if (isset($blocks[$idx])) $newBlocks[] = $blocks[$idx];
+            }
+            if (count($newBlocks) === count($blocks)) {
+                save_json($blocksPath, $newBlocks);
+                $success = admin_t('save');
+            }
+        }
+        $tab = 'blocks';
+    }
+
     if ($action === 'import_products_csv') {
         $file = $_FILES['csv_file'] ?? null;
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
@@ -773,6 +790,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   opacity: .55;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -1738,45 +1756,70 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <h2 style="font-size:20px;margin-bottom:8px;">🧩 <?= admin_t('blocks_title') ?></h2>
       <p style="color:#64748b;font-size:13px;margin-bottom:20px;"><?= admin_t('blocks_desc') ?></p>
 
-      <form method="post" style="margin-bottom:24px;">
-        <input type="hidden" name="action" value="save_blocks">
-        <div style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Drag-and-drop reorder form -->
+      <form method="post" style="margin-bottom:24px;" id="reorderForm">
+        <input type="hidden" name="action" value="reorder_blocks">
+        <div id="sortable-blocks" style="display:flex;flex-direction:column;gap:16px;">
           <?php foreach ($blocks as $i => $b): ?>
-            <div style="background:#f8fafc;border-radius:16px;padding:20px;border:2px solid #e2e8f0;">
+            <div data-idx="<?= $i ?>" style="background:#f8fafc;border-radius:16px;padding:20px;border:2px solid #e2e8f0;cursor:move;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <span style="font-size:14px;font-weight:900;color:#0f172a;">#<?= $i+1 ?> <?= e($blockTypes[$b['type'] ?? ''] ?? $b['type'] ?? '') ?></span>
-                <div style="display:flex;gap:6px;">
-                  <?php if ($i > 0): ?>
-                    <button type="submit" form="moveUp<?= $i ?>" class="btn" style="padding:6px 10px;font-size:12px;">↑</button>
-                  <?php endif; ?>
-                  <?php if ($i < count($blocks) - 1): ?>
-                    <button type="submit" form="moveDown<?= $i ?>" class="btn" style="padding:6px 10px;font-size:12px;">↓</button>
-                  <?php endif; ?>
-                  <button type="submit" form="delBlock<?= $i ?>" class="btn btn-red" style="padding:6px 10px;font-size:12px;" onclick="return confirm('<?= admin_t('delete') ?>?')">🗑️</button>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:18px;cursor:grab;">☰</span>
+                  <span style="font-size:14px;font-weight:900;color:#0f172a;">#<?= $i+1 ?> <?= e($blockTypes[$b['type'] ?? ''] ?? $b['type'] ?? '') ?></span>
                 </div>
+                <button type="submit" form="delBlock<?= $i ?>" class="btn btn-red" style="padding:6px 10px;font-size:12px;" onclick="return confirm('<?= admin_t('delete') ?>?')">🗑️</button>
               </div>
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-                <input type="hidden" name="block_type[]" value="<?= e($b['type'] ?? '') ?>">
-                <label><span style="font-size:12px;font-weight:800;color:#64748b;">📝 <?= admin_t('name') ?></span>
-                  <input name="block_title[]" value="<?= e($b['title'] ?? '') ?>" class="field" placeholder="Заголовок блока">
-                </label>
-                <label><span style="font-size:12px;font-weight:800;color:#64748b;">📄 Подзаголовок / Описание</span>
-                  <input name="block_subtitle[]" value="<?= e($b['subtitle'] ?? '') ?>" class="field" placeholder="Подзаголовок">
-                </label>
-                <label style="grid-column:1/-1;"><span style="font-size:12px;font-weight:800;color:#64748b;">📝 Содержимое (HTML)</span>
-                  <textarea name="block_content[]" rows="4" class="field" placeholder="Текст, HTML, описание..."><?= e($b['content'] ?? '') ?></textarea>
-                </label>
-                <label><span style="font-size:12px;font-weight:800;color:#64748b;">🔘 Текст кнопки</span>
-                  <input name="block_button[]" value="<?= e($b['button_text'] ?? '') ?>" class="field" placeholder="Например: Перейти в каталог">
-                </label>
-                <label><span style="font-size:12px;font-weight:800;color:#64748b;">🔗 Ссылка кнопки</span>
-                  <input name="block_link[]" value="<?= e($b['button_link'] ?? '') ?>" class="field" placeholder="index.php или https://...">
-                </label>
+                <input type="hidden" name="block_order[]" value="<?= $i ?>">
+                <div><span style="font-size:12px;font-weight:800;color:#64748b;">📝 <?= admin_t('name') ?></span><div class="field" style="background:#fff;padding:8px 12px;font-size:13px;"><?= e($b['title'] ?? '') ?: '—' ?></div></div>
+                <div><span style="font-size:12px;font-weight:800;color:#64748b;">📄 Подзаголовок</span><div class="field" style="background:#fff;padding:8px 12px;font-size:13px;"><?= e($b['subtitle'] ?? '') ?: '—' ?></div></div>
+                <div style="grid-column:1/-1;"><span style="font-size:12px;font-weight:800;color:#64748b;">📝 Тип: <?= e($b['type'] ?? '') ?></span><div class="field" style="background:#fff;padding:8px 12px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= e(mb_substr($b['content'] ?? '', 0, 120)) ?><?= mb_strlen($b['content'] ?? '') > 120 ? '...' : '' ?></div></div>
               </div>
             </div>
           <?php endforeach; ?>
         </div>
-        <button class="btn" style="margin-top:12px;">💾 <?= admin_t('save') ?></button>
+        <?php if (count($blocks) > 1): ?>
+          <button class="btn" style="margin-top:12px;">💾 <?= admin_t('save') ?> <?= admin_t('tab_blocks') ?></button>
+        <?php endif; ?>
+      </form>
+      <script>
+        if (document.getElementById('sortable-blocks')) {
+          new Sortable(document.getElementById('sortable-blocks'), {
+            animation: 200,
+            handle: '[style*="cursor:grab"]',
+            onEnd: function() {
+              const items = document.querySelectorAll('#sortable-blocks > [data-idx]');
+              items.forEach((el, i) => {
+                const input = el.querySelector('input[name="block_order[]"]');
+                if (input) input.value = el.dataset.idx;
+              });
+            }
+          });
+        }
+      </script>
+
+      <!-- Edit blocks content -->
+      <form method="post" style="margin-bottom:24px;">
+        <input type="hidden" name="action" value="save_blocks">
+        <details>
+          <summary style="font-size:14px;font-weight:900;color:#0f172a;cursor:pointer;padding:12px 0;">✏️ <?= admin_t('edit') ?> <?= admin_t('tab_blocks') ?></summary>
+          <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px;">
+            <?php foreach ($blocks as $i => $b): ?>
+              <div style="background:#f8fafc;border-radius:16px;padding:20px;border:2px solid #e2e8f0;">
+                <div style="font-size:12px;font-weight:900;color:#64748b;margin-bottom:12px;">#<?= $i+1 ?> <?= e($blockTypes[$b['type'] ?? ''] ?? $b['type'] ?? '') ?></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                  <input type="hidden" name="block_type[]" value="<?= e($b['type'] ?? '') ?>">
+                  <label><span style="font-size:12px;font-weight:800;color:#64748b;">📝 <?= admin_t('name') ?></span><input name="block_title[]" value="<?= e($b['title'] ?? '') ?>" class="field" placeholder="Заголовок"></label>
+                  <label><span style="font-size:12px;font-weight:800;color:#64748b;">📄 Подзаголовок</span><input name="block_subtitle[]" value="<?= e($b['subtitle'] ?? '') ?>" class="field" placeholder="Подзаголовок"></label>
+                  <label style="grid-column:1/-1;"><span style="font-size:12px;font-weight:800;color:#64748b;">📝 Содержимое (HTML)</span><textarea name="block_content[]" rows="4" class="field" placeholder="Текст, HTML..."><?= e($b['content'] ?? '') ?></textarea></label>
+                  <label><span style="font-size:12px;font-weight:800;color:#64748b;">🔘 Кнопка</span><input name="block_button[]" value="<?= e($b['button_text'] ?? '') ?>" class="field" placeholder="Текст кнопки"></label>
+                  <label><span style="font-size:12px;font-weight:800;color:#64748b;">🔗 Ссылка</span><input name="block_link[]" value="<?= e($b['button_link'] ?? '') ?>" class="field" placeholder="index.php"></label>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <button class="btn" style="margin-top:12px;">💾 <?= admin_t('save') ?></button>
+        </details>
       </form>
 
       <!-- Add new block -->
@@ -1807,20 +1850,6 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       </form>
 
       <?php foreach ($blocks as $i => $b): ?>
-        <?php if ($i > 0): ?>
-          <form method="post" id="moveUp<?= $i ?>" style="display:none;">
-            <input type="hidden" name="action" value="move_block">
-            <input type="hidden" name="block_idx" value="<?= $i ?>">
-            <input type="hidden" name="direction" value="up">
-          </form>
-        <?php endif; ?>
-        <?php if ($i < count($blocks) - 1): ?>
-          <form method="post" id="moveDown<?= $i ?>" style="display:none;">
-            <input type="hidden" name="action" value="move_block">
-            <input type="hidden" name="block_idx" value="<?= $i ?>">
-            <input type="hidden" name="direction" value="down">
-          </form>
-        <?php endif; ?>
         <form method="post" id="delBlock<?= $i ?>" style="display:none;">
           <input type="hidden" name="action" value="delete_block">
           <input type="hidden" name="block_idx" value="<?= $i ?>">
