@@ -78,12 +78,16 @@ $defaultSettings = [
     'phone' => '+7 (966) 085-34-70',
     'phone2' => '+7 (925) 536-07-22',
     'phone3' => '+7 (926) 869-04-28',
+    'whatsapp' => '',
     'email_manager' => 'info@tmopro.ru',
+    'address' => '',
     'theme_color' => 'emerald',
     'default_view' => 'table',
     'logo_type' => 'image',
     'logo_text' => 'TMOPRO',
     'logo_url' => 'logo.svg',
+    'favicon' => '',
+    'font_family' => 'Inter',
     'background_type' => 'gradient',
     'background_color' => '#f8fafc',
     'background_image' => '',
@@ -123,12 +127,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
             'site_name' => trim($_POST['site_name'] ?? $settings['site_name']),
             'site_short_name' => trim($_POST['site_short_name'] ?? $settings['site_short_name']),
             'phone' => trim($_POST['phone'] ?? $settings['phone']),
+            'phone2' => trim($_POST['phone2'] ?? $settings['phone2']),
+            'phone3' => trim($_POST['phone3'] ?? $settings['phone3']),
+            'whatsapp' => trim($_POST['whatsapp'] ?? $settings['whatsapp']),
             'email_manager' => trim($_POST['email_manager'] ?? $settings['email_manager']),
+            'address' => trim($_POST['address'] ?? $settings['address']),
             'theme_color' => in_array($_POST['theme_color'] ?? '', ['indigo','emerald','slate']) ? $_POST['theme_color'] : 'indigo',
             'default_view' => in_array($_POST['default_view'] ?? '', ['table','grid']) ? $_POST['default_view'] : 'table',
             'logo_type' => in_array($_POST['logo_type'] ?? '', ['text','image']) ? $_POST['logo_type'] : 'text',
             'logo_text' => trim($_POST['logo_text'] ?? 'TMO'),
             'logo_url' => trim($_POST['logo_url'] ?? ''),
+            'favicon' => trim($_POST['favicon'] ?? ''),
+            'font_family' => in_array($_POST['font_family'] ?? '', ['Inter','Roboto','Open Sans','Manrope','Noto Sans']) ? $_POST['font_family'] : 'Inter',
             'background_type' => in_array($_POST['background_type'] ?? '', ['gradient','solid','image']) ? $_POST['background_type'] : 'gradient',
             'background_color' => trim($_POST['background_color'] ?? '#f8fafc'),
             'background_image' => trim($_POST['background_image'] ?? ''),
@@ -139,6 +149,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
             $logo = handle_upload('logo_file', 'logos');
             if ($logo && !str_starts_with($logo, 'err_')) { $settings['logo_url'] = $logo; $settings['logo_type'] = 'image'; }
             elseif ($logo) $error = 'Ошибка загрузки логотипа: ' . $logo;
+        }
+        if (!empty($_FILES['favicon_file']['tmp_name'])) {
+            $fav = handle_upload('favicon_file', 'uploads');
+            if ($fav && !str_starts_with($fav, 'err_')) { $settings['favicon'] = $fav; }
+            elseif ($fav) $error = 'Ошибка загрузки favicon: ' . $fav;
         }
         if (!empty($_FILES['bg_file']['tmp_name'])) {
             $bg = handle_upload('bg_file', 'backgrounds');
@@ -1342,8 +1357,21 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
         <label><span>Название сайта</span><input name="site_name" value="<?= e($settings['site_name']) ?>" class="field"></label>
         <label><span>Короткое имя</span><input name="site_short_name" value="<?= e($settings['site_short_name']) ?>" class="field"></label>
-        <label><span>Телефон</span><input name="phone" value="<?= e($settings['phone']) ?>" class="field"></label>
+        <label><span>Телефон 1</span><input name="phone" value="<?= e($settings['phone']) ?>" class="field"></label>
+        <label><span>Телефон 2</span><input name="phone2" value="<?= e($settings['phone2']) ?>" class="field"></label>
+        <label><span>Телефон 3</span><input name="phone3" value="<?= e($settings['phone3']) ?>" class="field"></label>
+        <label><span>WhatsApp</span><input name="whatsapp" value="<?= e($settings['whatsapp']) ?>" class="field" placeholder="+7... (без + и пробелов)"></label>
         <label><span>Email менеджера</span><input name="email_manager" type="email" value="<?= e($settings['email_manager']) ?>" class="field"></label>
+        <label><span>Адрес компании</span><textarea name="address" rows="2" class="field"><?= e($settings['address']) ?></textarea></label>
+        <label><span>Шрифт сайта</span>
+          <select name="font_family" class="field">
+            <option value="Inter" <?= $settings['font_family']==='Inter'?'selected':'' ?>>Inter</option>
+            <option value="Roboto" <?= $settings['font_family']==='Roboto'?'selected':'' ?>>Roboto</option>
+            <option value="Open Sans" <?= $settings['font_family']==='Open Sans'?'selected':'' ?>>Open Sans</option>
+            <option value="Manrope" <?= $settings['font_family']==='Manrope'?'selected':'' ?>>Manrope</option>
+            <option value="Noto Sans" <?= $settings['font_family']==='Noto Sans'?'selected':'' ?>>Noto Sans</option>
+          </select>
+        </label>
         <label><span>Цвет темы</span>
           <select name="theme_color" class="field">
             <option value="indigo" <?= $settings['theme_color']==='indigo'?'selected':'' ?>>Индиго</option>
@@ -1367,6 +1395,9 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <label style="grid-column:1/-1;"><span>Ссылка на логотип</span><input name="logo_url" value="<?= e($settings['logo_url']) ?>" placeholder="logo.png" class="field"></label>
         <label style="grid-column:1/-1;"><span>Или загрузить логотип</span><input type="file" name="logo_file" accept="image/*" class="field" style="padding:8px;"></label>
         <?php if ($settings['logo_url']): ?><div style="grid-column:1/-1;"><img src="<?= e($settings['logo_url']) ?>" style="max-height:60px;border-radius:8px;"></div><?php endif; ?>
+        <label><span>Favicon (ссылка)</span><input name="favicon" value="<?= e($settings['favicon']) ?>" placeholder="favicon.ico или .png" class="field"></label>
+        <label style="grid-column:1/-1;"><span>Или загрузить favicon</span><input type="file" name="favicon_file" accept="image/*" class="field" style="padding:8px;"></label>
+        <?php if ($settings['favicon']): ?><div style="grid-column:1/-1;"><img src="<?= e($settings['favicon']) ?>" style="max-height:32px;border-radius:4px;"></div><?php endif; ?>
         <label><span>Тип фона</span>
           <select name="background_type" class="field">
             <option value="gradient" <?= $settings['background_type']==='gradient'?'selected':'' ?>>Градиент</option>
