@@ -2,6 +2,10 @@
 session_start();
 $b2bUser = !empty($_SESSION['b2b_user_id']);
 $b2bName = $_SESSION['b2b_user_name'] ?? '';
+
+$pagesPath = __DIR__ . '/pages.json';
+$footerPages = file_exists($pagesPath) ? json_decode(file_get_contents($pagesPath), true) : [];
+$footerPages = is_array($footerPages) ? $footerPages : [];
 ?>
 <!doctype html>
 <html lang="ru">
@@ -17,6 +21,8 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
   <meta property="og:description" content="Премиальные решения для водоснабжения и отопления. Смесители, запорная арматура, трубы и фитинги оптом от производителя.">
   <meta property="og:url" content="https://tmopro.ru/">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://tmopro.ru/">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://tmopro.ru/sitemap.php">
   <meta name="theme-color" content="#008A4E">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -604,5 +610,18 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
       window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     }
   </script>
+
+  <footer class="container py-12 border-t border-gray-100 mt-12">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="text-sm font-extrabold text-gray-900"><?= htmlspecialchars($settings['site_short_name'] ?? 'TMOPRO', ENT_QUOTES, 'UTF-8') ?></div>
+      <div class="flex flex-wrap items-center gap-6">
+        <?php foreach ($footerPages as $fp): ?>
+          <a href="page.php?slug=<?= htmlspecialchars($fp['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition"><?= htmlspecialchars($fp['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></a>
+        <?php endforeach; ?>
+      </div>
+      <div class="text-sm font-bold text-gray-400">© <?= date('Y') ?> TMOPRO</div>
+    </div>
+  </footer>
+
 </body>
 </html>

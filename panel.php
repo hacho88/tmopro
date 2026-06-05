@@ -49,6 +49,7 @@ function tmopro_db_safe() {
 $settingsPath = __DIR__ . '/settings.json';
 $productsPath = __DIR__ . '/products.json';
 $categoriesPath = __DIR__ . '/categories.json';
+$pagesPath = __DIR__ . '/pages.json';
 $categories = read_json($categoriesPath, []);
 
 $defaultSettings = [
@@ -72,6 +73,7 @@ $defaultSettings = [
 
 $settings = array_merge($defaultSettings, read_json($settingsPath, $defaultSettings));
 $products = read_json($productsPath, []);
+$pages = read_json($pagesPath, []);
 $tab = $_GET['tab'] ?? 'overview';
 $error = '';
 $success = '';
@@ -360,6 +362,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
         exit;
     }
 
+    if ($action === 'save_pages') {
+        $pagesPath = __DIR__ . '/pages.json';
+        $slugs = $_POST['page_slug'] ?? [];
+        $titles = $_POST['page_title'] ?? [];
+        $contents = $_POST['page_content'] ?? [];
+        $metas = $_POST['page_meta'] ?? [];
+        $saved = [];
+        foreach ($slugs as $i => $slug) {
+            $slug = trim((string)$slug);
+            if ($slug === '') continue;
+            $saved[] = [
+                'slug' => $slug,
+                'title' => trim((string)($titles[$i] ?? '')),
+                'content' => trim((string)($contents[$i] ?? '')),
+                'meta' => trim((string)($metas[$i] ?? '')),
+            ];
+        }
+        if (save_json($pagesPath, $saved)) {
+            $success = 'Страницы сохранены.';
+        } else {
+            $error = 'Не удалось сохранить страницы.';
+        }
+        $tab = 'pages';
+    }
+
+    if ($action === 'add_page') {
+        $pagesPath = __DIR__ . '/pages.json';
+        $pages = file_exists($pagesPath) ? json_decode(file_get_contents($pagesPath), true) : [];
+        $pages = is_array($pages) ? $pages : [];
+        $pages[] = ['slug' => 'new-page', 'title' => 'Новая страница', 'content' => '<p>Содержимое страницы...</p>', 'meta' => ''];
+        save_json($pagesPath, $pages);
+        $success = 'Страница добавлена.';
+        $tab = 'pages';
+    }
+
+    if ($action === 'delete_page') {
+        $did = trim((string)($_POST['delete_slug'] ?? ''));
+        $pagesPath = __DIR__ . '/pages.json';
+        $pages = file_exists($pagesPath) ? json_decode(file_get_contents($pagesPath), true) : [];
+        $pages = is_array($pages) ? $pages : [];
+        $pages = array_values(array_filter($pages, fn($p) => ($p['slug'] ?? '') !== $did));
+        save_json($pagesPath, $pages);
+        $success = 'Страница удалена.';
+        $tab = 'pages';
+    }
+
     if ($action === 'import_products_csv') {
         $file = $_FILES['csv_file'] ?? null;
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
@@ -590,6 +638,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <a href="panel.php?tab=clients" class="<?= $tab==='clients'?'active':'' ?>">Клиенты</a>
     <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
     <a href="panel.php?tab=import" class="<?= $tab==='import'?'active':'' ?>">Импорт/Экспорт</a>
+    <a href="panel.php?tab=pages" class="<?= $tab==='pages'?'active':'' ?>">Страницы</a>
   </div>
 
   <?php if ($tab === 'overview'): ?>
@@ -1104,6 +1153,50 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           </div>
         </div>
       </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'pages'): ?>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:20px;">Контентные страницы</h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Управление страницами сайта (О компании, Доставка и т.д.). Slug используется в URL: page.php?slug=...</p>
+        </div>
+        <form method="post" style="display:inline;">
+          <input type="hidden" name="action" value="add_page">
+          <button class="btn btn-dark">Добавить страницу</button>
+        </form>
+      </div>
+
+      <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="save_pages">
+        <?php foreach ($pages as $idx => $p): ?>
+          <div class="card" style="padding:16px;margin-bottom:12px;background:#f8fafc;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px;">
+              <label><span>Slug (URL) *</span><input name="page_slug[]" value="<?= e($p['slug'] ?? '') ?>" class="field" required></label>
+              <label><span>Заголовок</span><input name="page_title[]" value="<?= e($p['title'] ?? '') ?>" class="field"></label>
+              <label><span>Meta description</span><input name="page_meta[]" value="<?= e($p['meta'] ?? '') ?>" class="field"></label>
+              <div style="display:flex;align-items:flex-end;gap:8px;">
+                <a href="page.php?slug=<?= e($p['slug'] ?? '') ?>" target="_blank" class="btn btn-dark" style="height:42px;font-size:12px;text-decoration:none;">Открыть</a>
+                <button type="button" class="btn btn-ghost" style="height:42px;font-size:12px;" onclick="if(confirm('Удалить страницу?')){document.getElementById('delpage<?= $idx ?>').submit();}">Удалить</button>
+              </div>
+            </div>
+            <label><span>Содержимое (HTML)</span><textarea name="page_content[]" rows="4" class="field"><?= e($p['content'] ?? '') ?></textarea></label>
+          </div>
+        <?php endforeach; ?>
+        <?php if (empty($pages)): ?>
+          <p style="color:#64748b;font-size:14px;">Пока нет страниц. Добавьте первую выше.</p>
+        <?php endif; ?>
+        <button class="btn" style="margin-top:8px;">Сохранить страницы</button>
+      </form>
+
+      <?php foreach ($pages as $idx => $p): ?>
+        <form method="post" id="delpage<?= $idx ?>" style="display:none;">
+          <input type="hidden" name="action" value="delete_page">
+          <input type="hidden" name="delete_slug" value="<?= e($p['slug'] ?? '') ?>">
+        </form>
+      <?php endforeach; ?>
     </div>
   <?php endif; ?>
 

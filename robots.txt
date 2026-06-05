@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /panel.php
+Disallow: /admin.php
+Disallow: /login.php
+Disallow: /profile.php
+Disallow: /setup.php
+Disallow: /checkout.php
+Disallow: /send_order.php
+Disallow: /api/
+Disallow: /sql/
+
+Host: https://tmopro.ru
+Sitemap: https://tmopro.ru/sitemap.php

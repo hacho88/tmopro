@@ -64,6 +64,7 @@ $accentBg = $themeColor === 'indigo' ? 'bg-indigo-600' : ($themeColor === 'slate
   <meta property="og:url" content="https://tmopro.ru/product.php?id=<?= e($productId) ?>">
   <?php if ($productImage): ?><meta property="og:image" content="https://tmopro.ru/<?= e($productImage) ?>"><?php endif; ?>
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://tmopro.ru/sitemap.php">
   <meta name="theme-color" content="#008A4E">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
