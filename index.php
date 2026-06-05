@@ -15,7 +15,7 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=lux-gold-f">
+  <link rel="stylesheet" href="style.css?v=lux-gold-g">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -177,7 +177,8 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
             </div>
 
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Поиск по артикулу</label>
-            <input v-model.trim="search" type="text" placeholder="Например, Cu001" class="input mb-6">
+            <live-search v-model="search" @select="onSearchSelect"></live-search>
+            <div class="mb-4"></div>
 
             <div class="mb-6">
               <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Категория</div>
@@ -383,8 +384,119 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
       }
     };
 
+    const LiveSearch = {
+      props: ['modelValue'],
+      emits: ['update:modelValue', 'select'],
+      data() {
+        return {
+          query: this.modelValue || '',
+          results: [],
+          show: false,
+          activeIndex: -1,
+          loading: false,
+          debounceTimer: null
+        };
+      },
+      watch: {
+        modelValue(val) { this.query = val; }
+      },
+      template: `
+        <div class="live-search" style="position:relative;">
+          <input
+            v-model="query"
+            @input="onInput"
+            @keydown.down.prevent="moveDown"
+            @keydown.up.prevent="moveUp"
+            @keydown.enter.prevent="selectActive"
+            @keydown.esc="show = false"
+            @focus="onFocus"
+            @blur="onBlur"
+            type="text"
+            placeholder="Например, Cu001"
+            class="input"
+            style="width:100%;"
+            autocomplete="off"
+          >
+          <div v-if="loading" class="live-search-loader">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+          </div>
+          <div v-if="show && results.length" class="live-search-dropdown">
+            <a
+              v-for="(item, idx) in results"
+              :key="item.id"
+              :href="'product.php?id=' + item.id"
+              @mouseenter="activeIndex = idx"
+              :class="['live-search-item', idx === activeIndex ? 'is-active' : '']"
+              @click.prevent="goToProduct(item)"
+            >
+              <div class="live-search-img-wrap">
+                <img v-if="item.image" :src="item.image" class="live-search-img">
+                <div v-else class="live-search-img-placeholder"></div>
+              </div>
+              <div class="live-search-info">
+                <div class="live-search-name">{{ item.name }}</div>
+                <div class="live-search-meta">{{ item.article }} · {{ item.brand }} · {{ item.category }}</div>
+                <div class="live-search-price">{{ money(item.price_base) }}</div>
+              </div>
+            </a>
+          </div>
+          <div v-else-if="show && query.length >= 2 && !loading && !results.length" class="live-search-dropdown">
+            <div class="live-search-empty">Ничего не найдено</div>
+          </div>
+        </div>
+      `,
+      methods: {
+        money(value) {
+          return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
+        },
+        onInput() {
+          this.$emit('update:modelValue', this.query);
+          clearTimeout(this.debounceTimer);
+          if (this.query.length < 2) { this.results = []; this.show = false; return; }
+          this.loading = true;
+          this.debounceTimer = setTimeout(() => this.fetchResults(), 250);
+        },
+        async fetchResults() {
+          try {
+            const res = await fetch('api/search.php?q=' + encodeURIComponent(this.query) + '&limit=8');
+            const data = await res.json();
+            this.results = data.results || [];
+            this.activeIndex = -1;
+            this.show = true;
+          } catch (e) {
+            this.results = [];
+          } finally {
+            this.loading = false;
+          }
+        },
+        onFocus() {
+          if (this.query.length >= 2 && this.results.length) this.show = true;
+        },
+        onBlur() {
+          setTimeout(() => { this.show = false; }, 200);
+        },
+        moveDown() {
+          if (!this.results.length) return;
+          this.activeIndex = (this.activeIndex + 1) % this.results.length;
+        },
+        moveUp() {
+          if (!this.results.length) return;
+          this.activeIndex = (this.activeIndex - 1 + this.results.length) % this.results.length;
+        },
+        selectActive() {
+          if (this.activeIndex >= 0 && this.results[this.activeIndex]) {
+            this.goToProduct(this.results[this.activeIndex]);
+          }
+        },
+        goToProduct(item) {
+          this.$emit('select', item);
+          window.location.href = 'product.php?id=' + item.id;
+        }
+      }
+    };
+
     createApp({
-      components: { QtyControl, PriceBlock },
+      components: { QtyControl, PriceBlock, LiveSearch },
       data() {
         return {
           settings: { site_name: 'TMOPRO — Сантехника Оптом', site_short_name: 'TMOPRO', phone: '+7 (966) 085-34-70', email_manager: 'info@tmopro.ru', theme_color: 'emerald', default_view: 'table', logo_type: 'text', logo_text: 'TMO', logo_url: '', background_type: 'gradient', background_color: '#f8fafc', background_image: '', background_image_mobile: '', hero_title: 'Сантехника оптом от производителя. Все на одной площадке.', hero_subtitle: 'Подберите позиции, укажите количество и отправьте заявку на счет. Оптовая цена включается автоматически от 10 штук.' },
@@ -460,6 +572,9 @@ $b2bName = $_SESSION['b2b_user_name'] ?? '';
         toggle(list, value) { return list.includes(value) ? list.filter(item => item !== value) : [...list, value]; },
         countBy(field, value) { return this.products.filter(product => product[field] === value).length; },
         resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; },
+        onSearchSelect(item) {
+          this.search = item.article || item.name;
+        },
         addToCart(product) {
           const cart = JSON.parse(localStorage.getItem('tmopro_cart') || '[]');
           const amount = Number(this.qty[product.id] || 1);
