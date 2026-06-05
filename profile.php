@@ -206,6 +206,12 @@ $statusLabels = [
                   </div>
                 </div>
               <?php endif; ?>
+              <div class="border-t border-gray-100 pt-4 mt-4">
+                <button type="button" onclick="reorder(<?= htmlspecialchars(json_encode(array_map(fn($it)=>['id'=>$it['product_id']??0,'name'=>$it['name'],'article'=>$it['article']??'','brand'=>$it['brand']??'','category'=>$it['category']??'','price_base'=>$it['price_base']??0,'price_wholesale'=>$it['price_wholesale']??0,'image'=>'','qty'=>$it['qty']??1]), JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>)" class="inline-flex items-center gap-2 text-sm font-extrabold text-emerald-600 hover:text-emerald-800 transition cursor-pointer" style="background:none;border:none;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                  Повторить заказ
+                </button>
+              </div>
             </div>
           <?php endforeach; ?>
         </div>
@@ -218,5 +224,18 @@ $statusLabels = [
   © <?= date('Y') ?> <?= e($siteName) ?>
 </footer>
 
+<script>
+function reorder(items) {
+  const cart = JSON.parse(localStorage.getItem('tmopro_cart') || '[]');
+  for (const it of items) {
+    if (!it.id) continue;
+    const existing = cart.find(c => c.id === it.id);
+    if (existing) { existing.qty += Number(it.qty || 1); }
+    else { cart.push({ ...it, qty: Number(it.qty || 1) }); }
+  }
+  localStorage.setItem('tmopro_cart', JSON.stringify(cart));
+  window.location.href = 'index.php';
+}
+</script>
 </body>
 </html>

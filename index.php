@@ -106,6 +106,11 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
       </div>
     </header>
 
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+      <div v-for="(t, i) in toasts" :key="t.id" :class="['toast', t.visible ? 'show' : '']">{{ t.message }}</div>
+    </div>
+
     <!-- Hero -->
     <section class="lux-hero">
       <div class="lux-hero-bg" aria-hidden="true">
@@ -204,6 +209,17 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
             <div class="mb-4"></div>
 
             <div class="mb-6">
+              <button @click="showFavoritesOnly = !showFavoritesOnly"
+                :class="['chip w-full justify-between mb-2', showFavoritesOnly ? 'chip-active' : 'chip-default']">
+                <span class="flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  Только избранное
+                </span>
+                <span class="opacity-60" style="font-size: 11px;">{{ favoritesCount }}</span>
+              </button>
+            </div>
+
+            <div class="mb-6">
               <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Категория</div>
               <div class="space-y-2">
                 <div v-for="cat in categoryList" :key="cat.id">
@@ -288,7 +304,12 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                     <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
                   </td>
                   <td>
-                    <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">В корзину</button>
+                    <div class="flex items-center gap-2">
+                      <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">В корзину</button>
+                      <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -312,7 +333,12 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
                       <h3 class="text-lg font-extrabold leading-snug text-gray-900 hover:underline">{{ product.name }}</h3>
                     </a>
                   </div>
-                  <span class="badge badge-primary flex-shrink-0">{{ product.brand }}</span>
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'" @mousedown="$event.target.style.transform='scale(0.9)'" @mouseup="$event.target.style.transform='scale(1)'">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </button>
+                    <span class="badge badge-primary">{{ product.brand }}</span>
+                  </div>
                 </div>
                 <div class="flex items-center justify-between mb-4 p-3 rounded-xl bg-gray-50">
                   <span class="text-sm font-bold text-gray-500">{{ product.category }}</span>
@@ -544,7 +570,11 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           view: 'grid',
           dense: false,
           loading: true,
-          cartBump: false
+          cartBump: false,
+          showFavoritesOnly: false,
+          favorites: [],
+          toasts: [],
+          toastId: 0
         };
       },
       computed: {
@@ -569,12 +599,14 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
         brands() { return [...new Set(this.products.map(item => item.brand))]; },
         cart() { return JSON.parse(localStorage.getItem('tmopro_cart') || '[]'); },
         cartCount() { return this.cart.reduce((sum, item) => sum + Number(item.qty), 0); },
+        favoritesCount() { return this.favorites.length; },
         filteredProducts() {
           return this.products.filter(product => {
             const byCategory = !this.selectedCategories.length || this.selectedCategories.includes(product.category);
             const byBrand = !this.selectedBrands.length || this.selectedBrands.includes(product.brand);
             const bySearch = !this.search || product.article.toLowerCase().includes(this.search.toLowerCase()) || product.name.toLowerCase().includes(this.search.toLowerCase());
-            return byCategory && byBrand && bySearch;
+            const byFav = !this.showFavoritesOnly || this.favorites.includes(product.id);
+            return byCategory && byBrand && bySearch && byFav;
           });
         },
         accentBg() { return { indigo: 'bg-primary', emerald: 'bg-primary', slate: 'bg-dark-2' }[this.settings.theme_color] || 'bg-primary'; },
@@ -588,6 +620,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           this.categories = await categoriesResponse.json();
           this.view = this.settings.default_view || 'grid';
           this.dense = localStorage.getItem('tmopro_dense') === '1';
+          this.favorites = JSON.parse(localStorage.getItem('tmopro_favorites') || '[]');
           this.products.forEach(product => this.qty[product.id] = 1);
           document.title = this.settings.site_name;
         } finally {
@@ -606,7 +639,32 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
         toggleBrand(brand) { this.selectedBrands = this.toggle(this.selectedBrands, brand); },
         toggle(list, value) { return list.includes(value) ? list.filter(item => item !== value) : [...list, value]; },
         countBy(field, value) { return this.products.filter(product => product[field] === value).length; },
-        resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; },
+        resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; this.showFavoritesOnly = false; },
+        isFavorite(id) { return this.favorites.includes(id); },
+        toggleFavorite(id) {
+          const product = this.products.find(p => p.id === id);
+          if (this.favorites.includes(id)) {
+            this.favorites = this.favorites.filter(fid => fid !== id);
+            this.showToast((product?.name || 'Товар') + ' удален из избранного');
+          } else {
+            this.favorites = [...this.favorites, id];
+            this.showToast((product?.name || 'Товар') + ' добавлен в избранное');
+          }
+          localStorage.setItem('tmopro_favorites', JSON.stringify(this.favorites));
+        },
+        showToast(message) {
+          const id = ++this.toastId;
+          this.toasts.push({ id, message, visible: false });
+          requestAnimationFrame(() => {
+            const t = this.toasts.find(x => x.id === id);
+            if (t) t.visible = true;
+          });
+          setTimeout(() => {
+            const t = this.toasts.find(x => x.id === id);
+            if (t) t.visible = false;
+            setTimeout(() => { this.toasts = this.toasts.filter(x => x.id !== id); }, 400);
+          }, 2500);
+        },
         onSearchSelect(item) {
           this.search = item.article || item.name;
         },
@@ -617,6 +675,7 @@ $priceTiers = array_map(fn($t) => ['label' => $t['label'] ?? '', 'discount' => (
           if (existing) { existing.qty += amount; }
           else { cart.push({ ...product, qty: amount }); }
           localStorage.setItem('tmopro_cart', JSON.stringify(cart));
+          this.showToast(product.name + ' добавлен в заявку (' + amount + ' шт)');
           this.cartBump = false;
           requestAnimationFrame(() => this.cartBump = true);
           setTimeout(() => this.cartBump = false, 700);
