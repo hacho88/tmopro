@@ -396,6 +396,11 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
                 <input type="checkbox" v-model="showInStockOnly" class="accent-emerald-600" style="width:16px;height:16px;">
                 {{ lang==='en' ? 'In stock only' : 'Только в наличии' }}
               </label>
+              <div class="flex items-center gap-2">
+                <input v-model.number="minPrice" type="number" placeholder="от ₽" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
+                <span class="text-xs font-bold text-gray-400">—</span>
+                <input v-model.number="maxPrice" type="number" placeholder="до ₽" class="field" style="width:80px;height:32px;font-size:12px;padding:0 8px;">
+              </div>
               <button type="button" @click="toggleDense" :class="['density-toggle', dense ? 'is-on' : '']">
                 <span class="density-dot" aria-hidden="true"></span>
                 <span>Плотно</span>
@@ -755,6 +760,8 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
           cartBump: false,
           showFavoritesOnly: false,
           showInStockOnly: false,
+          minPrice: '',
+          maxPrice: '',
           favorites: [],
           toasts: [],
           toastId: 0,
@@ -787,13 +794,17 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
         cartCount() { return this.cart.reduce((sum, item) => sum + Number(item.qty), 0); },
         favoritesCount() { return this.favorites.length; },
         filteredProducts() {
+          const min = parseFloat(this.minPrice);
+          const max = parseFloat(this.maxPrice);
           let list = this.products.filter(product => {
             const byCategory = !this.selectedCategories.length || this.selectedCategories.includes(product.category);
             const byBrand = !this.selectedBrands.length || this.selectedBrands.includes(product.brand);
             const bySearch = !this.search || product.article.toLowerCase().includes(this.search.toLowerCase()) || product.name.toLowerCase().includes(this.search.toLowerCase());
             const byFav = !this.showFavoritesOnly || this.favorites.includes(product.id);
             const byStock = !this.showInStockOnly || (Number(product.stock) || 0) > 0;
-            return byCategory && byBrand && bySearch && byFav && byStock;
+            const price = Number(product.price_base) || 0;
+            const byPrice = (!this.minPrice || price >= min) && (!this.maxPrice || price <= max);
+            return byCategory && byBrand && bySearch && byFav && byStock && byPrice;
           });
           switch (this.sortBy) {
             case 'price_asc': list.sort((a, b) => (Number(a.price_base) || 0) - (Number(b.price_base) || 0)); break;
@@ -839,7 +850,7 @@ $allCategories = is_array($allCategories) ? $allCategories : [];
         toggleBrand(brand) { this.selectedBrands = this.toggle(this.selectedBrands, brand); },
         toggle(list, value) { return list.includes(value) ? list.filter(item => item !== value) : [...list, value]; },
         countBy(field, value) { return this.products.filter(product => product[field] === value).length; },
-        resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; this.showFavoritesOnly = false; },
+        resetFilters() { this.selectedCategories = []; this.selectedBrands = []; this.search = ''; this.showFavoritesOnly = false; this.minPrice = ''; this.maxPrice = ''; this.showInStockOnly = false; },
         isFavorite(id) { return this.favorites.includes(id); },
         toggleFavorite(id) {
           const product = this.products.find(p => p.id === id);

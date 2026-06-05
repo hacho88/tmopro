@@ -66,6 +66,15 @@
             <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Email</span><input name="email" type="email" required class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]"></label>
             <label class="sm:col-span-2"><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Промокод (если есть)</span><input name="coupon_code" class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]" placeholder="Введите код скидки"></label>
           </div>
+          <div class="mt-6 border-t border-slate-100 pt-6">
+            <h3 class="mb-4 text-base font-extrabold text-slate-700">Адрес доставки</h3>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <label class="sm:col-span-2"><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Город</span><input name="city" class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]" placeholder="Москва"></label>
+              <label class="sm:col-span-2"><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Адрес (улица, дом, офис)</span><input name="address" class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]" placeholder="ул. Примерная, д. 10, оф. 5"></label>
+              <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Индекс</span><input name="zip" class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]" placeholder="101000"></label>
+              <label><span class="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">Комментарий к доставке</span><input name="delivery_note" class="w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 font-semibold outline-none transition focus:border-transparent focus:bg-white focus:ring-4 focus:ring-[rgba(var(--tmo-accent-rgb),0.18)]" placeholder="Доставка до 18:00"></label>
+            </div>
+          </div>
           <input type="hidden" name="cart_json" :value="cartJson">
           <button type="submit" :disabled="cart.length === 0" :class="['mt-8 w-full rounded-2xl px-6 py-5 text-base font-extrabold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-[.99] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none', cart.length ? accentBg : 'bg-slate-300']">Запросить счет и резерв</button>
         </section>

@@ -9,7 +9,7 @@ function money($value) {
     return number_format((float)$value, 0, ',', ' ') . ' ₽';
 }
 
-function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart, $couponCode = '', $couponDiscount = 0) {
+function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart, $couponCode = '', $couponDiscount = 0, $delivery = []) {
     $dbPath = __DIR__ . '/db.php';
     if (!file_exists($dbPath)) return;
     require_once $dbPath;
@@ -21,8 +21,8 @@ function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone,
 
     try {
         $pdo->beginTransaction();
-        try { $pdo->exec("ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(32) DEFAULT NULL, ADD COLUMN coupon_discount DECIMAL(12,2) DEFAULT 0"); } catch (Throwable $e) {}
-        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, account_id, company_name, inn, contact_person, phone, email, total_base, total, coupon_code, coupon_discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        try { $pdo->exec("ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(32) DEFAULT NULL, ADD COLUMN coupon_discount DECIMAL(12,2) DEFAULT 0, ADD COLUMN city VARCHAR(100) DEFAULT NULL, ADD COLUMN address TEXT DEFAULT NULL, ADD COLUMN zip VARCHAR(20) DEFAULT NULL, ADD COLUMN delivery_note TEXT DEFAULT NULL"); } catch (Throwable $e) {}
+        $stmt = $pdo->prepare('INSERT INTO orders (order_number, source, status, account_id, company_name, inn, contact_person, phone, email, total_base, total, coupon_code, coupon_discount, city, address, zip, delivery_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute([
             $orderNumber,
             'site',
@@ -37,6 +37,10 @@ function db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone,
             (float)$total,
             ($couponCode !== '' ? $couponCode : null),
             (float)$couponDiscount,
+            ($delivery['city'] ?? '') !== '' ? $delivery['city'] : null,
+            ($delivery['address'] ?? '') !== '' ? $delivery['address'] : null,
+            ($delivery['zip'] ?? '') !== '' ? $delivery['zip'] : null,
+            ($delivery['delivery_note'] ?? '') !== '' ? $delivery['delivery_note'] : null,
         ]);
         $orderId = (int)$pdo->lastInsertId();
 
@@ -216,8 +220,15 @@ $customerMsg .= '<div style="margin-top:24px;border-top:1px solid #e2e8f0;paddin
 $customerMsg .= 'Если у вас есть вопросы, позвоните: ' . e($settings['phone'] ?? '') . '<br>' . e($settings['email_manager'] ?? '') . '</div>';
 $customerMsg .= '</div></div></body></html>';
 
+$delivery = [
+    'city' => trim((string)($_POST['city'] ?? '')),
+    'address' => trim((string)($_POST['address'] ?? '')),
+    'zip' => trim((string)($_POST['zip'] ?? '')),
+    'delivery_note' => trim((string)($_POST['delivery_note'] ?? ''))
+];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $company !== '' && count($cart) > 0) {
-    db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart, $couponApplied, $couponDiscount);
+    db_try_save_order($orderNumber, $company, $inn, $contactPerson, $phone, $email, $baseTotal, $total, $cart, $couponApplied, $couponDiscount, $delivery);
     mail($managerEmail, '=?UTF-8?B?' . base64_encode($subject) . '?=', $managerMsg, implode("\r\n", $headers));
     if ($email !== '') {
         mail($email, '=?UTF-8?B?' . base64_encode($customerSubject) . '?=', $customerMsg, implode("\r\n", $headers));
