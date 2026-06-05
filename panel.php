@@ -1040,8 +1040,8 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <div class="card" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h2 style="font-size:20px;">B2B Клиенты</h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;">Управление компаниями и пользователями B2B портала.</p>
+          <h2 style="font-size:20px;">👥 <?= admin_t('tab_clients') ?></h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">B2B</p>
         </div>
       </div>
 
@@ -1179,8 +1179,8 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h2 style="font-size:20px;">Категории</h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;">Для витрины категории обязательна фотография. Если фото не указано — сохранить нельзя.</p>
+          <h2 style="font-size:20px;">📂 <?= admin_t('tab_categories') ?></h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;"><?= admin_t('save_categories') ?></p>
         </div>
       </div>
 
@@ -1230,7 +1230,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
             </div>
           </div>
         <?php endforeach; ?>
-        <div class="sticky-save"><button class="btn" style="width:100%;">Сохранить категории</button></div>
+        <div class="sticky-save"><button class="btn" style="width:100%;">💾 <?= admin_t('save_categories') ?></button></div>
       </form>
     </div>
   <?php endif; ?>
@@ -1238,7 +1238,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   <?php if ($tab === 'settings'): ?>
     <form method="post" class="card" enctype="multipart/form-data">
       <input type="hidden" name="action" value="save_settings">
-      <h2 style="font-size:20px;margin-bottom:16px;">Настройки сайта</h2>
+      <h2 style="font-size:20px;margin-bottom:16px;">⚙️ <?= admin_t('tab_settings') ?></h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
         <label><span>Название сайта</span><input name="site_name" value="<?= e($settings['site_name']) ?>" class="field"></label>
         <label><span>Короткое имя</span><input name="site_short_name" value="<?= e($settings['site_short_name']) ?>" class="field"></label>
@@ -1281,7 +1281,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <label style="grid-column:1/-1;"><span>Главный заголовок</span><textarea name="hero_title" rows="2" class="field"><?= e($settings['hero_title']) ?></textarea></label>
         <label style="grid-column:1/-1;"><span>Подзаголовок</span><textarea name="hero_subtitle" rows="3" class="field"><?= e($settings['hero_subtitle']) ?></textarea></label>
       </div>
-      <button class="btn" style="margin-top:16px;">Сохранить настройки</button>
+      <button class="btn" style="margin-top:16px;">💾 <?= admin_t('save') ?></button>
       <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:12px;font-size:13px;color:#64748b;">
         <b>Проверка записи:</b> settings.json <?= is_writable($settingsPath)?'✅ доступен':'❌ нет прав' ?> | products.json <?= is_writable($productsPath)?'✅ доступен':'❌ нет прав' ?>
       </div>
@@ -1463,15 +1463,15 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
         <!-- Import -->
         <div class="card" style="background:#f8fafc;">
-          <h3 style="font-size:16px;margin-bottom:12px;">Импорт CSV</h3>
-          <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Загрузите CSV для массового создания или обновления товаров. Если id заполнен — товар обновится, если пустой — создастся новый.</p>
+          <h3 style="font-size:16px;margin-bottom:12px;">📥 <?= admin_t('import_csv') ?></h3>
+          <p style="color:#64748b;font-size:13px;margin-bottom:16px;">CSV <?= admin_t('import_csv') ?>. ID = update, empty = create.</p>
           <form method="post" enctype="multipart/form-data">
             <input type="hidden" name="action" value="import_products_csv">
             <label style="display:block;margin-bottom:12px;">
-              <span style="font-size:12px;font-weight:800;color:#64748b;">CSV файл (разделитель ;)</span>
+              <span style="font-size:12px;font-weight:800;color:#64748b;">CSV</span>
               <input type="file" name="csv_file" accept=".csv,text/csv" class="field" required style="padding:8px;">
             </label>
-            <button class="btn">Загрузить и импортировать</button>
+            <button class="btn">📥 <?= admin_t('import_csv') ?></button>
           </form>
           <div style="margin-top:12px;font-size:12px;color:#64748b;font-weight:700;">
             Формат: id;article;name;category;brand;stock;price_base;price_wholesale;image;description
@@ -1485,12 +1485,12 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <div class="card" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h2 style="font-size:20px;">Контентные страницы</h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;">Управление страницами сайта (О компании, Доставка и т.д.). Slug используется в URL: page.php?slug=...</p>
+          <h2 style="font-size:20px;">📄 <?= admin_t('tab_pages') ?></h2>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">CMS pages. Slug = URL.</p>
         </div>
         <form method="post" style="display:inline;">
           <input type="hidden" name="action" value="add_page">
-          <button class="btn btn-dark">Добавить страницу</button>
+          <button class="btn btn-dark">➕ <?= admin_t('add_page') ?></button>
         </form>
       </div>
 
@@ -1513,7 +1513,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <?php if (empty($pages)): ?>
           <p style="color:#64748b;font-size:14px;">Пока нет страниц. Добавьте первую выше.</p>
         <?php endif; ?>
-        <button class="btn" style="margin-top:8px;">Сохранить страницы</button>
+        <button class="btn" style="margin-top:8px;">💾 <?= admin_t('save_pages') ?></button>
       </form>
 
       <?php foreach ($pages as $idx => $p): ?>
@@ -1545,26 +1545,26 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       }
     ?>
     <div class="card" style="margin-bottom:16px;">
-      <h2 style="font-size:20px;margin-bottom:16px;">Аналитика продаж</h2>
+      <h2 style="font-size:20px;margin-bottom:16px;">📈 <?= admin_t('tab_analytics') ?></h2>
       <?php if (!$pdo): ?>
-        <div class="msg err">База не подключена. Аналитика недоступна.</div>
+        <div class="msg err">DB error</div>
       <?php else: ?>
         <!-- KPI Cards -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
           <div class="card stat" style="padding:16px;">
-            <div class="lbl">Всего заказов</div>
+            <div class="lbl"><?= admin_t('tab_orders') ?></div>
             <div class="num"><?= number_format($metrics['total_orders'], 0, ',', ' ') ?></div>
           </div>
           <div class="card stat" style="padding:16px;">
-            <div class="lbl">За 30 дней</div>
+            <div class="lbl">30d</div>
             <div class="num"><?= number_format($metrics['last30_orders'], 0, ',', ' ') ?></div>
           </div>
           <div class="card stat" style="padding:16px;">
-            <div class="lbl">Средний чек</div>
+            <div class="lbl"><?= admin_t('analytics_avg_check') ?></div>
             <div class="num"><?= number_format($metrics['avg_check'], 0, ',', ' ') ?> ₽</div>
           </div>
           <div class="card stat" style="padding:16px;">
-            <div class="lbl">Выручка</div>
+            <div class="lbl"><?= admin_t('analytics_revenue') ?></div>
             <div class="num"><?= number_format($metrics['total_revenue'], 0, ',', ' ') ?> ₽</div>
           </div>
         </div>
@@ -1572,7 +1572,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         <!-- Monthly Sales Chart -->
         <?php if (!empty($metrics['monthly_sales'])): ?>
           <div class="card" style="margin-bottom:16px;padding:16px;background:#f8fafc;">
-            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Продажи по месяцам</div>
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;"><?= admin_t('analytics_monthly_sales') ?></div>
             <?php
               $maxRevenue = max(array_map(fn($r)=>(float)$r['revenue'], $metrics['monthly_sales'])) ?: 1;
               foreach (array_reverse($metrics['monthly_sales']) as $m):
@@ -1616,7 +1616,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
           <!-- Top Products -->
           <div class="card" style="padding:16px;background:#f8fafc;">
-            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Топ товары по выручке</div>
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;"><?= admin_t('analytics_top_products') ?></div>
             <?php if (empty($metrics['top_products'])): ?>
               <p style="color:#64748b;font-size:13px;">Нет данных.</p>
             <?php else: ?>
@@ -1636,7 +1636,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
           <!-- Top Clients -->
           <div class="card" style="padding:16px;background:#f8fafc;">
-            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Топ клиенты</div>
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;"><?= admin_t('analytics_top_clients') ?></div>
             <?php if (empty($metrics['top_clients'])): ?>
               <p style="color:#64748b;font-size:13px;">Нет данных.</p>
             <?php else: ?>
@@ -1665,8 +1665,8 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       if (!is_array($coupons)) $coupons = [];
     ?>
     <div class="card">
-      <h2 style="font-size:20px;margin-bottom:16px;">Промокоды</h2>
-      <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Скидочные коды для клиентов. Процент или фиксированная сумма.</p>
+      <h2 style="font-size:20px;margin-bottom:16px;">🏷️ <?= admin_t('tab_coupons') ?></h2>
+      <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Percent / Fixed</p>
 
       <form method="post" style="margin-bottom:24px;">
         <input type="hidden" name="action" value="create_coupon">
@@ -1708,7 +1708,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
               </div>
             <?php endforeach; ?>
           </div>
-          <button class="btn" style="margin-top:12px;">Сохранить промокоды</button>
+          <button class="btn" style="margin-top:12px;">💾 <?= admin_t('save_coupons') ?></button>
         </form>
         <?php foreach ($coupons as $i => $c): ?>
           <form method="post" id="delCoupon<?= $i ?>" style="display:none;">
