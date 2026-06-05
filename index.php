@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=lux-gold-e">
+  <link rel="stylesheet" href="style.css?v=lux-gold-f">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: Inter, system-ui, sans-serif; color: #0f172a; }
@@ -231,10 +231,12 @@
                 <tr v-for="product in filteredProducts" :key="product.id" class="animate-fadeIn">
                   <td>
                     <div class="flex items-center gap-3">
-                      <img v-if="product.image" :src="product.image" @error="onProductImgError(product)" class="rounded-lg object-cover" style="width: 48px; height: 48px;">
-                      <span v-else class="table-img-placeholder" aria-hidden="true"></span>
+                      <a :href="'product.php?id=' + product.id" class="shrink-0">
+                        <img v-if="product.image" :src="product.image" @error="onProductImgError(product)" class="rounded-lg object-cover" style="width: 48px; height: 48px;">
+                        <span v-else class="table-img-placeholder" aria-hidden="true" style="display:inline-block;width:48px;height:48px;"></span>
+                      </a>
                       <div>
-                        <div class="font-extrabold text-gray-900">{{ product.name }}</div>
+                        <a :href="'product.php?id=' + product.id" class="font-extrabold text-gray-900 hover:underline" style="text-decoration:none;">{{ product.name }}</a>
                         <div class="mt-1 text-xs font-bold text-gray-400">{{ product.article }}</div>
                       </div>
                     </div>
@@ -256,15 +258,19 @@
           <!-- Grid View -->
           <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
             <article v-for="product in filteredProducts" :key="product.id" class="card-product animate-fadeIn">
-              <div class="product-media">
-                <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
-                <div v-else class="product-img-placeholder" aria-hidden="true"></div>
-              </div>
+              <a :href="'product.php?id=' + product.id" class="block">
+                <div class="product-media">
+                  <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
+                  <div v-else class="product-img-placeholder" aria-hidden="true"></div>
+                </div>
+              </a>
               <div class="p-5">
                 <div class="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">{{ product.article }}</div>
-                    <h3 class="text-lg font-extrabold leading-snug">{{ product.name }}</h3>
+                    <a :href="'product.php?id=' + product.id" class="block" style="text-decoration:none;">
+                      <h3 class="text-lg font-extrabold leading-snug text-gray-900 hover:underline">{{ product.name }}</h3>
+                    </a>
                   </div>
                   <span class="badge badge-primary flex-shrink-0">{{ product.brand }}</span>
                 </div>
