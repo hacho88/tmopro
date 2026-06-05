@@ -368,13 +368,15 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             <div class="mb-6">
               <div class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Категория</div>
               <div class="space-y-2">
-                <div v-for="cat in categoryList" :key="cat.id">
-                  <div class="text-xs font-bold text-gray-500 px-1 py-1">{{ cat.name }}</div>
-                  <button v-for="sub in cat.subcategories" :key="sub.id" @click="toggleCategory(sub.name)"
-                    :class="['chip w-full justify-between', selectedCategories.includes(sub.name) ? 'chip-active' : 'chip-default']">
-                    <span>{{ sub.name }}</span>
-                    <span class="opacity-60" style="font-size: 11px;">{{ countBy('category', sub.name) }}</span>
-                  </button>
+                <div v-for="cat in categoryList" :key="cat.id" class="sidebar-cat-group">
+                  <div class="sidebar-cat-title">{{ cat.name }}</div>
+                  <div class="sidebar-subcat-list">
+                    <button v-for="sub in cat.subcategories" :key="sub.id" @click="toggleCategory(sub.name)"
+                      :class="['sidebar-subcat-btn', selectedCategories.includes(sub.name) ? 'active' : '']">
+                      <span>{{ sub.name }}</span>
+                      <span class="count">{{ countBy('category', sub.name) }}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -595,24 +597,28 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
     </main>
 
     <!-- Mobile Navigation -->
-    <nav class="mobile-nav md:hidden">
-      <div class="grid grid-cols-4 gap-1">
-        <a href="index.php" :class="['flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold transition', 'bg-primary text-white shadow-md']">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
-          <span>Каталог</span>
+    <nav class="mobile-nav md:hidden" style="padding: 8px 12px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(15,23,42,0.06);">
+      <div class="grid grid-cols-5 gap-1">
+        <a href="index.php" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold transition" :class="'text-primary'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+          <span>Главная</span>
         </a>
-        <button @click="view = view === 'table' ? 'grid' : 'table'" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          <span>Вид</span>
+        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          <span>Категории</span>
         </button>
-        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
-          <span>Звонок</span>
-        </a>
+        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold transition', showFavoritesOnly ? 'text-rose-500' : 'text-gray-500']">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span>Избранное</span>
+        </button>
         <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
           <span>Корзина</span>
-          <b :class="['absolute top-1 rounded-full px-1.5 text-white', accentBg]" style="font-size: 10px; right: 8px;">{{ cartCount }}</b>
+          <b v-if="cartCount > 0" :class="['absolute top-0 rounded-full px-1.5 text-white', accentBg]" style="font-size: 9px; right: 6px;">{{ cartCount }}</b>
+        </a>
+        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
+          <span>Позвонить</span>
         </a>
       </div>
     </nav>
@@ -937,6 +943,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           this.dense = !this.dense;
           localStorage.setItem('tmopro_dense', this.dense ? '1' : '0');
         },
+        scrollToCatalog() { document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }); },
         toggleCategory(category) { this.selectedCategories = this.toggle(this.selectedCategories, category); this.page = 1; },
         toggleBrand(brand) { this.selectedBrands = this.toggle(this.selectedBrands, brand); this.page = 1; },
         toggle(list, value) { return list.includes(value) ? list.filter(item => item !== value) : [...list, value]; },
@@ -1009,32 +1016,45 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
     }
   </script>
 
-  <footer class="container py-12 border-t border-gray-100 mt-12">
-    <div class="flex flex-col md:flex-row justify-between items-start gap-6">
-      <div>
-        <div class="text-sm font-extrabold text-gray-900 mb-2"><?= htmlspecialchars($settings['site_short_name'] ?? 'TMOPRO', ENT_QUOTES, 'UTF-8') ?></div>
-        <?php if (!empty($settings['address'])): ?><div class="text-sm font-bold text-gray-400"><?= e($settings['address']) ?></div><?php endif; ?>
+  <footer style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#94a3b8;">
+    <div class="container" style="padding-top:64px;padding-bottom:40px;">
+      <div class="grid md:grid-cols-3 gap-12">
+        <div>
+          <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.02em;"><?= e($settings['site_short_name'] ?? 'TMOPRO') ?></div>
+          <p style="margin-top:12px;font-size:14px;line-height:1.7;color:#94a3b8;">Сантехника оптом от производителя. Шаровые краны, фитинги, трубы и комплектующие для инженерных систем.</p>
+          <?php if (!empty($settings['address'])): ?><p style="margin-top:12px;font-size:13px;color:#64748b;"><?= e($settings['address']) ?></p><?php endif; ?>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;color:#c9a35e;text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;">Контакты</div>
+          <?php if (!empty($settings['phone'])): ?><a href="tel:<?= e(preg_replace('/\D/', '', $settings['phone'])) ?>" style="display:block;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:10px;text-decoration:none;"><?= e($settings['phone']) ?></a><?php endif; ?>
+          <?php if (!empty($settings['phone2'])): ?><a href="tel:<?= e(preg_replace('/\D/', '', $settings['phone2'])) ?>" style="display:block;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:10px;text-decoration:none;"><?= e($settings['phone2']) ?></a><?php endif; ?>
+          <?php if (!empty($settings['phone3'])): ?><a href="tel:<?= e(preg_replace('/\D/', '', $settings['phone3'])) ?>" style="display:block;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:10px;text-decoration:none;"><?= e($settings['phone3']) ?></a><?php endif; ?>
+          <?php if (!empty($settings['email_manager'])): ?><a href="mailto:<?= e($settings['email_manager']) ?>" style="display:block;color:#94a3b8;font-size:14px;font-weight:600;text-decoration:none;"><?= e($settings['email_manager']) ?></a><?php endif; ?>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;color:#c9a35e;text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;">Навигация</div>
+          <?php foreach ($footerPages as $fp): ?>
+            <a href="page.php?slug=<?= e($fp['slug'] ?? '') ?>" style="display:block;color:#94a3b8;font-size:14px;font-weight:600;margin-bottom:10px;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'"><?= e($fp['title'] ?? '') ?></a>
+          <?php endforeach; ?>
+          <a href="index.php" style="display:block;color:#94a3b8;font-size:14px;font-weight:600;margin-bottom:10px;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#94a3b8'">Каталог</a>
+        </div>
       </div>
-      <div class="flex flex-col gap-2 text-right">
-        <?php if (!empty($settings['phone'])): ?><a :href="'tel:' + settings.phone" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition">{{ settings.phone }}</a><?php endif; ?>
-        <?php if (!empty($settings['phone2'])): ?><a :href="'tel:' + settings.phone2" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition">{{ settings.phone2 }}</a><?php endif; ?>
-        <?php if (!empty($settings['phone3'])): ?><a :href="'tel:' + settings.phone3" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition">{{ settings.phone3 }}</a><?php endif; ?>
-        <?php if (!empty($settings['email_manager'])): ?><a :href="'mailto:' + settings.email_manager" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition">{{ settings.email_manager }}</a><?php endif; ?>
+      <div style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <span style="font-size:13px;font-weight:600;color:#475569;">© <?= date('Y') ?> <?= e($settings['site_short_name'] ?? 'TMOPRO') ?></span>
+        <span style="font-size:12px;font-weight:600;color:#475569;">Сантехника оптом</span>
       </div>
-    </div>
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6 mt-8 pt-6 border-t border-gray-100">
-      <div class="flex flex-wrap items-center gap-6">
-        <?php foreach ($footerPages as $fp): ?>
-          <a href="page.php?slug=<?= htmlspecialchars($fp['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>" class="text-sm font-bold text-gray-500 hover:text-gray-900 transition"><?= htmlspecialchars($fp['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></a>
-        <?php endforeach; ?>
-      </div>
-      <div class="text-sm font-bold text-gray-400">© <?= date('Y') ?> <?= htmlspecialchars($settings['site_short_name'] ?? 'TMOPRO', ENT_QUOTES, 'UTF-8') ?></div>
     </div>
   </footer>
 
   <!-- Floating WhatsApp Button -->
-  <a v-if="settings.whatsapp || settings.phone" :href="'https://wa.me/' + (settings.whatsapp || settings.phone).replace(/\D/g, '')" target="_blank" class="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition" style="width:56px;height:56px;" title="WhatsApp">
+  <?php
+  $waPhone = !empty($settings['whatsapp']) ? $settings['whatsapp'] : ($settings['phone'] ?? '');
+  $waClean = preg_replace('/\D/', '', $waPhone);
+  if ($waClean):
+  ?>
+  <a href="https://wa.me/<?= e($waClean) ?>" target="_blank" class="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition" style="width:56px;height:56px;" title="WhatsApp">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
+  <?php endif; ?>
 </body>
 </html>
