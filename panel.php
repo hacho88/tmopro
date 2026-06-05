@@ -1369,7 +1369,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
               <label style="margin:0;flex:1;"><span>Название категории</span><input name="cat_name_<?= e($cat['id'] ?? 0) ?>" value="<?= e($cat['name'] ?? '') ?>" class="field"></label>
-              <button type="button" class="btn" style="margin-left:12px;background:#fee2e2;color:#991b1b;border-color:#fecaca;" onclick="if(confirm('Удалить категорию и все подкатегории?')){const f=document.createElement('form');f.method='post';f.innerHTML='<input type=hidden name=action value=delete_category><input type=hidden name=category_id value=<?= e($cat['id'] ?? 0) ?>';document.body.appendChild(f);f.submit();}">🗑 Удалить</button>
+              <button type="button" class="btn" style="margin-left:12px;background:#fee2e2;color:#991b1b;border-color:#fecaca;" onclick="delCat(<?= (int)($cat['id'] ?? 0) ?>)">🗑 Удалить</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
               <?php foreach (($cat['subcategories'] ?? []) as $sub): ?>
@@ -1388,7 +1388,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
                       <input type="file" name="subcat_image_<?= e($sub['id'] ?? 0) ?>" accept="image/*" class="field" style="padding:8px;">
                     </label>
                     <div style="margin-top:8px;font-size:12px;color:#64748b;font-weight:700;">Текущее: <?= e($sub['image'] ?? '') ?></div>
-                    <button type="button" class="btn" style="margin-top:8px;background:#fee2e2;color:#991b1b;border-color:#fecaca;width:100%;" onclick="if(confirm('Удалить подкатегорию?')){const f=document.createElement('form');f.method='post';f.innerHTML='<input type=hidden name=action value=delete_subcategory><input type=hidden name=category_id value=<?= e($cat['id'] ?? 0) ?>><input type=hidden name=subcategory_id value=<?= e($sub['id'] ?? 0) ?>';document.body.appendChild(f);f.submit();}">🗑 Удалить подкатегорию</button>
+                    <button type="button" class="btn" style="margin-top:8px;background:#fee2e2;color:#991b1b;border-color:#fecaca;width:100%;" onclick="delSub(<?= (int)($cat['id'] ?? 0) ?>,<?= (int)($sub['id'] ?? 0) ?>)">🗑 Удалить подкатегорию</button>
                   </div>
                 </div>
               <?php endforeach; ?>
@@ -2049,6 +2049,21 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 
 </div>
 <?php endif; ?>
+
+<script>
+function delCat(id){
+  if(!confirm('Удалить категорию и все подкатегории?')) return;
+  const f=document.createElement('form');f.method='post';
+  f.innerHTML='<input type="hidden" name="action" value="delete_category"><input type="hidden" name="category_id" value="'+id+'">';
+  document.body.appendChild(f);f.submit();
+}
+function delSub(catId,subId){
+  if(!confirm('Удалить подкатегорию?')) return;
+  const f=document.createElement('form');f.method='post';
+  f.innerHTML='<input type="hidden" name="action" value="delete_subcategory"><input type="hidden" name="category_id" value="'+catId+'"><input type="hidden" name="subcategory_id" value="'+subId+'">';
+  document.body.appendChild(f);f.submit();
+}
+</script>
 
 </body>
 </html>
