@@ -639,6 +639,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
     <a href="panel.php?tab=products" class="<?= $tab==='products'?'active':'' ?>">Товары</a>
     <a href="panel.php?tab=import" class="<?= $tab==='import'?'active':'' ?>">Импорт/Экспорт</a>
     <a href="panel.php?tab=pages" class="<?= $tab==='pages'?'active':'' ?>">Страницы</a>
+    <a href="panel.php?tab=analytics" class="<?= $tab==='analytics'?'active':'' ?>">Аналитика</a>
   </div>
 
   <?php if ($tab === 'overview'): ?>
@@ -1197,6 +1198,139 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
           <input type="hidden" name="delete_slug" value="<?= e($p['slug'] ?? '') ?>">
         </form>
       <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($tab === 'analytics'): ?>
+    <?php
+      $pdo = tmopro_db_safe();
+      $metrics = [
+        'total_orders' => 0, 'last30_orders' => 0, 'avg_check' => 0,
+        'total_revenue' => 0, 'status_counts' => [], 'top_products' => [],
+        'top_clients' => [], 'monthly_sales' => []
+      ];
+      if ($pdo) {
+        $metrics['total_orders'] = (int)$pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+        $metrics['last30_orders'] = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn();
+        $metrics['avg_check'] = (float)$pdo->query("SELECT AVG(total) FROM orders")->fetchColumn();
+        $metrics['total_revenue'] = (float)$pdo->query("SELECT SUM(total) FROM orders")->fetchColumn();
+        $metrics['status_counts'] = $pdo->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status ORDER BY cnt DESC")->fetchAll();
+        $metrics['top_products'] = $pdo->query("SELECT name, article, SUM(qty) as total_qty, SUM(line_total) as total_sum FROM order_items GROUP BY name, article ORDER BY total_sum DESC LIMIT 8")->fetchAll();
+        $metrics['top_clients'] = $pdo->query("SELECT company_name, COUNT(*) as order_count, SUM(total) as total_spent FROM orders WHERE company_name IS NOT NULL AND company_name != '' GROUP BY company_name ORDER BY total_spent DESC LIMIT 8")->fetchAll();
+        $metrics['monthly_sales'] = $pdo->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as cnt, SUM(total) as revenue FROM orders GROUP BY month ORDER BY month DESC LIMIT 12")->fetchAll();
+      }
+    ?>
+    <div class="card" style="margin-bottom:16px;">
+      <h2 style="font-size:20px;margin-bottom:16px;">Аналитика продаж</h2>
+      <?php if (!$pdo): ?>
+        <div class="msg err">База не подключена. Аналитика недоступна.</div>
+      <?php else: ?>
+        <!-- KPI Cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
+          <div class="card stat" style="padding:16px;">
+            <div class="lbl">Всего заказов</div>
+            <div class="num"><?= number_format($metrics['total_orders'], 0, ',', ' ') ?></div>
+          </div>
+          <div class="card stat" style="padding:16px;">
+            <div class="lbl">За 30 дней</div>
+            <div class="num"><?= number_format($metrics['last30_orders'], 0, ',', ' ') ?></div>
+          </div>
+          <div class="card stat" style="padding:16px;">
+            <div class="lbl">Средний чек</div>
+            <div class="num"><?= number_format($metrics['avg_check'], 0, ',', ' ') ?> ₽</div>
+          </div>
+          <div class="card stat" style="padding:16px;">
+            <div class="lbl">Выручка</div>
+            <div class="num"><?= number_format($metrics['total_revenue'], 0, ',', ' ') ?> ₽</div>
+          </div>
+        </div>
+
+        <!-- Monthly Sales Chart -->
+        <?php if (!empty($metrics['monthly_sales'])): ?>
+          <div class="card" style="margin-bottom:16px;padding:16px;background:#f8fafc;">
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Продажи по месяцам</div>
+            <?php
+              $maxRevenue = max(array_map(fn($r)=>(float)$r['revenue'], $metrics['monthly_sales'])) ?: 1;
+              foreach (array_reverse($metrics['monthly_sales']) as $m):
+                $pct = min(100, round(((float)$m['revenue'] / $maxRevenue) * 100));
+            ?>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="width:70px;font-size:12px;font-weight:800;color:#64748b;flex-shrink:0;"><?= e($m['month']) ?></div>
+                <div style="flex:1;height:28px;background:#e2e8f0;border-radius:8px;overflow:hidden;">
+                  <div style="height:100%;width:<?= $pct ?>%;background:linear-gradient(90deg,#059669,#34d399);border-radius:8px;display:flex;align-items:center;padding-left:10px;">
+                    <span style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap;"><?= number_format((float)$m['revenue'],0,',',' ') ?> ₽ (<?= (int)$m['cnt'] ?>)</span>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+        <!-- Two columns -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
+          <!-- Status Distribution -->
+          <div class="card" style="padding:16px;background:#f8fafc;">
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Заказы по статусам</div>
+            <?php if (empty($metrics['status_counts'])): ?>
+              <p style="color:#64748b;font-size:13px;">Нет данных.</p>
+            <?php else:
+              $totalStatus = array_sum(array_map(fn($s)=>(int)$s['cnt'], $metrics['status_counts']));
+              $statusMap = ['new'=>'Новый','processing'=>'В работе','invoiced'=>'Счет выставлен','shipped'=>'Отгружен','done'=>'Закрыт','cancelled'=>'Отмена'];
+              foreach ($metrics['status_counts'] as $s):
+                $pct = round(((int)$s['cnt'] / max(1,$totalStatus)) * 100);
+                $label = $statusMap[$s['status']] ?? $s['status'];
+            ?>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:13px;font-weight:800;"><?= e($label) ?></span>
+                <span style="font-size:13px;font-weight:900;color:#64748b;"><?= (int)$s['cnt'] ?> (<?= $pct ?>%)</span>
+              </div>
+              <div style="height:6px;background:#e2e8f0;border-radius:999px;margin-bottom:10px;overflow:hidden;">
+                <div style="height:100%;width:<?= $pct ?>%;background:#4f46e5;border-radius:999px;"></div>
+              </div>
+            <?php endforeach; endif; ?>
+          </div>
+
+          <!-- Top Products -->
+          <div class="card" style="padding:16px;background:#f8fafc;">
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Топ товары по выручке</div>
+            <?php if (empty($metrics['top_products'])): ?>
+              <p style="color:#64748b;font-size:13px;">Нет данных.</p>
+            <?php else: ?>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <?php foreach ($metrics['top_products'] as $tp): ?>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff;border-radius:10px;">
+                    <div style="min-width:0;">
+                      <div style="font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= e($tp['name']) ?></div>
+                      <div style="font-size:11px;font-weight:700;color:#64748b;"><?= e($tp['article']) ?> · <?= (int)$tp['total_qty'] ?> шт</div>
+                    </div>
+                    <div style="font-size:13px;font-weight:900;color:#0f172a;flex-shrink:0;margin-left:8px;"><?= number_format((float)$tp['total_sum'],0,',',' ') ?> ₽</div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </div>
+
+          <!-- Top Clients -->
+          <div class="card" style="padding:16px;background:#f8fafc;">
+            <div style="font-size:14px;font-weight:900;margin-bottom:12px;">Топ клиенты</div>
+            <?php if (empty($metrics['top_clients'])): ?>
+              <p style="color:#64748b;font-size:13px;">Нет данных.</p>
+            <?php else: ?>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <?php foreach ($metrics['top_clients'] as $tc): ?>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff;border-radius:10px;">
+                    <div style="min-width:0;">
+                      <div style="font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= e($tc['company_name']) ?></div>
+                      <div style="font-size:11px;font-weight:700;color:#64748b;"><?= (int)$tc['order_count'] ?> заказов</div>
+                    </div>
+                    <div style="font-size:13px;font-weight:900;color:#0f172a;flex-shrink:0;margin-left:8px;"><?= number_format((float)$tc['total_spent'],0,',',' ') ?> ₽</div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 
