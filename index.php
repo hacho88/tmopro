@@ -298,17 +298,16 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
           class="category-tile hover-lift">
-          <span class="category-media" aria-hidden="true">
-            <img v-if="cat.image" :src="cat.image" class="category-media-img" @error="cat.image = ''">
-            <span v-else class="category-media-placeholder"></span>
-          </span>
-          <span class="category-body">
-            <span class="category-title">{{ cat.name }}</span>
-            <span class="category-meta">{{ cat.count }} позиций</span>
-          </span>
-          <span class="category-icon" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-          </span>
+          <div v-if="cat.image" class="category-tile-bg" :style="{ backgroundImage: 'url(' + cat.image + ')' }"></div>
+          <div v-else class="category-tile-fallback"></div>
+          <div class="category-tile-overlay"></div>
+          <div class="category-tile-content">
+            <div class="category-tile-name">{{ cat.name }}</div>
+            <div class="category-tile-count">{{ cat.count }} позиций</div>
+          </div>
+          <div class="category-tile-arrow" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
         </button>
       </div>
     </section>
@@ -373,7 +372,11 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                   <div class="sidebar-subcat-list">
                     <button v-for="sub in cat.subcategories" :key="sub.id" @click="toggleCategory(sub.name)"
                       :class="['sidebar-subcat-btn', selectedCategories.includes(sub.name) ? 'active' : '']">
-                      <span>{{ sub.name }}</span>
+                      <span class="flex items-center gap-2.5 min-w-0">
+                        <span v-if="sub.image" class="sidebar-subcat-thumb" :style="{ backgroundImage: 'url(' + sub.image + ')' }"></span>
+                        <span v-else class="sidebar-subcat-dot"></span>
+                        <span class="truncate">{{ sub.name }}</span>
+                      </span>
                       <span class="count">{{ countBy('category', sub.name) }}</span>
                     </button>
                   </div>
