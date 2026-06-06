@@ -339,7 +339,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
     </section>
 
     <!-- Catalog -->
-    <main id="catalog" class="container py-10 lg:py-16 catalog-shell">
+    <main id="catalog" class="container py-10 lg:py-16 catalog-shell pb-20 md:pb-10">
       <div class="grid gap-8 lg:grid-cols-sidebar">
         <!-- Sidebar Filters -->
         <aside class="h-fit lg:sticky lg:top-24">
@@ -562,30 +562,14 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
                   <div class="min-w-0">
                     <div style="font-size:11px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">{{ product.article }}</div>
                     <a :href="'product.php?id=' + product.id" style="text-decoration:none;" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
-                      <h3 style="font-size:16px;font-weight:900;color:#0f172a;line-height:1.3;letter-spacing:-0.01em;" class="hover:underline">{{ product.name }}</h3>
+                      <h3 style="font-size:15px;font-weight:900;color:#0f172a;line-height:1.35;letter-spacing:-0.01em;" class="hover:underline">{{ product.name }}</h3>
                     </a>
                   </div>
-                  <div class="flex items-center gap-1 flex-shrink-0">
-                    <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'" @mousedown="$event.target.style.transform='scale(0.9)'" @mouseup="$event.target.style.transform='scale(1)'">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    </button>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2 mb-4">
-                  <span style="font-size:12px;font-weight:800;color:#64748b;">{{ product.category }}</span>
-                  <span style="width:3px;height:3px;border-radius:50%;background:#cbd5e1;"></span>
-                  <span :class="['text-xs font-extrabold', stockStatus(product.stock).cls]" style="padding:2px 8px;border-radius:8px;">{{ stockStatus(product.stock).label }}</span>
-                </div>
-                <div class="flex items-center justify-between gap-4 mb-4">
-                  <price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
-                  <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
-                </div>
-                <div class="flex gap-2">
-                  <button @click="addToCart(product)" class="btn btn-primary" style="flex:1;border-radius:16px;font-weight:900;">В заявку</button>
-                  <button @click="recordView(product); quickViewProduct = product" style="flex-shrink:0;padding:0 14px;border-radius:16px;border:none;background:#0f172a;color:#fff;cursor:pointer;font-weight:900;" :title="'Быстрый просмотр'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center flex-shrink-0" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'" @mousedown="$event.target.style.transform='scale(0.9)'" @mouseup="$event.target.style.transform='scale(1)'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                   </button>
                 </div>
+                <button @click="addToCart(product)" class="btn btn-primary w-full" style="border-radius:14px;font-weight:900;padding:10px 0;">В заявку</button>
               </div>
             </article>
           </div>
@@ -600,28 +584,28 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
       </div>
     </main>
 
-    <!-- Mobile Navigation -->
-    <nav class="mobile-nav md:hidden" style="padding: 8px 12px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(15,23,42,0.06);">
-      <div class="grid grid-cols-5 gap-1">
-        <a href="index.php" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold transition" :class="'text-primary'">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+    <!-- Mobile Navigation — native bottom dock -->
+    <nav class="mobile-nav md:hidden">
+      <div class="grid grid-cols-5">
+        <a href="index.php" class="active flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
           <span>Главная</span>
         </a>
-        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
           <span>Категории</span>
         </button>
-        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold transition', showFavoritesOnly ? 'text-rose-500' : 'text-gray-500']">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider', showFavoritesOnly ? 'text-rose-500' : '']">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           <span>Избранное</span>
         </button>
-        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
           <span>Корзина</span>
-          <b v-if="cartCount > 0" :class="['absolute top-0 rounded-full px-1.5 text-white', accentBg]" style="font-size: 9px; right: 6px;">{{ cartCount }}</b>
+          <b v-if="cartCount > 0" class="absolute top-0.5 right-2 rounded-full px-1.5 bg-tech-blue text-white" style="font-size: 8px;">{{ cartCount }}</b>
         </a>
-        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-extrabold text-gray-500 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
+        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
           <span>Позвонить</span>
         </a>
       </div>
