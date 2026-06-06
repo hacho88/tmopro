@@ -923,7 +923,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
 <?php if (!$isAuthorized): ?>
 <div class="login-box">
-  <div class="logo">TMO</div>
+  <img src="logo.svg" alt="TMOPRO" style="height: 64px; width: auto; margin: 0 auto 20px; display: block;">
   <h1>Панель управления</h1>
   <p>Вход для администратора сайта</p>
   <?php if ($error): ?><div class="msg err"><?= e($error) ?></div><?php endif; ?>

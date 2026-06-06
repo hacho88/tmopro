@@ -99,9 +99,8 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
     <header class="absolute top-0 left-0 right-0 z-50">
       <div class="max-w-7xl mx-auto px-4 w-full flex items-center justify-between py-5">
         <!-- Logo -->
-        <a href="index.php" class="flex flex-col leading-none">
-          <span class="text-2xl font-black tracking-tight" style="color: #d4af37;">TMOPRO</span>
-          <span class="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase mt-0.5">Сантехника оптом</span>
+        <a href="index.php" class="flex items-center leading-none">
+          <img src="logo.svg" alt="TMOPRO" style="height: 48px; width: auto; display: block;">
         </a>
         <!-- Nav -->
         <nav class="hidden lg:flex items-center gap-8">
