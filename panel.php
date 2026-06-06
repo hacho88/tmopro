@@ -96,6 +96,9 @@ $defaultSettings = [
     'background_type' => 'gradient',
     'background_color' => '#f8fafc',
     'background_image' => '',
+    'catalog_title' => 'Категории',
+    'catalog_subtitle' => 'Быстрый доступ к основным группам товара',
+    'footer_html' => '',
     'hero_title' => 'Сантехника оптом от производителя. Все на одной площадке.',
     'hero_subtitle' => 'Шаровые краны, фитинги, трубы и комплектующие для инженерных систем. Оптовые цены от 10 шт.'
 ];
@@ -151,6 +154,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
             'background_type' => in_array($_POST['background_type'] ?? '', ['gradient','solid','image']) ? $_POST['background_type'] : 'gradient',
             'background_color' => trim($_POST['background_color'] ?? '#f8fafc'),
             'background_image' => trim($_POST['background_image'] ?? ''),
+            'catalog_title' => trim($_POST['catalog_title'] ?? $settings['catalog_title']),
+            'catalog_subtitle' => trim($_POST['catalog_subtitle'] ?? $settings['catalog_subtitle']),
+            'footer_html' => trim($_POST['footer_html'] ?? $settings['footer_html']),
             'hero_title' => trim($_POST['hero_title'] ?? $settings['hero_title']),
             'hero_subtitle' => trim($_POST['hero_subtitle'] ?? $settings['hero_subtitle'])
         ]);
@@ -1483,8 +1489,11 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <label style="grid-column:1/-1;"><span>Ссылка на фон</span><input name="background_image" value="<?= e($settings['background_image']) ?>" placeholder="background.jpg" class="field"></label>
         <label style="grid-column:1/-1;"><span>Или загрузить фон</span><input type="file" name="bg_file" accept="image/*" class="field" style="padding:8px;"></label>
         <?php if ($settings['background_image']): ?><div style="grid-column:1/-1;"><img src="<?= e($settings['background_image']) ?>" style="max-height:120px;border-radius:8px;"></div><?php endif; ?>
+        <label style="grid-column:1/-1;"><span>Заголовок категорий</span><input name="catalog_title" value="<?= e($settings['catalog_title']) ?>" class="field"></label>
+        <label style="grid-column:1/-1;"><span>Подзаголовок категорий</span><input name="catalog_subtitle" value="<?= e($settings['catalog_subtitle']) ?>" class="field"></label>
         <label style="grid-column:1/-1;"><span>Главный заголовок</span><textarea name="hero_title" rows="2" class="field"><?= e($settings['hero_title']) ?></textarea></label>
         <label style="grid-column:1/-1;"><span>Подзаголовок</span><textarea name="hero_subtitle" rows="3" class="field"><?= e($settings['hero_subtitle']) ?></textarea></label>
+        <label style="grid-column:1/-1;"><span>Футер (HTML)</span><textarea name="footer_html" rows="6" class="field" placeholder="<div>...</div>"><?= e($settings['footer_html']) ?></textarea></label>
       </div>
       <button class="btn" style="margin-top:16px;">💾 <?= admin_t('save') ?></button>
       <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:12px;font-size:13px;color:#64748b;">
@@ -1962,6 +1971,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         'features' => admin_t('block_features'),
         'products' => admin_t('block_products'),
         'categories' => admin_t('block_categories'),
+        'catalog' => admin_t('block_catalog'),
         'cta' => admin_t('block_cta')
       ];
     ?>

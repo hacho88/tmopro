@@ -46,6 +46,31 @@ if (!is_array($navLinks) || empty($navLinks)) {
         ['label'=>'Контакты','url'=>'page.php?slug=contacts'],
     ];
 }
+$catTitle = $settings['catalog_title'] ?? 'Категории';
+$catSubtitle = $settings['catalog_subtitle'] ?? 'Быстрый доступ к основным группам товара';
+$footerHtml = $settings['footer_html'] ?? '';
+
+// Default blocks if none exist
+if (empty($blocks)) {
+    $blocks = [
+        [
+            'type' => 'hero',
+            'title' => $heroTitle,
+            'subtitle' => 'ПРЕМИАЛЬНАЯ САНТЕХНИКА',
+            'content' => 'TMOPRO — ваш надежный партнер в сфере оптовых поставок сантехники премиум-класса.',
+            'button_text' => 'МГНОВЕННЫЙ РАСЧЕТ',
+            'button_link' => '#catalog'
+        ],
+        [
+            'type' => 'features',
+            'title' => '',
+            'subtitle' => '',
+            'content' => "Оптовые цены: Прямые поставки от производителя без посредников\nМгновенный расчет: Цена автоматически пересчитывается от количества\nБыстрая доставка: Отгрузка в день заказа по всей России\nСертификация: Вся продукция с официальными сертификатами",
+            'button_text' => '',
+            'button_link' => ''
+        ]
+    ];
+}
 ?>
 <!doctype html>
 <html lang="ru">
@@ -143,46 +168,6 @@ if (!is_array($navLinks) || empty($navLinks)) {
     </div>
 
     <!-- Dynamic Blocks -->
-    <?php if (empty($blocks)): ?>
-      <!-- Hero — Premium Dark -->
-      <section class="relative bg-[#0d0d0d] min-h-[520px] md:min-h-[580px] w-full overflow-hidden flex items-center">
-        <!-- Background Image -->
-        <div class="absolute inset-0 z-0">
-          <img src="<?= e($heroBg) ?>" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'">
-        </div>
-        <!-- Dark Overlay -->
-        <div class="absolute inset-0 z-10" style="background: linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.35) 100%);"></div>
-        <!-- Content -->
-        <div class="relative z-20 max-w-7xl mx-auto px-4 w-full pt-24 pb-16">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div>
-              <span class="text-xs font-semibold uppercase tracking-[0.15em] mb-3 block" style="color: #d4af37;">ПРЕМИАЛЬНАЯ САНТЕХНИКА</span>
-              <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">Сантехника оптом<br>от производителя</h1>
-              <p class="text-base md:text-lg mb-8 max-w-lg" style="color: #9ca3af;">TMOPRO — ваш надежный партнер в сфере оптовых поставок сантехники премиум-класса.</p>
-              <div class="flex flex-wrap gap-3">
-                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:brightness-110" style="background: #d4af37; color: #000;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
-                  МГНОВЕННЫЙ РАСЧЕТ
-                </a>
-                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-white/30 text-white transition-all duration-200 hover:border-white hover:bg-white/10">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  СКАЧАТЬ ПРАЙС-ЛИСТ
-                </a>
-              </div>
-            </div>
-            <div class="hidden md:block"></div>
-          </div>
-          <!-- Bottom right badge -->
-          <div class="absolute bottom-6 right-4 md:right-8 flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-md border border-white/10" style="background: rgba(13,13,13,0.7);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <div>
-              <div class="text-[11px] font-bold uppercase tracking-wider" style="color: #d4af37;">Гарантия качества</div>
-              <div class="text-[10px] text-gray-400 mt-0.5">Вся продукция сертифицирована</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    <?php else: ?>
       <?php foreach ($blocks as $bi => $b):
         $bt = $b['type'] ?? '';
         $btitle = $b['title'] ?? '';
@@ -192,20 +177,34 @@ if (!is_array($navLinks) || empty($navLinks)) {
         $blink = $b['button_link'] ?? '';
       ?>
         <?php if ($bt === 'hero'): ?>
-          <section class="lux-hero" style="margin-bottom:0;">
-            <div class="container lux-hero-inner">
-              <div class="lux-hero-copy">
-                <?php if ($bsub): ?><div class="lux-kicker"><?= e($bsub) ?></div><?php endif; ?>
-                <h1 class="lux-title"><?= e($btitle) ?></h1>
-                <?php if ($bcont): ?><p class="lux-subtitle"><?= $bcont ?></p><?php endif; ?>
-                <?php if ($bbtn): ?>
-                  <div class="lux-hero-actions">
-                    <a href="<?= e($blink ?: '#catalog') ?>" class="lux-btn-gold">
-                      <span><?= e($bbtn) ?></span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
-                    </a>
-                  </div>
-                <?php endif; ?>
+          <section class="relative bg-[#0d0d0d] min-h-[520px] md:min-h-[580px] w-full overflow-hidden flex items-center">
+            <div class="absolute inset-0 z-0">
+              <img src="<?= e($heroBg) ?>" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'">
+            </div>
+            <div class="absolute inset-0 z-10" style="background: linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.35) 100%);"></div>
+            <div class="relative z-20 max-w-7xl mx-auto px-4 w-full pt-24 pb-16">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                  <?php if ($bsub): ?><span class="text-xs font-semibold uppercase tracking-[0.15em] mb-3 block" style="color: #d4af37;"><?= e($bsub) ?></span><?php endif; ?>
+                  <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-4"><?= e($btitle) ?></h1>
+                  <?php if ($bcont): ?><p class="text-base md:text-lg mb-8 max-w-lg" style="color: #9ca3af;"><?= e($bcont) ?></p><?php endif; ?>
+                  <?php if ($bbtn): ?>
+                    <div class="flex flex-wrap gap-3">
+                      <a href="<?= e($blink ?: '#catalog') ?>" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:brightness-110" style="background: #d4af37; color: #000;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                        <?= e($bbtn) ?>
+                      </a>
+                    </div>
+                  <?php endif; ?>
+                </div>
+                <div class="hidden md:block"></div>
+              </div>
+              <div class="absolute bottom-6 right-4 md:right-8 flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-md border border-white/10" style="background: rgba(13,13,13,0.7);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider" style="color: #d4af37;">Гарантия качества</div>
+                  <div class="text-[10px] text-gray-400 mt-0.5">Вся продукция сертифицирована</div>
+                </div>
               </div>
             </div>
           </section>
@@ -284,6 +283,34 @@ if (!is_array($navLinks) || empty($navLinks)) {
               <?php endforeach; ?>
             </div>
           </section>
+        <?php elseif ($bt === 'catalog'): ?>
+          <section class="container py-16">
+            <div class="text-center mb-10">
+              <?php if ($btitle): ?><h2 class="text-3xl font-black text-gray-900 mb-4"><?= e($btitle) ?></h2><?php endif; ?>
+              <?php if ($bsub): ?><p class="text-lg text-gray-500 font-bold max-w-2xl mx-auto"><?= e($bsub) ?></p><?php endif; ?>
+              <?php if ($bbtn): ?><a href="<?= e($blink ?: '#catalog') ?>" class="btn btn-primary mt-6 inline-block"><?= e($bbtn) ?></a><?php endif; ?>
+            </div>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <?php
+                $showProducts = array_slice($allProducts, 0, 4);
+                foreach ($showProducts as $p):
+                  $pStock = (int)($p['stock'] ?? 0);
+                  $pStockLabel = $pStock <= 0 ? 'Нет' : ($pStock < 10 ? 'Мало' : 'В наличии');
+                  $pStockCls = $pStock <= 0 ? 'bg-red-50 text-red-700' : ($pStock < 10 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700');
+              ?>
+                <a href="product.php?id=<?= e($p['id'] ?? 0) ?>" style="text-decoration:none;display:block;background:#fff;border-radius:20px;border:1px solid #e2e8f0;padding:16px;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(15,23,42,.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+                  <div style="aspect-ratio:1;background:#f1f5f9;border-radius:16px;overflow:hidden;margin-bottom:12px;">
+                    <?php if (!empty($p['image'])): ?><img src="<?= e($p['image']) ?>" style="width:100%;height:100%;object-fit:contain;padding:12px;"><?php endif; ?>
+                  </div>
+                  <div style="font-size:11px;font-weight:900;color:#94a3b8;margin-bottom:4px;"><?= e($p['article'] ?? '') ?></div>
+                  <div style="font-size:14px;font-weight:900;color:#0f172a;margin-bottom:8px;line-height:1.3;"><?= e($p['name'] ?? '') ?></div>
+                  <div style="display:flex;justify-content:flex-end;align-items:center;">
+                    <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg <?= e($pStockCls) ?>"><?= e($pStockLabel) ?></span>
+                  </div>
+                </a>
+              <?php endforeach; ?>
+            </div>
+          </section>
         <?php elseif ($bt === 'cta'): ?>
           <section style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:80px 0;">
             <div class="container text-center">
@@ -294,58 +321,13 @@ if (!is_array($navLinks) || empty($navLinks)) {
           </section>
         <?php endif; ?>
       <?php endforeach; ?>
-    <?php endif; ?>
-
-    <!-- Features — dark premium -->
-    <section class="bg-[#121212] border-y border-white/[0.06]">
-      <div class="max-w-7xl mx-auto px-4 w-full py-10 md:py-12">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white uppercase tracking-wider">Оптовые цены</div>
-              <div class="text-xs mt-1" style="color: #9ca3af;">Прямые поставки от производителя без посредников</div>
-            </div>
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white uppercase tracking-wider">Мгновенный расчет</div>
-              <div class="text-xs mt-1" style="color: #9ca3af;">Цена автоматически пересчитывается от количества</div>
-            </div>
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white uppercase tracking-wider">Быстрая доставка</div>
-              <div class="text-xs mt-1" style="color: #9ca3af;">Отгрузка в день заказа по всей России</div>
-            </div>
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white uppercase tracking-wider">Сертификация</div>
-              <div class="text-xs mt-1" style="color: #9ca3af;">Вся продукция с официальными сертификатами</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Light section: Categories + Catalog -->
     <div class="bg-[#f9fafb] py-12">
       <section class="max-w-7xl mx-auto px-4 w-full py-10 lg:py-16">
         <div class="section-head mb-8">
-          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-gray-900">Категории</h2>
-          <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2">Быстрый доступ к основным группам товара</p>
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-gray-900"><?= e($catTitle) ?></h2>
+          <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2"><?= e($catSubtitle) ?></p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
@@ -999,6 +981,9 @@ if (!is_array($navLinks) || empty($navLinks)) {
     }
   </script>
 
+  <?php if (!empty($footerHtml)): ?>
+    <?= $footerHtml ?>
+  <?php else: ?>
   <footer style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#94a3b8;">
     <div class="container" style="padding-top:64px;padding-bottom:40px;">
       <div class="grid md:grid-cols-3 gap-12">
@@ -1013,6 +998,8 @@ if (!is_array($navLinks) || empty($navLinks)) {
           <?php if (!empty($settings['phone2'])): ?><a href="tel:<?= e(preg_replace('/\D/', '', $settings['phone2'])) ?>" style="display:block;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:10px;text-decoration:none;"><?= e($settings['phone2']) ?></a><?php endif; ?>
           <?php if (!empty($settings['phone3'])): ?><a href="tel:<?= e(preg_replace('/\D/', '', $settings['phone3'])) ?>" style="display:block;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:10px;text-decoration:none;"><?= e($settings['phone3']) ?></a><?php endif; ?>
           <?php if (!empty($settings['email_manager'])): ?><a href="mailto:<?= e($settings['email_manager']) ?>" style="display:block;color:#94a3b8;font-size:14px;font-weight:600;text-decoration:none;"><?= e($settings['email_manager']) ?></a><?php endif; ?>
+          <?php if (!empty($settings['email_sales'])): ?><a href="mailto:<?= e($settings['email_sales']) ?>" style="display:block;color:#94a3b8;font-size:14px;font-weight:600;text-decoration:none;"><?= e($settings['email_sales']) ?></a><?php endif; ?>
+          <?php if (!empty($settings['email_support'])): ?><a href="mailto:<?= e($settings['email_support']) ?>" style="display:block;color:#94a3b8;font-size:14px;font-weight:600;text-decoration:none;"><?= e($settings['email_support']) ?></a><?php endif; ?>
         </div>
         <div>
           <div style="font-size:11px;font-weight:800;color:#c9a35e;text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;">Навигация</div>
@@ -1031,6 +1018,7 @@ if (!is_array($navLinks) || empty($navLinks)) {
       </div>
     </div>
   </footer>
+  <?php endif; ?>
 
   <!-- Floating WhatsApp Button -->
   <?php
