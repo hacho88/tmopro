@@ -809,44 +809,51 @@ $totalRetail = array_sum(array_map(fn($p) => (float)($p['price_base'] ?? 0), $pr
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; }
-body { font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif; background: #f6f7fb; color: #0f172a; line-height: 1.5; }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial, sans-serif; background: #0d0d0d; color: #f8fafc; line-height: 1.5; }
 a { color: inherit; text-decoration: none; }
 input, select, textarea, button { font: inherit; }
 
-.wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
-.card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,.06); margin-bottom: 20px; }
-.btn { display: inline-block; background: <?= e($themeColor) ?>; color: #fff; padding: 12px 20px; border-radius: 12px; font-weight: 700; border: 0; cursor: pointer; }
-.btn-dark { background: #0f172a; }
-.btn-red { background: #dc2626; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px; }
+.card { background: #121212; border-radius: 20px; padding: 24px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 20px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #d4af37; color: #000; padding: 12px 20px; border-radius: 12px; font-weight: 700; border: 0; cursor: pointer; transition: all .2s ease; }
+.btn:hover { background: #c5a059; transform: translateY(-1px); }
+.btn-dark { background: #1a1a1a; color: #fff; }
+.btn-dark:hover { background: #d4af37; color: #000; }
+.btn-red { background: #dc2626; color: #fff; }
+.btn-red:hover { background: #b91c1c; }
+.btn-ghost { background: rgba(255,255,255,0.06); color: #9ca3af; }
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-.field { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: 600; }
+.field { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #1a1a1a; color: #f8fafc; font-weight: 600; }
+.field:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,0.15); }
 label { display: block; margin-bottom: 16px; }
-label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+label span { display: block; font-size: 11px; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
 
 .login-box { max-width: 400px; margin: 80px auto; text-align: center; }
-.login-box .logo { width: 64px; height: 64px; line-height: 64px; border-radius: 16px; color: #fff; font-weight: 900; margin: 0 auto 20px; background: <?= e($themeColor) ?>; }
-.login-box h1 { font-size: 24px; margin-bottom: 8px; }
-.login-box p { color: #64748b; margin-bottom: 24px; font-size: 14px; }
+.login-box .logo { width: 64px; height: 64px; line-height: 64px; border-radius: 16px; color: #000; font-weight: 900; margin: 0 auto 20px; background: #d4af37; font-size: 18px; }
+.login-box h1 { font-size: 24px; margin-bottom: 8px; color: #fff; }
+.login-box p { color: #9ca3af; margin-bottom: 24px; font-size: 14px; }
 .login-box input { margin-bottom: 12px; }
 .login-box .btn { width: 100%; }
 
 .nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-.nav a { padding: 10px 16px; border-radius: 12px; background: #f1f5f9; color: #475569; font-weight: 700; font-size: 14px; }
-.nav a.active { background: <?= e($themeColor) ?>; color: #fff; }
+.nav a { padding: 10px 16px; border-radius: 12px; background: rgba(255,255,255,0.06); color: #9ca3af; font-weight: 700; font-size: 14px; transition: all .2s ease; }
+.nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.nav a.active { background: #d4af37; color: #000; }
 
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
 .stat { text-align: center; }
-.stat .num { font-size: 32px; font-weight: 900; }
-.stat .lbl { font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+.stat .num { font-size: 32px; font-weight: 900; color: #d4af37; }
+.stat .lbl { font-size: 12px; color: #9ca3af; font-weight: 700; text-transform: uppercase; }
 
 .product-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
 @media (max-width: 768px) { .product-row { grid-template-columns: 1fr 1fr; } }
 
-.msg { padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; font-weight: 700; font-size: 14px; }
-.msg.ok { background: #ecfdf5; color: #047857; }
-.msg.err { background: #fef2f2; color: #b91c1c; }
+.msg { padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; font-weight: 700; font-size: 14px; border: 1px solid transparent; }
+.msg.ok { background: rgba(212,175,55,0.08); color: #d4af37; border-color: rgba(212,175,55,0.2); }
+.msg.err { background: rgba(220,38,38,0.08); color: #ef4444; border-color: rgba(220,38,38,0.2); }
 
-.sticky-save { position: sticky; bottom: 16px; background: #fff; padding: 12px; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.12); text-align: center; }
+.sticky-save { position: sticky; bottom: 16px; background: rgba(18,18,18,0.95); padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(16px); text-align: center; }
 
 .mb-2 { margin-bottom: 8px; }
 .mb-3 { margin-bottom: 12px; }
@@ -859,33 +866,34 @@ label span { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; 
 </style>
 <style>
 :root {
-  --accent: <?= e($themeColor) ?>;
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --shadow-sm: 0 10px 30px rgba(15,23,42,.06);
-  --shadow-md: 0 24px 80px rgba(15,23,42,.12);
+  --accent: #d4af37;
+  --bg: #0d0d0d;
+  --card: #121212;
+  --text: #f8fafc;
+  --muted: #9ca3af;
+  --border: rgba(255,255,255,0.06);
+  --shadow-sm: 0 10px 30px rgba(0,0,0,.3);
+  --shadow-md: 0 24px 80px rgba(0,0,0,.4);
 }
 
-body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial, sans-serif; background: var(--bg); color: var(--text); }
 .wrap { max-width: 1180px; padding: 28px 16px; }
 @media (min-width: 768px) { .wrap { padding: 40px 24px; } }
-.card { border-radius: 28px; box-shadow: var(--shadow-sm); border: 1px solid rgba(226,232,240,.75); }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 16px; font-weight: 900; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; box-shadow: 0 18px 50px rgba(15,23,42,.14); }
-.btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
+.card { border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 12px; font-weight: 700; transition: all .2s ease; }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
 .btn:active { transform: translateY(0px); }
-.btn:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(79,70,229,.16), 0 18px 50px rgba(15,23,42,.14); }
-.btn-dark { background: #020617; }
-.btn-ghost { background: #f1f5f9; color: #334155; box-shadow: none; }
-.btn-ghost:hover { background: #fff; box-shadow: var(--shadow-sm); }
-.field { border-radius: 18px; padding: 14px 16px; font-weight: 800; }
-.field:focus { box-shadow: 0 0 0 4px rgba(79,70,229,.14); }
-.msg { border-radius: 18px; font-weight: 900; border: 1px solid transparent; }
-.msg.ok { border-color: #d1fae5; }
-.msg.err { border-color: #fee2e2; }
-.sticky-save { border-radius: 22px; background: rgba(255,255,255,.92); border: 1px solid rgba(226,232,240,.9); backdrop-filter: blur(16px); box-shadow: var(--shadow-md); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(212,175,55,.2); }
+.btn-dark { background: #1a1a1a; color: #fff; }
+.btn-dark:hover { background: #d4af37; color: #000; }
+.btn-ghost { background: rgba(255,255,255,0.06); color: #9ca3af; box-shadow: none; }
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.field { border-radius: 12px; padding: 12px 14px; font-weight: 600; }
+.field:focus { box-shadow: 0 0 0 2px rgba(212,175,55,.15); border-color: #d4af37; }
+.msg { border-radius: 12px; font-weight: 700; border: 1px solid transparent; }
+.msg.ok { border-color: rgba(212,175,55,0.2); }
+.msg.err { border-color: rgba(220,38,38,0.2); }
+.sticky-save { border-radius: 16px; background: rgba(18,18,18,0.95); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(16px); box-shadow: var(--shadow-md); }
 
 .bg-orb { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
 .bg-orb::before {
@@ -897,11 +905,15 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
   height: 520px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: radial-gradient(closest-side, rgba(255,255,255,.0), rgba(255,255,255,0)),
-              radial-gradient(closest-side, rgba(79,70,229,.22), transparent 70%);
-  filter: blur(44px);
-  opacity: .55;
+  background: radial-gradient(closest-side, rgba(212,175,55,.06), transparent 70%);
+  filter: blur(60px);
+  opacity: .8;
 }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; font-weight: 700; }
+tr:hover td { background: rgba(255,255,255,0.02); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
@@ -926,13 +938,13 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 <div class="wrap">
   <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
-      <div style="font-size:12px;font-weight:700;color:#64748b;">Без MySQL · JSON CMS</div>
+      <div style="font-size:12px;font-weight:700;color:#9ca3af;">Без MySQL · JSON CMS</div>
       <h1 style="font-size:28px;margin-top:4px;">Админ-панель</h1>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <form method="get" style="display:flex;gap:4px;align-items:center;">
         <?php foreach ($allowedAdminLangs as $l): ?>
-          <button type="submit" name="admin_lang" value="<?= e($l) ?>" style="padding:4px 10px;border-radius:8px;border:1px solid <?= $adminLang===$l?'#0f172a':'#e2e8f0' ?>;background:<?= $adminLang===$l?'#0f172a':'#fff' ?>;color:<?= $adminLang===$l?'#fff':'#64748b' ?>;font-size:12px;font-weight:900;cursor:pointer;"><?= e(strtoupper($l)) ?></button>
+          <button type="submit" name="admin_lang" value="<?= e($l) ?>" style="padding:4px 10px;border-radius:8px;border:1px solid <?= $adminLang===$l?'#d4af37':'rgba(255,255,255,0.1)' ?>;background:<?= $adminLang===$l?'#d4af37':'transparent' ?>;color:<?= $adminLang===$l?'#000':'#9ca3af' ?>;font-size:12px;font-weight:900;cursor:pointer;"><?= e(strtoupper($l)) ?></button>
         <?php endforeach; ?>
       </form>
       <a href="index.php" target="_blank" class="btn btn-dark" style="text-decoration:none;">🌐 <?= admin_t('preview') ?></a>
@@ -968,19 +980,19 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
         <a href="panel.php?tab=settings" class="card" style="text-decoration:none;">
           <b>1. <?= admin_t('tab_settings') ?></b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step1') ?></p>
+          <p style="margin-top:6px;color:#9ca3af;font-size:14px;"><?= admin_t('overview_step1') ?></p>
         </a>
         <a href="panel.php?tab=products" class="card" style="text-decoration:none;">
           <b>2. <?= admin_t('tab_products') ?></b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step2') ?></p>
+          <p style="margin-top:6px;color:#9ca3af;font-size:14px;"><?= admin_t('overview_step2') ?></p>
         </a>
         <a href="index.php" target="_blank" class="card" style="text-decoration:none;">
           <b>3. <?= admin_t('preview') ?></b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step3') ?></p>
+          <p style="margin-top:6px;color:#9ca3af;font-size:14px;"><?= admin_t('overview_step3') ?></p>
         </a>
         <a href="backup.php" target="_blank" class="card" style="text-decoration:none;">
           <b>4. <?= admin_t('backup') ?></b>
-          <p style="margin-top:6px;color:#64748b;font-size:14px;"><?= admin_t('overview_step4') ?></p>
+          <p style="margin-top:6px;color:#9ca3af;font-size:14px;"><?= admin_t('overview_step4') ?></p>
         </a>
       </div>
     </div>
@@ -1047,7 +1059,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div>
           <h2 style="font-size:20px;">📦 <?= admin_t('tab_orders') ?></h2>
-          <p style="color:#64748b;font-size:13px;margin-top:4px;"><?= count($orders) ?> <?= admin_t('tab_orders') ?></p>
+          <p style="color:#9ca3af;font-size:13px;margin-top:4px;"><?= count($orders) ?> <?= admin_t('tab_orders') ?></p>
         </div>
         <form method="post" style="display:inline;">
           <input type="hidden" name="action" value="export_orders_csv">
@@ -1078,12 +1090,12 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
       <?php endif; ?>
 
       <?php if (empty($orders)): ?>
-        <div style="padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-weight:800;"><?= admin_t('tab_orders') ?> — 0</div>
+        <div style="padding:14px;border-radius:16px;background:#121212;border:1px solid rgba(255,255,255,0.06);color:#9ca3af;font-weight:800;"><?= admin_t('tab_orders') ?> — 0</div>
       <?php else: ?>
         <form method="post" id="bulkStatusForm" style="margin-bottom:12px;">
           <input type="hidden" name="action" value="bulk_update_orders_status">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:800;color:#1e40af;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:800;color:#d4af37;">
               <input type="checkbox" id="orderSelectAll" style="width:16px;height:16px;">
               Выбрать все
             </label>
@@ -1097,29 +1109,29 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
         </form>
 
         <?php foreach ($orders as $o): $oid = (int)$o['id']; ?>
-          <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="background:#121212;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
               <div style="display:flex;align-items:flex-start;gap:10px;">
-                <input type="checkbox" name="bulk_order_ids[]" value="<?= e($oid) ?>" form="bulkStatusForm" class="order-bulk-cb" style="margin-top:4px; width:18px; height:18px; accent-color:#0f172a; cursor:pointer;">
+                <input type="checkbox" name="bulk_order_ids[]" value="<?= e($oid) ?>" form="bulkStatusForm" class="order-bulk-cb" style="margin-top:4px; width:18px; height:18px; accent-color:#d4af37; cursor:pointer;">
                 <div>
-                  <div style="font-size:12px;font-weight:900;color:#64748b;">#<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
+                  <div style="font-size:12px;font-weight:900;color:#9ca3af;">#<?= e($o['order_number']) ?> · <?= e($o['created_at']) ?></div>
                 <div style="font-size:18px;font-weight:1000;margin-top:6px;"><?= e($o['company_name'] ?: '—') ?></div>
-                <div style="margin-top:6px;font-size:13px;color:#64748b;font-weight:800;"><?= admin_t('inn') ?>: <?= e($o['inn'] ?: '—') ?> · <?= admin_t('contact_person') ?>: <?= e($o['contact_person'] ?: '—') ?> · <?= e($o['phone'] ?: '—') ?> · <?= e($o['email'] ?: '—') ?></div>
+                <div style="margin-top:6px;font-size:13px;color:#9ca3af;font-weight:800;"><?= admin_t('inn') ?>: <?= e($o['inn'] ?: '—') ?> · <?= admin_t('contact_person') ?>: <?= e($o['contact_person'] ?: '—') ?> · <?= e($o['phone'] ?: '—') ?> · <?= e($o['email'] ?: '—') ?></div>
                 </div>
               </div>
               <div style="min-width:260px;flex:0 0 auto;">
                 <div style="display:flex;justify-content:space-between;gap:12px;font-weight:1000;">
-                  <div style="color:#64748b;"><?= admin_t('total') ?></div>
+                  <div style="color:#9ca3af;"><?= admin_t('total') ?></div>
                   <div><?= e(number_format((float)$o['total'], 0, ',', ' ')) ?> ₽</div>
                 </div>
-                <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#059669;font-weight:900;margin-top:6px;">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#d4af37;font-weight:900;margin-top:6px;">
                   <div><?= admin_t('retail') ?></div>
                   <div><?= e(number_format((float)$o['total_base'], 0, ',', ' ')) ?> ₽</div>
                 </div>
                 <?php if (!empty($o['city']) || !empty($o['address'])): ?>
-                <div style="margin-top:8px;padding:8px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;color:#64748b;font-weight:800;">
-                  <span style="color:#0f172a;font-weight:900;">📍 <?= admin_t('delivery_address') ?>:</span> <?= e($o['city'] ?? '') ?><?= ($o['city'] && $o['address']) ? ', ' : '' ?><?= e($o['address'] ?? '') ?><?= ($o['zip']) ? ' (' . e($o['zip']) . ')' : '' ?>
-                  <?php if (!empty($o['delivery_note'])): ?><br><span style="color:#059669;">📝 <?= e($o['delivery_note']) ?></span><?php endif; ?>
+                <div style="margin-top:8px;padding:8px 10px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);border-radius:10px;font-size:12px;color:#9ca3af;font-weight:800;">
+                  <span style="color:#f8fafc;font-weight:900;">📍 <?= admin_t('delivery_address') ?>:</span> <?= e($o['city'] ?? '') ?><?= ($o['city'] && $o['address']) ? ', ' : '' ?><?= e($o['address'] ?? '') ?><?= ($o['zip']) ? ' (' . e($o['zip']) . ')' : '' ?>
+                  <?php if (!empty($o['delivery_note'])): ?><br><span style="color:#d4af37;">📝 <?= e($o['delivery_note']) ?></span><?php endif; ?>
                 </div>
                 <?php endif; ?>
                 <form method="post" style="margin-top:10px;">
