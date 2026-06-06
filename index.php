@@ -33,7 +33,7 @@ $settings = is_array($settings) ? $settings : [];
 $siteName = $settings['site_name'] ?? 'TMOPRO — Сантехника Оптом';
 $heroTitle = $settings['hero_title'] ?? 'Сантехника оптом от производителя';
 $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения для водоснабжения и отопления';
-$heroImage = !empty($settings['background_image']) ? $settings['background_image'] : 'hero-sanitary.jpg';
+$heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное имя файла из папки /uploads/
 ?>
 <!doctype html>
 <html lang="ru">
@@ -62,7 +62,7 @@ $heroImage = !empty($settings['background_image']) ? $settings['background_image
   ?>
   <link href="https://fonts.googleapis.com/css2?family=<?= e($fontSlug) ?>:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>:root{ --font-sans: '<?= e($fontFamily) ?>', 'Noto Sans', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }</style>
-  <link rel="stylesheet" href="style.css?v=lux-dark-m">
+  <link rel="stylesheet" href="style.css?v=lux-dark-n">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -121,29 +121,29 @@ $heroImage = !empty($settings['background_image']) ? $settings['background_image
 
     <!-- Dynamic Blocks -->
     <?php if (empty($blocks)): ?>
-      <!-- Hero — Premium Dark -->
-      <section class="bg-[#0d0d0d] overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 w-full">
-          <div class="flex flex-col md:flex-row items-center justify-between min-h-[500px] md:min-h-[560px] gap-8 py-12 md:py-0">
-            <!-- Text Left -->
-            <div class="w-full md:w-1/2 z-10">
-              <div class="text-[11px] font-extrabold text-[#d4af37] uppercase tracking-[0.2em] mb-4">Премиальная сантехника</div>
-              <h1 class="text-3xl sm:text-4xl lg:text-[48px] font-black text-white leading-[1.1] tracking-tight mb-4">Сантехника оптом от производителя</h1>
-              <p class="text-sm text-gray-400 leading-relaxed mb-6 max-w-md">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
-              <div class="flex flex-wrap gap-3">
-                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d4af37] text-black text-sm font-semibold transition-all duration-200 hover:bg-[#e5c158] hover:-translate-y-0.5">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
-                  <span>Мгновенный расчет</span>
-                </a>
-                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/20 text-white text-sm font-semibold transition-all duration-200 hover:border-[#d4af37] hover:text-[#d4af37]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  <span>Скачать прайс-лист</span>
-                </a>
-              </div>
-            </div>
-            <!-- Image Right -->
-            <div class="w-full md:w-1/2 h-[300px] md:h-[450px]">
-              <img src="<?= e($heroImage) ?>" alt="Премиальная сантехника" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'">
+      <!-- Hero — Premium Dark with Background Image -->
+      <section class="relative bg-[#0d0d0d] min-h-[550px] w-full overflow-hidden">
+        <!-- Background Image Layer -->
+        <div class="absolute inset-0 z-0">
+          <img src="<?= e($heroBg) ?>" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'">
+        </div>
+        <!-- Dark Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent z-10"></div>
+        <!-- Content -->
+        <div class="max-w-7xl mx-auto px-4 w-full h-full relative z-20 grid grid-cols-1 md:grid-cols-2 items-center pt-20 pb-12">
+          <div>
+            <div class="text-[11px] font-bold text-[#d4af37] uppercase tracking-[0.2em] mb-4">Премиальная сантехника</div>
+            <h1 class="text-white text-4xl md:text-5xl font-bold tracking-tight mb-4">Сантехника оптом от производителя</h1>
+            <p class="text-gray-300 text-lg mb-6 max-w-lg">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
+            <div class="flex flex-wrap gap-3">
+              <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d4af37] text-black font-semibold transition-colors hover:bg-[#c5a059]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                <span>Мгновенный расчет</span>
+              </a>
+              <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/25 text-white font-semibold transition-colors hover:border-[#d4af37] hover:text-[#d4af37]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>Скачать прайс-лист</span>
+              </a>
             </div>
           </div>
         </div>
@@ -264,55 +264,55 @@ $heroImage = !empty($settings['background_image']) ? $settings['background_image
     <?php endif; ?>
 
     <!-- Features — dark premium -->
-    <section class="bg-[#121212] border-t border-white/[0.05]">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+    <section class="bg-[#121212] border-y border-white/5 py-8">
+      <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="flex items-start gap-4">
-          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
+          <div class="text-[#d4af37] text-2xl flex-shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
           </div>
           <div>
-            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Оптовые цены</div>
-            <div class="text-[13px] text-gray-400 leading-relaxed">Прямые поставки от производителя без посредников</div>
+            <div class="text-white text-sm font-semibold uppercase tracking-wider">Оптовые цены</div>
+            <div class="text-gray-400 text-xs mt-1">Прямые поставки от производителя без посредников</div>
           </div>
         </div>
         <div class="flex items-start gap-4">
-          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+          <div class="text-[#d4af37] text-2xl flex-shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
           </div>
           <div>
-            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Мгновенный расчет</div>
-            <div class="text-[13px] text-gray-400 leading-relaxed">Цена автоматически пересчитывается от количества</div>
+            <div class="text-white text-sm font-semibold uppercase tracking-wider">Мгновенный расчет</div>
+            <div class="text-gray-400 text-xs mt-1">Цена автоматически пересчитывается от количества</div>
           </div>
         </div>
         <div class="flex items-start gap-4">
-          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="text-[#d4af37] text-2xl flex-shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div>
-            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Быстрая доставка</div>
-            <div class="text-[13px] text-gray-400 leading-relaxed">Отгрузка в день заказа по всей России</div>
+            <div class="text-white text-sm font-semibold uppercase tracking-wider">Быстрая доставка</div>
+            <div class="text-gray-400 text-xs mt-1">Отгрузка в день заказа по всей России</div>
           </div>
         </div>
         <div class="flex items-start gap-4">
-          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div class="text-[#d4af37] text-2xl flex-shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <div>
-            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Сертификация</div>
-            <div class="text-[13px] text-gray-400 leading-relaxed">Вся продукция с официальными сертификатами</div>
+            <div class="text-white text-sm font-semibold uppercase tracking-wider">Сертификация</div>
+            <div class="text-gray-400 text-xs mt-1">Вся продукция с официальными сертификатами</div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Light section: Categories + Catalog -->
-    <div class="bg-[#f9fafb]">
-      <section class="container py-10 lg:py-16">
+    <div class="bg-[#f9fafb] py-12">
+      <section class="max-w-7xl mx-auto px-4 w-full py-10 lg:py-16">
         <div class="section-head mb-8">
           <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-gray-900">Категории</h2>
           <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2">Быстрый доступ к основным группам товара</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
             class="category-tile hover-lift">
             <div v-if="cat.image" class="category-tile-bg" :style="{ backgroundImage: 'url(' + cat.image + ')' }"></div>
@@ -330,7 +330,7 @@ $heroImage = !empty($settings['background_image']) ? $settings['background_image
       </section>
 
       <!-- Catalog -->
-    <main id="catalog" class="container py-10 lg:py-16 catalog-shell pb-20 md:pb-10">
+    <main id="catalog" class="max-w-7xl mx-auto px-4 w-full py-10 lg:py-16 catalog-shell pb-20 md:pb-10">
       <div class="grid gap-8 lg:grid-cols-sidebar">
         <!-- Sidebar Filters -->
         <aside class="h-fit lg:sticky lg:top-24">
@@ -536,12 +536,12 @@ $heroImage = !empty($settings['background_image']) ? $settings['background_image
           </div>
 
           <!-- Grid View — premium white cards -->
-          <div v-else class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
-            <article v-for="product in paginatedProducts" :key="product.id" class="flex flex-col bg-white border border-gray-100 rounded-xl p-4 min-h-[380px] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 animate-fadeIn">
+          <div v-else class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mt-8">
+            <article v-for="product in paginatedProducts" :key="product.id" class="flex flex-col bg-white rounded-xl border border-gray-100 p-4 min-h-[380px] hover:shadow-lg transition-all duration-300 animate-fadeIn">
               <a :href="'product.php?id=' + product.id" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id" class="block">
-                <div class="w-full h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+                <div class="w-full h-44 bg-white flex items-center justify-center mb-4 p-2 rounded-lg">
                   <img v-if="product.image" :src="product.image" class="max-h-full max-w-full object-contain" @error="onProductImgError(product)">
-                  <div v-else class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200"></div>
+                  <div v-else class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-md"></div>
                 </div>
                 <div class="text-xs text-gray-400 mb-1">{{ product.brand || product.article }}</div>
                 <h3 class="text-sm font-medium text-gray-900 line-clamp-2 min-h-[2.5rem] mb-2">{{ product.name }}</h3>
@@ -569,7 +569,7 @@ $heroImage = !empty($settings['background_image']) ? $settings['background_image
 
     <!-- Bottom Navigation — mobile only (<768px) -->
     <!-- Mobile Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 z-50 h-16 bg-[#0d0d0d]/95 backdrop-blur-md border-t border-white/10 flex md:hidden" aria-label="Bottom navigation">
+    <nav class="fixed bottom-0 left-0 right-0 z-50 h-16 bg-[#0d0d0d]/95 backdrop-blur-md border-t border-white/10 flex md:hidden justify-around items-center" aria-label="Bottom navigation">
       <div class="grid grid-cols-5 w-full">
         <a href="index.php" class="active flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
