@@ -61,7 +61,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   ?>
   <link href="https://fonts.googleapis.com/css2?family=<?= e($fontSlug) ?>:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>:root{ --font-sans: '<?= e($fontFamily) ?>', 'Noto Sans', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }</style>
-  <link rel="stylesheet" href="style.css?v=lux-dark-k">
+  <link rel="stylesheet" href="style.css?v=lux-dark-l">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -78,7 +78,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   <div id="app" v-cloak class="min-h-screen pb-16 md:pb-0">
     <!-- Header — transparent dark over hero -->
     <header class="lux-header-dark">
-      <div class="container">
+      <div class="max-w-7xl mx-auto px-4 w-full flex items-center justify-between py-5">
         <a href="index.php" class="lux-logo-main">
           <span class="lux-logo-title">TMOPRO</span>
           <span class="lux-logo-sub">САНТЕХНИКА ОПТОМ</span>
@@ -121,30 +121,28 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
     <!-- Dynamic Blocks -->
     <?php if (empty($blocks)): ?>
       <!-- Hero — Premium Dark -->
-      <section class="relative bg-[#0d0d0d] overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative min-h-[680px] md:min-h-[720px] flex items-center">
-          <!-- Text Left -->
-          <div class="w-full md:w-1/2 z-10 relative py-20 md:py-24 pr-0 md:pr-10">
-            <div class="text-[11px] font-extrabold text-[#c5a059] uppercase tracking-[0.2em] mb-5">Премиальная сантехника</div>
-            <h1 class="text-4xl sm:text-5xl lg:text-[56px] font-black text-white leading-[1.1] tracking-tight mb-5">Сантехника оптом от производителя</h1>
-            <p class="text-base text-gray-400 leading-relaxed mb-8 max-w-md">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
-            <div class="flex flex-wrap gap-4">
-              <a href="#catalog" class="inline-flex items-center gap-3 px-7 py-4 rounded-xl bg-[#c5a059] text-[#0d0d0d] text-sm font-extrabold uppercase tracking-wider transition-all duration-300 hover:bg-[#d4b76a] hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(197,160,89,0.3)]">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
-                <span>Мгновенный расчет</span>
-              </a>
-              <a href="#catalog" class="inline-flex items-center gap-3 px-7 py-4 rounded-xl border border-white/25 text-white text-sm font-extrabold uppercase tracking-wider transition-all duration-300 hover:border-[#c5a059] hover:text-[#c5a059]">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>Скачать прайс-лист</span>
-              </a>
+      <section class="bg-[#0d0d0d] overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 w-full">
+          <div class="flex flex-col md:flex-row items-center justify-between min-h-[500px] md:min-h-[560px] gap-8 py-12 md:py-0">
+            <!-- Text Left -->
+            <div class="w-full md:w-1/2 z-10">
+              <div class="text-[11px] font-extrabold text-[#d4af37] uppercase tracking-[0.2em] mb-4">Премиальная сантехника</div>
+              <h1 class="text-3xl sm:text-4xl lg:text-[48px] font-black text-white leading-[1.1] tracking-tight mb-4">Сантехника оптом от производителя</h1>
+              <p class="text-sm text-gray-400 leading-relaxed mb-6 max-w-md">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
+              <div class="flex flex-wrap gap-3">
+                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d4af37] text-black text-sm font-semibold transition-all duration-200 hover:bg-[#e5c158] hover:-translate-y-0.5">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                  <span>Мгновенный расчет</span>
+                </a>
+                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/20 text-white text-sm font-semibold transition-all duration-200 hover:border-[#d4af37] hover:text-[#d4af37]">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>Скачать прайс-лист</span>
+                </a>
+              </div>
             </div>
-          </div>
-          <!-- Image Right -->
-          <div class="hidden md:block absolute right-0 top-0 w-1/2 h-full">
-            <img src="hero-sanitary.jpg" alt="Премиальная сантехника" class="w-full h-full object-cover" onerror="this.style.display='none'">
-            <div class="absolute bottom-6 right-6 flex items-center gap-3 px-5 py-3 rounded-xl bg-[#0d0d0d]/70 backdrop-blur-md border border-white/[0.08] text-white text-[11px] font-extrabold uppercase tracking-wider">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>Гарантия качества</span>
+            <!-- Image Right -->
+            <div class="w-full md:w-1/2 h-[300px] md:h-[450px]">
+              <img src="hero-sanitary.jpg" alt="Премиальная сантехника" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'">
             </div>
           </div>
         </div>
@@ -537,21 +535,23 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
           </div>
 
           <!-- Grid View — premium white cards -->
-          <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 xl:gap-6">
-            <article v-for="product in paginatedProducts" :key="product.id" class="bg-white border border-gray-100 rounded-xl p-3 md:p-4 transition-all duration-200 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 animate-fadeIn">
+          <div v-else class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
+            <article v-for="product in paginatedProducts" :key="product.id" class="flex flex-col bg-white border border-gray-100 rounded-xl p-4 min-h-[380px] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 animate-fadeIn">
               <a :href="'product.php?id=' + product.id" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id" class="block">
-                <div class="w-full h-40 md:h-48 bg-white flex items-center justify-center p-3 md:p-4 rounded-lg mb-3">
-                  <img v-if="product.image" :src="product.image" class="max-w-full max-h-full object-contain" @error="onProductImgError(product)">
-                  <div v-else class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-md"></div>
+                <div class="w-full h-44 bg-gray-50 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+                  <img v-if="product.image" :src="product.image" class="max-h-full max-w-full object-contain" @error="onProductImgError(product)">
+                  <div v-else class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200"></div>
                 </div>
-                <div class="text-[10px] md:text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-1">{{ product.brand || product.article }}</div>
-                <h3 class="text-sm md:text-[15px] font-medium text-gray-900 leading-snug mb-2 line-clamp-2">{{ product.name }}</h3>
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-base md:text-lg font-black text-gray-900">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
-                  <span :class="['text-[10px] md:text-xs font-extrabold px-2 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
-                </div>
+                <div class="text-xs text-gray-400 mb-1">{{ product.brand || product.article }}</div>
+                <h3 class="text-sm font-medium text-gray-900 line-clamp-2 min-h-[2.5rem] mb-2">{{ product.name }}</h3>
               </a>
-              <button @click="addToCart(product)" class="w-full mt-3 py-2.5 rounded-lg bg-[#0f172a] text-white text-xs font-extrabold uppercase tracking-wider transition-all duration-200 hover:bg-[#1e293b]">В заявку</button>
+              <div class="mt-auto">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="text-base font-bold text-gray-950">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
+                  <span :class="['text-[10px] font-extrabold px-2 py-1 rounded-md', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
+                </div>
+                <button @click="addToCart(product)" class="w-full py-2.5 rounded-lg bg-[#0f172a] text-white text-xs font-extrabold uppercase tracking-wider transition-all duration-200 hover:bg-[#1e293b]">В заявку</button>
+              </div>
             </article>
           </div>
 
