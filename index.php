@@ -1045,7 +1045,10 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
       </div>
       <div style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <span style="font-size:13px;font-weight:600;color:#475569;">© <?= date('Y') ?> <?= e($settings['site_short_name'] ?? 'TMOPRO') ?></span>
-        <span style="font-size:12px;font-weight:600;color:#475569;">Сантехника оптом</span>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <a href="panel.php" style="font-size:11px;font-weight:700;color:#475569;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#475569'">⚙️ Админка</a>
+          <span style="font-size:12px;font-weight:600;color:#475569;">Сантехника оптом</span>
+        </div>
       </div>
     </div>
   </footer>
