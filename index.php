@@ -70,7 +70,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
       }
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=lux-dark-p">
+  <link rel="stylesheet" href="style.css?v=lux-dark-q">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -85,38 +85,39 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
 </head>
 <body class="theme-luxury">
   <div id="app" v-cloak class="min-h-screen pb-16 md:pb-0">
-    <!-- Header — transparent dark over hero -->
-    <header class="lux-header-dark">
+    <!-- Header — transparent absolute over hero -->
+    <header class="absolute top-0 left-0 right-0 z-50">
       <div class="max-w-7xl mx-auto px-4 w-full flex items-center justify-between py-5">
-        <a href="index.php" class="lux-logo-main">
-          <span class="lux-logo-title">TMOPRO</span>
-          <span class="lux-logo-sub">САНТЕХНИКА ОПТОМ</span>
+        <!-- Logo -->
+        <a href="index.php" class="flex flex-col leading-none">
+          <span class="text-2xl font-black tracking-tight" style="color: #d4af37;">TMOPRO</span>
+          <span class="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase mt-0.5">Сантехника оптом</span>
         </a>
-
-        <nav class="hidden lg:flex lux-nav-dark">
-          <a href="#catalog">Каталог</a>
-          <a href="#catalog">О компании</a>
-          <a href="#catalog">Партнерам</a>
-          <a href="#catalog">Доставка</a>
-          <a href="#catalog">Контакты</a>
+        <!-- Nav -->
+        <nav class="hidden lg:flex items-center gap-8">
+          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Каталог</a>
+          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">О компании</a>
+          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Партнерам</a>
+          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Доставка</a>
+          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Контакты</a>
         </nav>
-
-        <div class="lux-header-actions">
+        <!-- Actions -->
+        <div class="hidden sm:flex items-center gap-5">
           <?php if ($b2bUser): ?>
-            <a href="profile.php" class="hidden sm:flex">
+            <a href="profile.php" class="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors duration-200">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <?= htmlspecialchars($b2bName, ENT_QUOTES, 'UTF-8') ?>
             </a>
           <?php else: ?>
-            <a href="login.php" class="hidden sm:flex">
+            <a href="login.php" class="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors duration-200">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Вход для клиентов
             </a>
           <?php endif; ?>
-          <a href="checkout.php" class="hidden sm:flex">
+          <a href="checkout.php" class="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors duration-200 relative">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
             Корзина
-            <span class="lux-cart-badge-gold">{{ cartCount }}</span>
+            <span v-if="cartCount > 0" class="absolute -top-2 -right-3 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] font-bold text-black px-1" style="background: #d4af37;">{{ cartCount }}</span>
           </a>
         </div>
       </div>
@@ -129,32 +130,41 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
 
     <!-- Dynamic Blocks -->
     <?php if (empty($blocks)): ?>
-      <!-- ЖЕСТКИЙ ТЕМНЫЙ ПЕРВЫЙ ЭКРАН С ОВЕРЛЕЕМ -->
-      <section style="position: relative; background-color: #0d0d0d; min-height: 500px; width: 100%; overflow: hidden; display: flex; align-items: center; padding-top: 80px; padding-bottom: 60px;">
-        <!-- Фоновое изображение из папки uploads -->
-        <img src="/uploads/hero-bg.jpg" alt="Background" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0;" />
-        <!-- Принудительное темное затемнение поверх картинки -->
-        <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.3) 100%); z-index: 10;"></div>
-        <!-- Контентный блок с ограничением ширины -->
-        <div class="max-w-7xl mx-auto px-4 w-full" style="position: relative; z-index: 20;">
+      <!-- Hero — Premium Dark -->
+      <section class="relative bg-[#0d0d0d] min-h-[520px] md:min-h-[580px] w-full overflow-hidden flex items-center">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+          <img src="/uploads/hero-bg.jpg" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'">
+        </div>
+        <!-- Dark Overlay -->
+        <div class="absolute inset-0 z-10" style="background: linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.35) 100%);"></div>
+        <!-- Content -->
+        <div class="relative z-20 max-w-7xl mx-auto px-4 w-full pt-24 pb-16">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <!-- Левая колонка: Текст и Кнопки -->
-            <div class="w-full">
-              <span style="color: #d4af37; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 12px;">Премиальная сантехника</span>
-              <h1 style="color: #ffffff; font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 16px;">Сантехника оптом<br>от производителя</h1>
-              <p style="color: #9ca3af; font-size: 1.125rem; margin-bottom: 32px; max-width: 520px;">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
-              <!-- Кнопки -->
-              <div class="flex flex-wrap gap-4">
-                <a href="#catalog" class="inline-flex items-center justify-center rounded-lg transition-colors" style="background-color: #d4af37; color: #000000; font-weight: 600; padding: 12px 24px;">
-                  Мгновенный расчет
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-[0.15em] mb-3 block" style="color: #d4af37;">ПРЕМИАЛЬНАЯ САНТЕХНИКА</span>
+              <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">Сантехника оптом<br>от производителя</h1>
+              <p class="text-base md:text-lg mb-8 max-w-lg" style="color: #9ca3af;">TMOPRO — ваш надежный партнер в сфере оптовых поставок сантехники премиум-класса.</p>
+              <div class="flex flex-wrap gap-3">
+                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:brightness-110" style="background: #d4af37; color: #000;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                  МГНОВЕННЫЙ РАСЧЕТ
                 </a>
-                <a href="#catalog" class="inline-flex items-center justify-center rounded-lg transition-colors" style="border: 1px solid #ffffff; color: #ffffff; font-weight: 600; padding: 12px 24px;">
-                  Скачать прайс-лист
+                <a href="#catalog" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-white/30 text-white transition-all duration-200 hover:border-white hover:bg-white/10">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  СКАЧАТЬ ПРАЙС-ЛИСТ
                 </a>
               </div>
             </div>
-            <!-- Правая колонка пустая, так как картинка на бэкграунде -->
             <div class="hidden md:block"></div>
+          </div>
+          <!-- Bottom right badge -->
+          <div class="absolute bottom-6 right-4 md:right-8 flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-md border border-white/10" style="background: rgba(13,13,13,0.7);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-wider" style="color: #d4af37;">Гарантия качества</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Вся продукция сертифицирована</div>
+            </div>
           </div>
         </div>
       </section>
@@ -273,40 +283,44 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
       <?php endforeach; ?>
     <?php endif; ?>
 
-    <!-- ТЕМНЫЙ БЛОК ПРЕИМУЩЕСТВ СРАЗУ ПОД НЕЙ -->
-    <section style="background-color: #121212; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 40px 0; width: 100%;">
-      <div class="max-w-7xl mx-auto px-4 w-full">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <!-- Карточка 1 -->
-          <div class="flex gap-4 items-start">
-            <div style="color: #d4af37; font-size: 1.5rem; font-weight: bold;">+</div>
+    <!-- Features — dark premium -->
+    <section class="bg-[#121212] border-y border-white/[0.06]">
+      <div class="max-w-7xl mx-auto px-4 w-full py-10 md:py-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
+            </div>
             <div>
-              <h4 style="color: #ffffff; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Оптовые цены</h4>
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 4px;">Прямые поставки от производителя без посредников</p>
+              <div class="text-sm font-semibold text-white uppercase tracking-wider">Оптовые цены</div>
+              <div class="text-xs mt-1" style="color: #9ca3af;">Прямые поставки от производителя без посредников</div>
             </div>
           </div>
-          <!-- Карточка 2 -->
-          <div class="flex gap-4 items-start">
-            <div style="color: #d4af37; font-size: 1.5rem; font-weight: bold;">📋</div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+            </div>
             <div>
-              <h4 style="color: #ffffff; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Мгновенный расчет</h4>
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 4px;">Цена автоматически пересчитывается от количества</p>
+              <div class="text-sm font-semibold text-white uppercase tracking-wider">Мгновенный расчет</div>
+              <div class="text-xs mt-1" style="color: #9ca3af;">Цена автоматически пересчитывается от количества</div>
             </div>
           </div>
-          <!-- Карточка 3 -->
-          <div class="flex gap-4 items-start">
-            <div style="color: #d4af37; font-size: 1.5rem; font-weight: bold;">🕒</div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
             <div>
-              <h4 style="color: #ffffff; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Быстрая доставка</h4>
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 4px;">Отгрузка в день заказа по всей России</p>
+              <div class="text-sm font-semibold text-white uppercase tracking-wider">Быстрая доставка</div>
+              <div class="text-xs mt-1" style="color: #9ca3af;">Отгрузка в день заказа по всей России</div>
             </div>
           </div>
-          <!-- Карточка 4 -->
-          <div class="flex gap-4 items-start">
-            <div style="color: #d4af37; font-size: 1.5rem; font-weight: bold;">🛡️</div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style="border-color: rgba(212,175,55,0.25); color: #d4af37;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
             <div>
-              <h4 style="color: #ffffff; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Сертификация</h4>
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 4px;">Вся продукция с официальными сертификатами</p>
+              <div class="text-sm font-semibold text-white uppercase tracking-wider">Сертификация</div>
+              <div class="text-xs mt-1" style="color: #9ca3af;">Вся продукция с официальными сертификатами</div>
             </div>
           </div>
         </div>
