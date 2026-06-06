@@ -100,7 +100,7 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
       <div class="max-w-7xl mx-auto px-4 w-full flex items-center justify-between py-5">
         <!-- Logo -->
         <a href="index.php" class="flex items-center leading-none">
-          <img src="logo.svg?v=2" alt="TMOPRO" style="height: 48px; width: auto; display: block;">
+          <img src="logo.svg?v=2" alt="TMOPRO" style="height: 56px; width: auto; display: block;">
         </a>
         <!-- Nav -->
         <nav class="hidden lg:flex items-center gap-8">
