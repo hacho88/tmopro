@@ -61,7 +61,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   ?>
   <link href="https://fonts.googleapis.com/css2?family=<?= e($fontSlug) ?>:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>:root{ --font-sans: '<?= e($fontFamily) ?>', 'Noto Sans', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }</style>
-  <link rel="stylesheet" href="style.css?v=lux-gold-i">
+  <link rel="stylesheet" href="style.css?v=lux-dark-j">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -76,61 +76,38 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
 </head>
 <body class="theme-luxury">
   <div id="app" v-cloak class="min-h-screen">
-    <!-- Header -->
-    <header class="sticky top-0 z-40 lux-header">
-      <div class="container flex items-center justify-between py-4 gap-4">
-        <a href="index.php" class="flex items-center gap-3">
-          <span v-if="settings.logo_type === 'image' && settings.logo_url" class="grid place-items-center overflow-hidden rounded-xl bg-white shadow-md" style="width: 44px; height: 44px;">
-            <img :src="settings.logo_url" alt="TMOPRO" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
-          </span>
-          <span v-else class="grid place-items-center rounded-xl text-white" :class="accentBg" style="width: 44px; height: 44px;">
-            <span class="text-xs font-black">{{ settings.logo_text || 'TMO' }}</span>
-          </span>
-          <span class="min-w-0">
-            <span class="block text-lg font-extrabold tracking-tight">{{ settings.site_short_name || 'TMOPRO' }}</span>
-            <span class="block text-xs font-medium text-gray-500">сантехника оптом</span>
-          </span>
+    <!-- Header — transparent dark over hero -->
+    <header class="lux-header-dark">
+      <div class="container">
+        <a href="index.php" class="lux-logo-main">
+          <span class="lux-logo-title">TMOPRO</span>
+          <span class="lux-logo-sub">САНТЕХНИКА ОПТОМ</span>
         </a>
 
-        <nav class="hidden lg:flex items-center gap-8 lux-nav">
-          <a href="#catalog" class="lux-nav-link">Продукция</a>
-          <a href="#catalog" class="lux-nav-link">Решения</a>
-          <a href="#catalog" class="lux-nav-link">Ресурсы</a>
-          <a href="#catalog" class="lux-nav-link">О нас</a>
-          <a href="#catalog" class="lux-nav-link">Контакты</a>
+        <nav class="hidden lg:flex lux-nav-dark">
+          <a href="#catalog">Каталог</a>
+          <a href="#catalog">О компании</a>
+          <a href="#catalog">Партнерам</a>
+          <a href="#catalog">Доставка</a>
+          <a href="#catalog">Контакты</a>
         </nav>
 
-        <div class="hidden md:flex items-center gap-6">
-          <a :href="'tel:' + settings.phone" class="lux-meta-link">{{ settings.phone }}</a>
-          <a :href="'mailto:' + settings.email_manager" class="lux-meta-link">{{ settings.email_manager }}</a>
-        </div>
-
-        <div class="flex items-center gap-3">
+        <div class="lux-header-actions">
           <?php if ($b2bUser): ?>
-            <a href="profile.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-700 hover:text-emerald-700 transition">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <a href="profile.php" class="hidden sm:flex">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <?= htmlspecialchars($b2bName, ENT_QUOTES, 'UTF-8') ?>
             </a>
           <?php else: ?>
-            <a href="login.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-700 hover:text-emerald-700 transition">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <a href="login.php" class="hidden sm:flex">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Вход для клиентов
             </a>
           <?php endif; ?>
-          <a href="orders.php" class="hidden sm:flex items-center gap-2 text-sm font-extrabold text-gray-500 hover:text-emerald-700 transition" title="Мои заказы">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Заказы
-          </a>
-          <a href="checkout.php" class="relative lux-cart">
-            <span class="lux-cart-icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-            </span>
-            <span class="hidden sm:block">Корзина</span>
-            <span class="lux-cart-badge">{{ cartCount }}</span>
-          </a>
-          <a href="#catalog" class="hidden sm:inline-flex lux-btn-gold">
-            <span>Запросить расчет</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+          <a href="checkout.php" class="hidden sm:flex">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+            Корзина
+            <span class="lux-cart-badge-gold">{{ cartCount }}</span>
           </a>
         </div>
       </div>
@@ -143,35 +120,30 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
 
     <!-- Dynamic Blocks -->
     <?php if (empty($blocks)): ?>
-      <!-- Default Hero -->
-      <section class="lux-hero">
-        <div class="lux-hero-bg" aria-hidden="true">
-          <picture v-if="settings.background_image">
-            <source v-if="settings.background_image_mobile" media="(max-width: 1024px)" :srcset="settings.background_image_mobile">
-            <img :src="settings.background_image" alt="">
-          </picture>
-        </div>
-        <div class="container lux-hero-inner">
-          <div class="lux-hero-copy">
-            <div class="lux-kicker">Премиальные решения для водоснабжения и отопления</div>
-            <h1 class="lux-title">
-              <span class="lux-title-strong">СОЗДАНО ДЛЯ</span>
-              <span class="lux-title-accent">ПРОФЕССИОНАЛОВ</span>
-            </h1>
-            <p class="lux-subtitle">{{ settings.hero_subtitle }}</p>
-            <div class="lux-hero-actions">
-              <a href="#catalog" class="lux-btn-gold">
-                <span>Получить расчет</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+      <!-- Hero — Luxury Dark Minimal -->
+      <section class="lux-hero-v2">
+        <div class="container lux-hero-inner-v2">
+          <div class="lux-hero-copy-v2">
+            <div class="lux-kicker-v2">Премиальная сантехника</div>
+            <h1 class="lux-title-v2">Сантехника оптом от производителя</h1>
+            <p class="lux-subtitle-v2">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
+            <div class="lux-hero-actions-v2">
+              <a href="#catalog" class="lux-btn-gold-v2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                <span>Мгновенный расчет</span>
               </a>
-              <a href="#catalog" class="lux-btn-ghost">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                <span>Скачать каталог</span>
+              <a href="#catalog" class="lux-btn-outline-v2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>Скачать прайс-лист</span>
               </a>
             </div>
           </div>
-          <div class="lux-hero-media" aria-hidden="true">
-            <div class="lux-hero-media-placeholder"></div>
+          <div class="lux-hero-media-v2">
+            <img src="hero-sanitary.jpg" alt="Премиальная сантехника" onerror="this.style.display='none'">
+            <div class="lux-hero-guarantee">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Гарантия качества</span>
+            </div>
           </div>
         </div>
       </section>
@@ -290,55 +262,73 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
       <?php endforeach; ?>
     <?php endif; ?>
 
-    <section class="container py-10 lg:py-16">
-      <div class="section-head mb-8">
-        <h2 class="text-2xl sm:text-3xl font-black tracking-tight">Категории</h2>
-        <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2">Быстрый доступ к основным группам товара</p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
-          class="category-tile hover-lift">
-          <div v-if="cat.image" class="category-tile-bg" :style="{ backgroundImage: 'url(' + cat.image + ')' }"></div>
-          <div v-else class="category-tile-fallback"></div>
-          <div class="category-tile-overlay"></div>
-          <div class="category-tile-content">
-            <div class="category-tile-name">{{ cat.name }}</div>
-            <div class="category-tile-count">{{ cat.count }} позиций</div>
+    <!-- Features — dark premium -->
+    <section class="lux-features-dark">
+      <div class="container lux-features-grid">
+        <div class="lux-feature-item">
+          <div class="lux-feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
           </div>
-          <div class="category-tile-arrow" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          <div>
+            <div class="lux-feature-title">Оптовые цены</div>
+            <div class="lux-feature-desc">Прямые поставки от производителя без посредников</div>
           </div>
-        </button>
-      </div>
-    </section>
-
-    <section class="container pb-10 lg:pb-0">
-      <div class="grid gap-4 lg:grid-cols-3">
-        <div class="card p-6 hover-lift">
-          <div class="adv-icon mb-4" :class="accentBg">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="text-lg font-extrabold">Мгновенный расчет опта</div>
-          <div class="text-sm font-semibold text-gray-500 mt-2">Цена автоматически пересчитывается от количества</div>
         </div>
-        <div class="card p-6 hover-lift">
-          <div class="adv-icon mb-4 bg-dark">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 7h-7"/><path d="M14 17H7"/><path d="M7 7v10"/><path d="M17 7v10"/></svg>
+        <div class="lux-feature-item">
+          <div class="lux-feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
           </div>
-          <div class="text-lg font-extrabold">Прайс как инструмент</div>
-          <div class="text-sm font-semibold text-gray-500 mt-2">Плитка или таблица — выбирай удобный режим</div>
+          <div>
+            <div class="lux-feature-title">Мгновенный расчет</div>
+            <div class="lux-feature-desc">Цена автоматически пересчитывается от количества</div>
+          </div>
         </div>
-        <div class="card p-6 hover-lift">
-          <div class="adv-icon mb-4 bg-accent">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        <div class="lux-feature-item">
+          <div class="lux-feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
-          <div class="text-lg font-extrabold">Быстрая поддержка</div>
-          <div class="text-sm font-semibold text-gray-500 mt-2">Ответим по наличию, доставке и условиям</div>
+          <div>
+            <div class="lux-feature-title">Быстрая доставка</div>
+            <div class="lux-feature-desc">Отгрузка в день заказа по всей России</div>
+          </div>
+        </div>
+        <div class="lux-feature-item">
+          <div class="lux-feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="lux-feature-title">Сертификация</div>
+            <div class="lux-feature-desc">Вся продукция с официальными сертификатами</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Catalog -->
+    <!-- Light section: Categories + Catalog -->
+    <div class="lux-light-section">
+      <section class="container py-10 lg:py-16">
+        <div class="section-head mb-8">
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-gray-900">Категории</h2>
+          <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2">Быстрый доступ к основным группам товара</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
+            class="category-tile hover-lift">
+            <div v-if="cat.image" class="category-tile-bg" :style="{ backgroundImage: 'url(' + cat.image + ')' }"></div>
+            <div v-else class="category-tile-fallback"></div>
+            <div class="category-tile-overlay"></div>
+            <div class="category-tile-content">
+              <div class="category-tile-name">{{ cat.name }}</div>
+              <div class="category-tile-count">{{ cat.count }} позиций</div>
+            </div>
+            <div class="category-tile-arrow" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Catalog -->
     <main id="catalog" class="container py-10 lg:py-16 catalog-shell pb-20 md:pb-10">
       <div class="grid gap-8 lg:grid-cols-sidebar">
         <!-- Sidebar Filters -->
@@ -544,33 +534,22 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             </table>
           </div>
 
-          <!-- Grid View -->
+          <!-- Grid View — clean luxury cards -->
           <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
-            <article v-for="product in paginatedProducts" :key="product.id" class="card-product animate-fadeIn">
-              <a :href="'product.php?id=' + product.id" class="block" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
-                <div class="product-media">
-                  <img v-if="product.image" :src="product.image" class="product-img" @error="onProductImgError(product)">
-                  <div v-else class="product-img-placeholder" aria-hidden="true"></div>
-                  <div class="product-media-info">
-                    <div class="product-media-brand">{{ product.brand }}</div>
-                    <div class="product-media-price">{{ product.price_base.toLocaleString('ru-RU') }} ₽</div>
-                  </div>
+            <article v-for="product in paginatedProducts" :key="product.id" class="lux-card-clean animate-fadeIn">
+              <a :href="'product.php?id=' + product.id" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
+                <div class="lux-card-img-wrap">
+                  <img v-if="product.image" :src="product.image" @error="onProductImgError(product)">
+                  <div v-else style="width:100%;height:100%;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);"></div>
+                </div>
+                <div class="lux-card-article">{{ product.article }}</div>
+                <div class="lux-card-name">{{ product.name }}</div>
+                <div class="lux-card-footer">
+                  <span class="lux-card-price">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
+                  <span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
                 </div>
               </a>
-              <div class="p-5">
-                <div class="flex items-start justify-between gap-3 mb-2">
-                  <div class="min-w-0">
-                    <div style="font-size:11px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">{{ product.article }}</div>
-                    <a :href="'product.php?id=' + product.id" style="text-decoration:none;" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
-                      <h3 style="font-size:15px;font-weight:900;color:#0f172a;line-height:1.35;letter-spacing:-0.01em;" class="hover:underline">{{ product.name }}</h3>
-                    </a>
-                  </div>
-                  <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center flex-shrink-0" style="width:32px;height:32px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:transform .15s;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'" @mousedown="$event.target.style.transform='scale(0.9)'" @mouseup="$event.target.style.transform='scale(1)'">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  </button>
-                </div>
-                <button @click="addToCart(product)" class="btn btn-primary w-full" style="border-radius:14px;font-weight:900;padding:10px 0;">В заявку</button>
-              </div>
+              <button @click="addToCart(product)" class="btn btn-primary w-full mt-3" style="border-radius:8px;font-weight:900;padding:10px 0;font-size:13px;background:#0f172a;color:#fff;">В заявку</button>
             </article>
           </div>
 
@@ -583,6 +562,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
         </div>
       </div>
     </main>
+    </div>
 
     <!-- Bottom Navigation — mobile only (<768px) -->
     <nav class="mobile-nav" aria-label="Bottom navigation">
