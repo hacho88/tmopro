@@ -81,12 +81,16 @@ $defaultSettings = [
     'phone3' => '+7 (926) 869-04-28',
     'whatsapp' => '',
     'email_manager' => 'info@tmopro.ru',
+    'email_sales' => '',
+    'email_support' => '',
     'address' => '',
+    'nav_links' => '[{"label":"Каталог","url":"#catalog"},{"label":"О компании","url":"page.php?slug=about"},{"label":"Партнерам","url":"page.php?slug=partners"},{"label":"Доставка","url":"page.php?slug=delivery"},{"label":"Контакты","url":"page.php?slug=contacts"}]',
     'theme_color' => 'emerald',
     'default_view' => 'table',
     'logo_type' => 'image',
     'logo_text' => 'TMOPRO',
     'logo_url' => 'logo.svg',
+    'logo_width' => 56,
     'favicon' => '',
     'font_family' => 'Inter',
     'background_type' => 'gradient',
@@ -132,12 +136,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAuthorized) {
             'phone3' => trim($_POST['phone3'] ?? $settings['phone3']),
             'whatsapp' => trim($_POST['whatsapp'] ?? $settings['whatsapp']),
             'email_manager' => trim($_POST['email_manager'] ?? $settings['email_manager']),
+            'email_sales' => trim($_POST['email_sales'] ?? $settings['email_sales']),
+            'email_support' => trim($_POST['email_support'] ?? $settings['email_support']),
             'address' => trim($_POST['address'] ?? $settings['address']),
+            'nav_links' => trim($_POST['nav_links'] ?? $settings['nav_links']),
             'theme_color' => in_array($_POST['theme_color'] ?? '', ['indigo','emerald','slate']) ? $_POST['theme_color'] : 'indigo',
             'default_view' => in_array($_POST['default_view'] ?? '', ['table','grid']) ? $_POST['default_view'] : 'table',
             'logo_type' => in_array($_POST['logo_type'] ?? '', ['text','image']) ? $_POST['logo_type'] : 'text',
             'logo_text' => trim($_POST['logo_text'] ?? 'TMO'),
             'logo_url' => trim($_POST['logo_url'] ?? ''),
+            'logo_width' => max(20, min(300, (int)($_POST['logo_width'] ?? 56))),
             'favicon' => trim($_POST['favicon'] ?? ''),
             'font_family' => in_array($_POST['font_family'] ?? '', ['Inter','Roboto','Open Sans','Manrope','Noto Sans']) ? $_POST['font_family'] : 'Inter',
             'background_type' => in_array($_POST['background_type'] ?? '', ['gradient','solid','image']) ? $_POST['background_type'] : 'gradient',
@@ -1424,7 +1432,10 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <label><span>Телефон 3</span><input name="phone3" value="<?= e($settings['phone3']) ?>" class="field"></label>
         <label><span>WhatsApp</span><input name="whatsapp" value="<?= e($settings['whatsapp']) ?>" class="field" placeholder="+7... (без + и пробелов)"></label>
         <label><span>Email менеджера</span><input name="email_manager" type="email" value="<?= e($settings['email_manager']) ?>" class="field"></label>
+        <label><span>Email продаж</span><input name="email_sales" type="email" value="<?= e($settings['email_sales']) ?>" class="field"></label>
+        <label><span>Email поддержки</span><input name="email_support" type="email" value="<?= e($settings['email_support']) ?>" class="field"></label>
         <label><span>Адрес компании</span><textarea name="address" rows="2" class="field"><?= e($settings['address']) ?></textarea></label>
+        <label style="grid-column:1/-1;"><span>Навигация (JSON)</span><textarea name="nav_links" rows="4" class="field"><?= e($settings['nav_links']) ?></textarea></label>
         <label><span>Шрифт сайта</span>
           <select name="font_family" class="field">
             <option value="Inter" <?= $settings['font_family']==='Inter'?'selected':'' ?>>Inter</option>
@@ -1454,6 +1465,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           </select>
         </label>
         <label><span>Текст логотипа</span><input name="logo_text" value="<?= e($settings['logo_text']) ?>" class="field"></label>
+        <label><span>Ширина логотипа (px)</span><input name="logo_width" type="number" value="<?= e($settings['logo_width']) ?>" class="field" min="20" max="300"></label>
         <label style="grid-column:1/-1;"><span>Ссылка на логотип</span><input name="logo_url" value="<?= e($settings['logo_url']) ?>" placeholder="logo.png" class="field"></label>
         <label style="grid-column:1/-1;"><span>Или загрузить логотип</span><input type="file" name="logo_file" accept="image/*" class="field" style="padding:8px;"></label>
         <?php if ($settings['logo_url']): ?><div style="grid-column:1/-1;"><img src="<?= e($settings['logo_url']) ?>" style="max-height:60px;border-radius:8px;"></div><?php endif; ?>

@@ -34,6 +34,18 @@ $siteName = $settings['site_name'] ?? 'TMOPRO — Сантехника Опто�
 $heroTitle = $settings['hero_title'] ?? 'Сантехника оптом от производителя';
 $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения для водоснабжения и отопления';
 $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['background_image'], '/') : '/uploads/hero-bg.jpg';
+$logoUrl = !empty($settings['logo_url']) ? $settings['logo_url'] : 'logo.svg?v=2';
+$logoWidth = (int)($settings['logo_width'] ?? 56);
+$navLinks = json_decode($settings['nav_links'] ?? '', true);
+if (!is_array($navLinks) || empty($navLinks)) {
+    $navLinks = [
+        ['label'=>'Каталог','url'=>'#catalog'],
+        ['label'=>'О компании','url'=>'page.php?slug=about'],
+        ['label'=>'Партнерам','url'=>'page.php?slug=partners'],
+        ['label'=>'Доставка','url'=>'page.php?slug=delivery'],
+        ['label'=>'Контакты','url'=>'page.php?slug=contacts'],
+    ];
+}
 ?>
 <!doctype html>
 <html lang="ru">
@@ -100,15 +112,13 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
       <div class="max-w-7xl mx-auto px-4 w-full flex items-center justify-between py-5">
         <!-- Logo -->
         <a href="index.php" class="flex items-center leading-none">
-          <img src="logo.svg?v=2" alt="TMOPRO" style="height: 56px; width: auto; display: block;">
+          <img src="<?= e($logoUrl) ?>" alt="TMOPRO" style="height: <?= $logoWidth ?>px; width: auto; display: block;">
         </a>
         <!-- Nav -->
         <nav class="hidden lg:flex items-center gap-8">
-          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Каталог</a>
-          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">О компании</a>
-          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Партнерам</a>
-          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Доставка</a>
-          <a href="#catalog" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">Контакты</a>
+          <?php foreach ($navLinks as $nl): ?>
+          <a href="<?= e($nl['url']) ?>" class="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"><?= e($nl['label']) ?></a>
+          <?php endforeach; ?>
         </nav>
         <!-- Actions -->
         <div class="hidden sm:flex items-center gap-5">
@@ -123,11 +133,6 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
               Вход для клиентов
             </a>
           <?php endif; ?>
-          <a href="checkout.php" class="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors duration-200 relative">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-            Корзина
-            <span v-if="cartCount > 0" class="absolute -top-2 -right-3 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] font-bold text-black px-1" style="background: #d4af37;">{{ cartCount }}</span>
-          </a>
         </div>
       </div>
     </header>
@@ -250,8 +255,7 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
                   </div>
                   <div style="font-size:11px;font-weight:900;color:#94a3b8;margin-bottom:4px;"><?= e($p['article'] ?? '') ?></div>
                   <div style="font-size:14px;font-weight:900;color:#0f172a;margin-bottom:8px;line-height:1.3;"><?= e($p['name'] ?? '') ?></div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-size:16px;font-weight:900;color:#0f172a;"><?= number_format((float)($p['price_base'] ?? 0), 0, ',', ' ') ?> ₽</span>
+                  <div style="display:flex;justify-content:flex-end;align-items:center;">
                     <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg <?= e($pStockCls) ?>"><?= e($pStockLabel) ?></span>
                   </div>
                 </a>
@@ -466,10 +470,7 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
                   <tr><td class="font-bold text-gray-500">Артикул</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold">{{ products.find(p => p.id === cid)?.article || '—' }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Бренд</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.brand || '—' }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Категория</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.category || '—' }}</td></tr>
-                  <tr><td class="font-bold text-gray-500">Цена</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold" style="color: #0d0d0d;">{{ money(products.find(p => p.id === cid)?.price_base || 0) }}</td></tr>
-                  <tr><td class="font-bold text-gray-500">Опт от 10 шт</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold">{{ money(products.find(p => p.id === cid)?.price_wholesale || 0) }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Остаток</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.stock || 0 }} шт</td></tr>
-                  <tr><td class="font-bold text-gray-500"></td><td v-for="cid in compareList" :key="cid" class="text-center"><button @click="addToCart(products.find(p => p.id === cid))" class="btn btn-sm btn-primary">В корзину</button></td></tr>
                 </tbody>
               </table>
             </div>
@@ -525,8 +526,6 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
                   <th>Артикул</th>
                   <th>Категория</th>
                   <th>Остаток</th>
-                  <th>Цена</th>
-                  <th>Кол-во</th>
                   <th></th>
                 </tr>
               </thead>
@@ -546,13 +545,8 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
                   </td>
                   <td><span class="badge badge-gray">{{ product.category }}</span></td>
                   <td><span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span></td>
-                  <td><price-block :product="product" :qty="qty[product.id]" :tier="b2bTier" :tiers="priceTiers"></price-block></td>
-                  <td>
-                    <qty-control :model-value="qty[product.id]" @update:model-value="setQty(product.id, $event)"></qty-control>
-                  </td>
                   <td>
                     <div class="flex items-center gap-2">
-                      <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">В корзину</button>
                       <button type="button" @click.stop.prevent="recordView(product); quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#9ca3af;" :title="'Быстрый просмотр'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                       </button>
@@ -578,11 +572,9 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
                 <h3 class="text-sm font-medium text-gray-900 line-clamp-2 min-h-[2.5rem] mb-2">{{ product.name }}</h3>
               </a>
               <div class="mt-auto">
-                <div class="flex items-center justify-between gap-2 mb-3">
-                  <span class="text-base font-bold text-gray-950">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
+                <div class="flex items-center justify-end gap-2 mb-3">
                   <span :class="['text-[10px] font-extrabold px-2 py-1 rounded-md', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
                 </div>
-                <button @click="addToCart(product)" class="w-full py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all duration-300" style="background: #0d0d0d; color: #fff;" onmouseover="this.style.background='#d4af37';this.style.color='#000'" onmouseout="this.style.background='#0d0d0d';this.style.color='#fff'">В заявку</button>
               </div>
             </article>
           </div>
@@ -614,11 +606,6 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           <span class="text-[9px] font-semibold tracking-wide">Избранное</span>
         </button>
-        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-          <span class="text-[9px] font-semibold tracking-wide">Корзина</span>
-          <b v-if="cartCount > 0" class="absolute top-0.5 right-2 rounded-full px-1 text-black text-[8px] font-black" style="background: #d4af37;">{{ cartCount }}</b>
-        </a>
         <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
           <span class="text-[9px] font-semibold tracking-wide">Позвонить</span>
@@ -644,13 +631,6 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
               <span class="badge badge-primary">{{ quickViewProduct.brand }}</span>
               <span class="badge badge-gray">{{ quickViewProduct.category }}</span>
               <span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(quickViewProduct.stock).cls]">{{ stockStatus(quickViewProduct.stock).label }}</span>
-            </div>
-            <div class="mb-6">
-              <price-block :product="quickViewProduct" :qty="qty[quickViewProduct.id]" :tier="b2bTier" :tiers="priceTiers"></price-block>
-            </div>
-            <div class="flex items-center gap-3 mb-4">
-              <qty-control :model-value="qty[quickViewProduct.id]" @update:model-value="setQty(quickViewProduct.id, $event)"></qty-control>
-              <button @click="addToCart(quickViewProduct); quickViewProduct = null" class="btn btn-primary" style="flex:1;">Добавить в заявку</button>
             </div>
             <a :href="'product.php?id=' + quickViewProduct.id" class="text-sm font-extrabold text-emerald-600 hover:underline">Подробнее →</a>
           </div>
@@ -773,7 +753,7 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
               <div class="live-search-info">
                 <div class="live-search-name">{{ item.name }}</div>
                 <div class="live-search-meta">{{ item.article }} · {{ item.brand }} · {{ item.category }}</div>
-                <div class="live-search-price">{{ money(item.price_base) }}</div>
+                <div class="live-search-price" style="display:none;"></div>
               </div>
             </a>
           </div>
