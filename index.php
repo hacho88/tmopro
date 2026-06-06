@@ -584,29 +584,29 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
       </div>
     </main>
 
-    <!-- Mobile Navigation — native bottom dock -->
+    <!-- Mobile Navigation — premium glass dock -->
     <nav class="mobile-nav md:hidden">
       <div class="grid grid-cols-5">
-        <a href="index.php" class="active flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
-          <span>Главная</span>
+        <a href="index.php" class="active flex flex-col items-center justify-center gap-1.5 py-2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Главная</span>
         </a>
-        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-          <span>Категории</span>
+        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1.5 py-2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Каталог</span>
         </button>
-        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider', showFavoritesOnly ? 'text-rose-500' : '']">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          <span>Избранное</span>
+        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1.5 py-2', showFavoritesOnly ? 'text-rose-400' : '']">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Избранное</span>
         </button>
-        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-          <span>Корзина</span>
-          <b v-if="cartCount > 0" class="absolute top-0.5 right-2 rounded-full px-1.5 bg-tech-blue text-white" style="font-size: 8px;">{{ cartCount }}</b>
+        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1.5 py-2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Корзина</span>
+          <b v-if="cartCount > 0" class="absolute -top-0.5 right-1 rounded-full px-1.5 text-white" style="font-size:8px;background:#C9A35E;">{{ cartCount }}</b>
         </a>
-        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-extrabold uppercase tracking-wider">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
-          <span>Позвонить</span>
+        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1.5 py-2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
+          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Позвонить</span>
         </a>
       </div>
     </nav>
