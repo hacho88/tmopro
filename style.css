@@ -1110,47 +1110,58 @@ img { max-width: 100%; display: block; }
   box-shadow: var(--shadow-md);
 }
 
-/* Mobile nav — premium glass dock */
+/* Bottom Navigation — premium glass dock (mobile only) */
 .mobile-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 12px max(10px, env(safe-area-inset-bottom)) 12px;
-  border-radius: 0;
-  background: rgba(15,23,42,0.88);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border-top: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 -8px 32px rgba(0,0,0,0.45);
-  z-index: 50;
+  display: none;
+}
+@media (max-width: 767px) {
+  .mobile-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    padding: 6px 8px max(8px, env(safe-area-inset-bottom)) 8px;
+    border-radius: 0;
+    background: rgba(15,23,42,0.92);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.45);
+    z-index: 50;
+  }
+  .mobile-nav .grid {
+    height: 100%;
+    align-items: center;
+  }
 }
 .mobile-nav a,
 .mobile-nav button {
   position: relative;
-  color: rgba(255,255,255,0.35);
-  transition: color 0.3s ease;
+  color: #94a3b8;
+  transition: color 0.25s ease;
 }
 .mobile-nav a.active,
 .mobile-nav button.active {
-  color: #fff;
+  color: #ffffff;
 }
 .mobile-nav a.active::after,
 .mobile-nav button.active::after {
   content: '';
   position: absolute;
-  bottom: 2px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
   height: 4px;
   border-radius: 50%;
   background: #C9A35E;
-  box-shadow: 0 0 8px rgba(201,163,94,0.6);
+  box-shadow: 0 0 10px rgba(201,163,94,0.7);
 }
 .mobile-nav a:hover,
 .mobile-nav button:hover {
-  color: rgba(255,255,255,0.7);
+  color: #cbd5e1;
 }
 
 /* Number smooth */

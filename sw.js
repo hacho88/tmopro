@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'tmopro-pwa-v3';
+﻿const CACHE_NAME = 'tmopro-pwa-v4';
 const APP_SHELL = [
   './',
   './index.php',

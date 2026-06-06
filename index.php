@@ -584,8 +584,8 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
       </div>
     </main>
 
-    <!-- Mobile Navigation — premium glass dock -->
-    <nav class="mobile-nav md:hidden">
+    <!-- Bottom Navigation — mobile only (<768px) -->
+    <nav class="mobile-nav" aria-label="Bottom navigation">
       <div class="grid grid-cols-5">
         <a href="index.php" class="active flex flex-col items-center justify-center gap-1.5 py-2">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
