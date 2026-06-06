@@ -70,7 +70,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
       }
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=lux-dark-q">
+  <link rel="stylesheet" href="style.css?v=lux-dark-r">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -79,6 +79,16 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
     .fallback a { display: inline-flex; margin-right: 10px; border-radius: 16px; background: #008A4E; color: #fff; padding: 13px 18px; font-weight: 800; text-decoration: none; }
     [v-cloak] { display: none !important; }
     .lux-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226,232,240,0.6); }
+    /* Brand palette overrides */
+    .btn-primary { background: #0d0d0d !important; color: #fff !important; box-shadow: 0 4px 12px rgba(13,13,13,0.18) !important; }
+    .btn-primary:hover { background: #d4af37 !important; color: #000 !important; box-shadow: 0 8px 20px rgba(212,175,55,0.25) !important; }
+    .chip-active { background: #0d0d0d !important; color: #fff !important; box-shadow: 0 4px 12px rgba(13,13,13,0.18) !important; border-color: transparent !important; }
+    .sidebar-subcat-btn.active { background: #0d0d0d !important; color: #fff !important; box-shadow: 0 4px 12px rgba(13,13,13,0.18) !important; border-color: transparent !important; }
+    .sidebar-subcat-btn.active .count { background: rgba(212,175,55,0.25) !important; }
+    .badge-primary { background: rgba(13,13,13,0.08) !important; color: #0d0d0d !important; }
+    .btn-dark { background: #0d0d0d !important; color: #fff !important; }
+    input[type="checkbox"] { accent-color: #d4af37; }
+    select.field:focus, input.field:focus { border-color: #d4af37 !important; outline: none !important; box-shadow: 0 0 0 1px #d4af37 !important; }
   </style>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"TMOPRO","url":"https://tmopro.ru","logo":"https://tmopro.ru/logo.svg","contactPoint":{"@type":"ContactPoint","telephone":"+7-966-085-34-70","contactType":"sales","areaServed":"RU","availableLanguage":"Russian"},"sameAs":[]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"TMOPRO — Сантехника Оптом","url":"https://tmopro.ru","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://tmopro.ru/?search={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
@@ -408,27 +418,27 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
             </div>
 
             <!-- Compare -->
-            <div v-if="compareList.length" class="mt-6 p-4 rounded-2xl bg-blue-50 border border-blue-100">
+            <div v-if="compareList.length" class="mt-6 p-4 rounded-2xl border" style="background: rgba(212,175,55,0.06); border-color: rgba(212,175,55,0.15);">
               <div class="flex items-center justify-between mb-3">
-                <div class="text-xs font-bold uppercase tracking-wider text-blue-400">⚖️ Сравнение ({{ compareList.length }})</div>
-                <button @click="compareList = []; localStorage.setItem('tmopro_compare', '[]');" class="text-xs font-bold text-blue-400 hover:text-blue-600">Очистить</button>
+                <div class="text-xs font-bold uppercase tracking-wider" style="color: #d4af37;">⚖️ Сравнение ({{ compareList.length }})</div>
+                <button @click="compareList = []; localStorage.setItem('tmopro_compare', '[]');" class="text-xs font-bold" style="color: #d4af37;" onmouseover="this.style.color='#0d0d0d'" onmouseout="this.style.color='#d4af37'">Очистить</button>
               </div>
               <div class="space-y-2">
                 <div v-for="cid in compareList" :key="cid" class="flex items-center justify-between">
-                  <span class="text-xs font-extrabold text-blue-900 truncate" style="max-width: 160px;">{{ (products.find(p => p.id === cid)?.name || cid) }}</span>
-                  <button @click="toggleCompare(cid)" class="text-blue-400 hover:text-blue-600 text-xs">×</button>
+                  <span class="text-xs font-extrabold truncate" style="max-width: 160px; color: #0d0d0d;">{{ (products.find(p => p.id === cid)?.name || cid) }}</span>
+                  <button @click="toggleCompare(cid)" class="text-xs" style="color: #d4af37;">×</button>
                 </div>
               </div>
               <button @click="compareModal = true" class="btn btn-sm btn-primary w-full mt-3" style="font-size:12px;">Сравнить</button>
             </div>
 
             <!-- Recently Viewed -->
-            <div v-if="recentViews.length" class="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-              <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">🕘 Недавно просмотрены</div>
+            <div v-if="recentViews.length" class="mt-6 p-4 rounded-2xl border" style="background: #fafafa; border-color: #e5e5e5;">
+              <div class="text-xs font-bold uppercase tracking-wider mb-3" style="color: #9ca3af;">🕘 Недавно просмотрены</div>
               <div class="space-y-2">
-                <a v-for="rid in recentViews" :key="rid" :href="'product.php?id=' + rid" @click.prevent="recordView(productById(rid)); window.location.href='product.php?id=' + rid" class="flex items-center gap-2 text-xs font-extrabold text-slate-700 hover:text-emerald-600 transition">
+                <a v-for="rid in recentViews" :key="rid" :href="'product.php?id=' + rid" @click.prevent="recordView(productById(rid)); window.location.href='product.php?id=' + rid" class="flex items-center gap-2 text-xs font-extrabold transition" style="color: #0d0d0d;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#0d0d0d'">
                   <img v-if="productById(rid)?.image" :src="productById(rid).image" class="w-8 h-8 rounded-lg object-cover" style="min-width:32px;">
-                  <span v-else class="w-8 h-8 rounded-lg bg-slate-200 inline-block"></span>
+                  <span v-else class="w-8 h-8 rounded-lg inline-block" style="background: #e5e5e5;"></span>
                   <span class="truncate">{{ productById(rid)?.name || rid }}</span>
                 </a>
               </div>
@@ -449,7 +459,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
                   <tr>
                     <th class="text-left">Параметр</th>
                     <th v-for="cid in compareList" :key="cid" class="text-center" style="min-width:180px;">
-                      <a :href="'product.php?id=' + cid" class="font-extrabold text-emerald-600 hover:underline">{{ (products.find(p => p.id === cid)?.name || cid) }}</a>
+                      <a :href="'product.php?id=' + cid" class="font-extrabold hover:underline" style="color: #d4af37;">{{ (products.find(p => p.id === cid)?.name || cid) }}</a>
                     </th>
                   </tr>
                 </thead>
@@ -457,7 +467,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
                   <tr><td class="font-bold text-gray-500">Артикул</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold">{{ products.find(p => p.id === cid)?.article || '—' }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Бренд</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.brand || '—' }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Категория</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.category || '—' }}</td></tr>
-                  <tr><td class="font-bold text-gray-500">Цена</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold text-emerald-600">{{ money(products.find(p => p.id === cid)?.price_base || 0) }}</td></tr>
+                  <tr><td class="font-bold text-gray-500">Цена</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold" style="color: #0d0d0d;">{{ money(products.find(p => p.id === cid)?.price_base || 0) }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Опт от 10 шт</td><td v-for="cid in compareList" :key="cid" class="text-center font-extrabold">{{ money(products.find(p => p.id === cid)?.price_wholesale || 0) }}</td></tr>
                   <tr><td class="font-bold text-gray-500">Остаток</td><td v-for="cid in compareList" :key="cid" class="text-center">{{ products.find(p => p.id === cid)?.stock || 0 }} шт</td></tr>
                   <tr><td class="font-bold text-gray-500"></td><td v-for="cid in compareList" :key="cid" class="text-center"><button @click="addToCart(products.find(p => p.id === cid))" class="btn btn-sm btn-primary">В корзину</button></td></tr>
@@ -483,7 +493,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
                 <option value="name_asc">По названию</option>
               </select>
               <label class="flex items-center gap-2 text-xs font-extrabold text-gray-600 cursor-pointer select-none">
-                <input type="checkbox" v-model="showInStockOnly" class="accent-emerald-600" style="width:16px;height:16px;">
+                <input type="checkbox" v-model="showInStockOnly" style="width:16px;height:16px; accent-color: #d4af37;">
                 Только в наличии
               </label>
               <div class="flex items-center gap-2">
@@ -544,10 +554,10 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
                   <td>
                     <div class="flex items-center gap-2">
                       <button @click="addToCart(product)" :class="['btn btn-sm btn-primary', cartBump ? 'animate-bounce' : '']">В корзину</button>
-                      <button type="button" @click.stop.prevent="recordView(product); quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#64748b;" :title="'Быстрый просмотр'">
+                      <button type="button" @click.stop.prevent="recordView(product); quickViewProduct = product" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer; color:#9ca3af;" :title="'Быстрый просмотр'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                       </button>
-                      <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#ef4444;' : 'color:#cbd5e1;'">
+                      <button type="button" @click.stop.prevent="toggleFavorite(product.id)" class="flex items-center justify-center" style="width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;" :style="isFavorite(product.id) ? 'color:#d4af37;' : 'color:#cbd5e1;'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                       </button>
                     </div>
@@ -573,7 +583,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
                   <span class="text-base font-bold text-gray-950">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
                   <span :class="['text-[10px] font-extrabold px-2 py-1 rounded-md', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
                 </div>
-                <button @click="addToCart(product)" class="w-full py-2.5 rounded-lg bg-[#0f172a] text-white text-xs font-extrabold uppercase tracking-wider transition-all duration-200 hover:bg-[#1e293b]">В заявку</button>
+                <button @click="addToCart(product)" class="w-full py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all duration-300" style="background: #0d0d0d; color: #fff;" onmouseover="this.style.background='#d4af37';this.style.color='#000'" onmouseout="this.style.background='#0d0d0d';this.style.color='#fff'">В заявку</button>
               </div>
             </article>
           </div>
@@ -601,14 +611,14 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
           <span class="text-[9px] font-semibold tracking-wide">Каталог</span>
         </button>
-        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 py-2 transition-colors hover:text-white', showFavoritesOnly ? 'text-rose-400' : 'text-white/60']">
+        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 py-2 transition-colors hover:text-white', showFavoritesOnly ? 'text-[#d4af37]' : 'text-white/60']">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           <span class="text-[9px] font-semibold tracking-wide">Избранное</span>
         </button>
         <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
           <span class="text-[9px] font-semibold tracking-wide">Корзина</span>
-          <b v-if="cartCount > 0" class="absolute top-0.5 right-2 rounded-full px-1 text-white text-[8px] font-black bg-[#C9A35E]">{{ cartCount }}</b>
+          <b v-if="cartCount > 0" class="absolute top-0.5 right-2 rounded-full px-1 text-black text-[8px] font-black" style="background: #d4af37;">{{ cartCount }}</b>
         </a>
         <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
@@ -905,8 +915,8 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
           return this.filteredProducts.slice(start, start + this.perPage);
         },
         totalPages() { return Math.ceil(this.filteredProducts.length / this.perPage) || 1; },
-        accentBg() { return { indigo: 'bg-primary', emerald: 'bg-primary', slate: 'bg-dark-2' }[this.settings.theme_color] || 'bg-primary'; },
-        accentBorder() { return { indigo: 'border-primary', emerald: 'border-primary', slate: 'border-dark-2' }[this.settings.theme_color] || 'border-primary'; }
+        accentBg() { return { indigo: 'bg-[#0d0d0d]', emerald: 'bg-[#0d0d0d]', slate: 'bg-[#0d0d0d]' }[this.settings.theme_color] || 'bg-[#0d0d0d]'; },
+        accentBorder() { return { indigo: 'border-[#d4af37]', emerald: 'border-[#d4af37]', slate: 'border-[#d4af37]' }[this.settings.theme_color] || 'border-[#d4af37]'; }
       },
       async mounted() {
         try {
@@ -927,9 +937,9 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
         money(value) { return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value); },
         stockStatus(stock) {
           const n = Number(stock) || 0;
-          if (n <= 0) return { label: 'Нет в наличии', cls: 'bg-red-50 text-red-700' };
-          if (n < 10) return { label: 'Заканчивается', cls: 'bg-amber-50 text-amber-700' };
-          return { label: 'В наличии', cls: 'bg-emerald-50 text-emerald-700' };
+          if (n <= 0) return { label: 'Нет в наличии', cls: 'bg-[#fafafa] text-[#0d0d0d]' };
+          if (n < 10) return { label: 'Заканчивается', cls: 'bg-[#faf5eb] text-[#0d0d0d]' };
+          return { label: 'В наличии', cls: 'bg-[#f0ece0] text-[#0d0d0d]' };
         },
         onProductImgError(product) { try { product.image = ''; } catch (e) {} },
         setQty(id, value) { this.qty[id] = Math.max(1, parseInt(value || 1, 10)); },
