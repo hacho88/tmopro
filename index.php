@@ -33,7 +33,7 @@ $settings = is_array($settings) ? $settings : [];
 $siteName = $settings['site_name'] ?? 'TMOPRO — Сантехника Оптом';
 $heroTitle = $settings['hero_title'] ?? 'Сантехника оптом от производителя';
 $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения для водоснабжения и отопления';
-$heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное имя файла из папки /uploads/
+$heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['background_image'], '/') : '/uploads/hero-bg.jpg';
 ?>
 <!doctype html>
 <html lang="ru">
@@ -144,7 +144,7 @@ $heroBg = '/uploads/hero-bg.jpg'; // Замените на реальное им
       <section class="relative bg-[#0d0d0d] min-h-[520px] md:min-h-[580px] w-full overflow-hidden flex items-center">
         <!-- Background Image -->
         <div class="absolute inset-0 z-0">
-          <img src="/uploads/hero-bg.jpg" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'">
+          <img src="<?= e($heroBg) ?>" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'">
         </div>
         <!-- Dark Overlay -->
         <div class="absolute inset-0 z-10" style="background: linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.35) 100%);"></div>
