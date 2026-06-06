@@ -61,7 +61,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   ?>
   <link href="https://fonts.googleapis.com/css2?family=<?= e($fontSlug) ?>:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>:root{ --font-sans: '<?= e($fontFamily) ?>', 'Noto Sans', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }</style>
-  <link rel="stylesheet" href="style.css?v=lux-dark-j">
+  <link rel="stylesheet" href="style.css?v=lux-dark-k">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -75,7 +75,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"TMOPRO — Сантехника Оптом","url":"https://tmopro.ru","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://tmopro.ru/?search={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body class="theme-luxury">
-  <div id="app" v-cloak class="min-h-screen">
+  <div id="app" v-cloak class="min-h-screen pb-16 md:pb-0">
     <!-- Header — transparent dark over hero -->
     <header class="lux-header-dark">
       <div class="container">
@@ -120,28 +120,30 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
 
     <!-- Dynamic Blocks -->
     <?php if (empty($blocks)): ?>
-      <!-- Hero — Luxury Dark Minimal -->
-      <section class="lux-hero-v2">
-        <div class="container lux-hero-inner-v2">
-          <div class="lux-hero-copy-v2">
-            <div class="lux-kicker-v2">Премиальная сантехника</div>
-            <h1 class="lux-title-v2">Сантехника оптом от производителя</h1>
-            <p class="lux-subtitle-v2">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
-            <div class="lux-hero-actions-v2">
-              <a href="#catalog" class="lux-btn-gold-v2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+      <!-- Hero — Premium Dark -->
+      <section class="relative bg-[#0d0d0d] overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative min-h-[680px] md:min-h-[720px] flex items-center">
+          <!-- Text Left -->
+          <div class="w-full md:w-1/2 z-10 relative py-20 md:py-24 pr-0 md:pr-10">
+            <div class="text-[11px] font-extrabold text-[#c5a059] uppercase tracking-[0.2em] mb-5">Премиальная сантехника</div>
+            <h1 class="text-4xl sm:text-5xl lg:text-[56px] font-black text-white leading-[1.1] tracking-tight mb-5">Сантехника оптом от производителя</h1>
+            <p class="text-base text-gray-400 leading-relaxed mb-8 max-w-md">Премиальные смесители, душевые системы и аксессуары для ванных комнат. Прямые поставки от производителя с гарантией качества.</p>
+            <div class="flex flex-wrap gap-4">
+              <a href="#catalog" class="inline-flex items-center gap-3 px-7 py-4 rounded-xl bg-[#c5a059] text-[#0d0d0d] text-sm font-extrabold uppercase tracking-wider transition-all duration-300 hover:bg-[#d4b76a] hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(197,160,89,0.3)]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
                 <span>Мгновенный расчет</span>
               </a>
-              <a href="#catalog" class="lux-btn-outline-v2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <a href="#catalog" class="inline-flex items-center gap-3 px-7 py-4 rounded-xl border border-white/25 text-white text-sm font-extrabold uppercase tracking-wider transition-all duration-300 hover:border-[#c5a059] hover:text-[#c5a059]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 <span>Скачать прайс-лист</span>
               </a>
             </div>
           </div>
-          <div class="lux-hero-media-v2">
-            <img src="hero-sanitary.jpg" alt="Премиальная сантехника" onerror="this.style.display='none'">
-            <div class="lux-hero-guarantee">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <!-- Image Right -->
+          <div class="hidden md:block absolute right-0 top-0 w-1/2 h-full">
+            <img src="hero-sanitary.jpg" alt="Премиальная сантехника" class="w-full h-full object-cover" onerror="this.style.display='none'">
+            <div class="absolute bottom-6 right-6 flex items-center gap-3 px-5 py-3 rounded-xl bg-[#0d0d0d]/70 backdrop-blur-md border border-white/[0.08] text-white text-[11px] font-extrabold uppercase tracking-wider">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <span>Гарантия качества</span>
             </div>
           </div>
@@ -263,55 +265,55 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
     <?php endif; ?>
 
     <!-- Features — dark premium -->
-    <section class="lux-features-dark">
-      <div class="container lux-features-grid">
-        <div class="lux-feature-item">
-          <div class="lux-feature-icon">
+    <section class="bg-[#121212] border-t border-white/[0.05]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
           </div>
           <div>
-            <div class="lux-feature-title">Оптовые цены</div>
-            <div class="lux-feature-desc">Прямые поставки от производителя без посредников</div>
+            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Оптовые цены</div>
+            <div class="text-[13px] text-gray-400 leading-relaxed">Прямые поставки от производителя без посредников</div>
           </div>
         </div>
-        <div class="lux-feature-item">
-          <div class="lux-feature-icon">
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
           </div>
           <div>
-            <div class="lux-feature-title">Мгновенный расчет</div>
-            <div class="lux-feature-desc">Цена автоматически пересчитывается от количества</div>
+            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Мгновенный расчет</div>
+            <div class="text-[13px] text-gray-400 leading-relaxed">Цена автоматически пересчитывается от количества</div>
           </div>
         </div>
-        <div class="lux-feature-item">
-          <div class="lux-feature-icon">
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div>
-            <div class="lux-feature-title">Быстрая доставка</div>
-            <div class="lux-feature-desc">Отгрузка в день заказа по всей России</div>
+            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Быстрая доставка</div>
+            <div class="text-[13px] text-gray-400 leading-relaxed">Отгрузка в день заказа по всей России</div>
           </div>
         </div>
-        <div class="lux-feature-item">
-          <div class="lux-feature-icon">
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-full border border-[#c5a059]/35 flex items-center justify-center text-[#c5a059] flex-shrink-0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <div>
-            <div class="lux-feature-title">Сертификация</div>
-            <div class="lux-feature-desc">Вся продукция с официальными сертификатами</div>
+            <div class="text-[13px] font-extrabold text-white uppercase tracking-wider mb-1">Сертификация</div>
+            <div class="text-[13px] text-gray-400 leading-relaxed">Вся продукция с официальными сертификатами</div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Light section: Categories + Catalog -->
-    <div class="lux-light-section">
+    <div class="bg-[#f9fafb]">
       <section class="container py-10 lg:py-16">
         <div class="section-head mb-8">
           <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-gray-900">Категории</h2>
           <p class="text-sm sm:text-base text-gray-500 font-semibold mt-2">Быстрый доступ к основным группам товара</p>
         </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
           <button v-for="cat in topCategories" :key="cat.name" @click="toggleCategory(cat.name); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });"
             class="category-tile hover-lift">
             <div v-if="cat.image" class="category-tile-bg" :style="{ backgroundImage: 'url(' + cat.image + ')' }"></div>
@@ -534,22 +536,22 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             </table>
           </div>
 
-          <!-- Grid View — clean luxury cards -->
-          <div v-else :class="['grid gap-5 sm:grid-cols-2', dense ? 'xl:grid-cols-4 dense-grid' : 'xl:grid-cols-3']">
-            <article v-for="product in paginatedProducts" :key="product.id" class="lux-card-clean animate-fadeIn">
-              <a :href="'product.php?id=' + product.id" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id">
-                <div class="lux-card-img-wrap">
-                  <img v-if="product.image" :src="product.image" @error="onProductImgError(product)">
-                  <div v-else style="width:100%;height:100%;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);"></div>
+          <!-- Grid View — premium white cards -->
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 xl:gap-6">
+            <article v-for="product in paginatedProducts" :key="product.id" class="bg-white border border-gray-100 rounded-xl p-3 md:p-4 transition-all duration-200 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 animate-fadeIn">
+              <a :href="'product.php?id=' + product.id" @click.prevent="recordView(product); window.location.href='product.php?id=' + product.id" class="block">
+                <div class="w-full h-40 md:h-48 bg-white flex items-center justify-center p-3 md:p-4 rounded-lg mb-3">
+                  <img v-if="product.image" :src="product.image" class="max-w-full max-h-full object-contain" @error="onProductImgError(product)">
+                  <div v-else class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-md"></div>
                 </div>
-                <div class="lux-card-article">{{ product.article }}</div>
-                <div class="lux-card-name">{{ product.name }}</div>
-                <div class="lux-card-footer">
-                  <span class="lux-card-price">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
-                  <span :class="['text-xs font-extrabold px-2.5 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
+                <div class="text-[10px] md:text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-1">{{ product.brand || product.article }}</div>
+                <h3 class="text-sm md:text-[15px] font-medium text-gray-900 leading-snug mb-2 line-clamp-2">{{ product.name }}</h3>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-base md:text-lg font-black text-gray-900">{{ product.price_base.toLocaleString('ru-RU') }} ₽</span>
+                  <span :class="['text-[10px] md:text-xs font-extrabold px-2 py-1 rounded-lg', stockStatus(product.stock).cls]">{{ stockStatus(product.stock).label }}</span>
                 </div>
               </a>
-              <button @click="addToCart(product)" class="btn btn-primary w-full mt-3" style="border-radius:8px;font-weight:900;padding:10px 0;font-size:13px;background:#0f172a;color:#fff;">В заявку</button>
+              <button @click="addToCart(product)" class="w-full mt-3 py-2.5 rounded-lg bg-[#0f172a] text-white text-xs font-extrabold uppercase tracking-wider transition-all duration-200 hover:bg-[#1e293b]">В заявку</button>
             </article>
           </div>
 
@@ -565,28 +567,29 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
     </div>
 
     <!-- Bottom Navigation — mobile only (<768px) -->
-    <nav class="mobile-nav" aria-label="Bottom navigation">
-      <div class="grid grid-cols-5">
-        <a href="index.php" class="active flex flex-col items-center justify-center gap-1.5 py-2">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
-          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Главная</span>
+    <!-- Mobile Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 h-16 bg-[#0d0d0d]/95 backdrop-blur-md border-t border-white/10 flex md:hidden" aria-label="Bottom navigation">
+      <div class="grid grid-cols-5 w-full">
+        <a href="index.php" class="active flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+          <span class="text-[9px] font-semibold tracking-wide">Главная</span>
         </a>
-        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1.5 py-2">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Каталог</span>
+        <button @click="scrollToCatalog(); showFavoritesOnly = false;" class="flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7 7 20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          <span class="text-[9px] font-semibold tracking-wide">Каталог</span>
         </button>
-        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1.5 py-2', showFavoritesOnly ? 'text-rose-400' : '']">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Избранное</span>
+        <button @click="showFavoritesOnly = !showFavoritesOnly; scrollToCatalog();" :class="['flex flex-col items-center justify-center gap-1 py-2 transition-colors hover:text-white', showFavoritesOnly ? 'text-rose-400' : 'text-white/60']">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span class="text-[9px] font-semibold tracking-wide">Избранное</span>
         </button>
-        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1.5 py-2">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
-          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Корзина</span>
-          <b v-if="cartCount > 0" class="absolute -top-0.5 right-1 rounded-full px-1.5 text-white" style="font-size:8px;background:#C9A35E;">{{ cartCount }}</b>
+        <a href="checkout.php" class="relative flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          <span class="text-[9px] font-semibold tracking-wide">Корзина</span>
+          <b v-if="cartCount > 0" class="absolute top-0.5 right-2 rounded-full px-1 text-white text-[8px] font-black bg-[#C9A35E]">{{ cartCount }}</b>
         </a>
-        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1.5 py-2">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
-          <span style="font-size:9px;font-weight:600;letter-spacing:0.02em;">Позвонить</span>
+        <a :href="'tel:' + settings.phone" class="flex flex-col items-center justify-center gap-1 py-2 text-white/60 transition-colors hover:text-white">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.1 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L9 10.7a16 16 0 0 0 4.3 4.3l1.27-1.27a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z"/></svg>
+          <span class="text-[9px] font-semibold tracking-wide">Позвонить</span>
         </a>
       </div>
     </nav>
