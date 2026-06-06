@@ -61,7 +61,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   ?>
   <link href="https://fonts.googleapis.com/css2?family=<?= e($fontSlug) ?>:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>:root{ --font-sans: '<?= e($fontFamily) ?>', 'Noto Sans', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }</style>
-  <link rel="stylesheet" href="style.css?v=lux-gold-h">
+  <link rel="stylesheet" href="style.css?v=lux-gold-i">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
