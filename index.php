@@ -90,7 +90,7 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
     input[type="checkbox"] { accent-color: #d4af37; }
     select.field:focus, input.field:focus { border-color: #d4af37 !important; outline: none !important; box-shadow: 0 0 0 1px #d4af37 !important; }
   </style>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"TMOPRO","url":"https://tmopro.ru","logo":"https://tmopro.ru/logo.svg","contactPoint":{"@type":"ContactPoint","telephone":"+7-966-085-34-70","contactType":"sales","areaServed":"RU","availableLanguage":"Russian"},"sameAs":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"TMOPRO","url":"https://tmopro.ru","logo":"https://tmopro.ru/logo.svg?v=2","contactPoint":{"@type":"ContactPoint","telephone":"+7-966-085-34-70","contactType":"sales","areaServed":"RU","availableLanguage":"Russian"},"sameAs":[]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"TMOPRO — Сантехника Оптом","url":"https://tmopro.ru","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://tmopro.ru/?search={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body class="theme-luxury">
@@ -100,7 +100,7 @@ $heroBg = !empty($settings['background_image']) ? '/' . ltrim($settings['backgro
       <div class="max-w-7xl mx-auto px-4 w-full flex items-center justify-between py-5">
         <!-- Logo -->
         <a href="index.php" class="flex items-center leading-none">
-          <img src="logo.svg" alt="TMOPRO" style="height: 48px; width: auto; display: block;">
+          <img src="logo.svg?v=2" alt="TMOPRO" style="height: 48px; width: auto; display: block;">
         </a>
         <!-- Nav -->
         <nav class="hidden lg:flex items-center gap-8">
