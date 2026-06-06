@@ -33,6 +33,7 @@ $settings = is_array($settings) ? $settings : [];
 $siteName = $settings['site_name'] ?? 'TMOPRO — Сантехника Оптом';
 $heroTitle = $settings['hero_title'] ?? 'Сантехника оптом от производителя';
 $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения для водоснабжения и отопления';
+$heroImage = !empty($settings['background_image']) ? $settings['background_image'] : 'hero-sanitary.jpg';
 ?>
 <!doctype html>
 <html lang="ru">
@@ -61,7 +62,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
   ?>
   <link href="https://fonts.googleapis.com/css2?family=<?= e($fontSlug) ?>:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>:root{ --font-sans: '<?= e($fontFamily) ?>', 'Noto Sans', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }</style>
-  <link rel="stylesheet" href="style.css?v=lux-dark-l">
+  <link rel="stylesheet" href="style.css?v=lux-dark-m">
   <script src="vue.global.prod.js"></script>
   <style>
     .fallback { max-width: 760px; margin: 80px auto; padding: 32px; border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(15,23,42,.12); font-family: var(--font-sans); color: #0f172a; }
@@ -142,7 +143,7 @@ $heroSub = $settings['hero_subtitle'] ?? 'Премиальные решения 
             </div>
             <!-- Image Right -->
             <div class="w-full md:w-1/2 h-[300px] md:h-[450px]">
-              <img src="hero-sanitary.jpg" alt="Премиальная сантехника" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'">
+              <img src="<?= e($heroImage) ?>" alt="Премиальная сантехника" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'">
             </div>
           </div>
         </div>
